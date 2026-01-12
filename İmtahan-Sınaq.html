@@ -2126,7 +2126,7 @@ function finish() {
         <div style="background:#2c3e50; color:white; padding:20px; border-radius:10px; text-align:center;">
             <h2>Nəticə</h2>
             <p>Doğru: ${correctCount} | Səhv: ${wrongCount}</p>
-            <p>Sınaq Balı: ${examScore} (doğru x2 - səhv x1)</p>
+            <p><strong>Sınaq Balı: ${examScore} (doğru ${correctCount}×2 - səhv ${wrongCount}×1)</strong></p>
             <hr>
             <h3>Yekun Bal: ${total}</h3>
         </div>`;
@@ -2137,6 +2137,7 @@ window.onload = start;
 </script>
 </body>
 </html>
+
 
 
 
