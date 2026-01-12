@@ -1,45 +1,45 @@
 # Sinaq
 
-Онлайн-система для синаг-имтаханов (экзаменационных тестов)
+Onlayn sınaq imtahan sistemi (testlər üçün)
 
-[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
-[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
-[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/az/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/az/docs/Web/CSS)
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/az/docs/Web/JavaScript)
 
-Живой сайт: https://niko77fiko.github.io/Sinaq/Sinaq.html
+Canlı sayt: https://niko77fiko.github.io/Sinaq/Sinaq.html
 
-## Описание
+## Təsvir
 
-Простая и удобная веб-страница для прохождения онлайн-тестов (sınaq imtahanı).  
-Подходит для подготовки к экзаменам по различным предметам (Riyaziyyat, Fizika, Elektrik dövrələri və s.).
+Sadə və rahat veb-səhifə onlayn testlərdən (sınaq imtahanı) keçmək üçün.  
+Fərqli fənlər üzrə imtahanlara hazırlaşmaq üçün uyğundur (Riyaziyyat, Fizika, Elektrik dövrələri və s.).
 
-### Основные функции
-- Таймер экзамена (Qalan vaxt)
-- Вопросы с несколькими вариантами ответов (A, B, C, D + Boş burax)
-- Классический формат азербайджанских экзаменов
-- Простой и читаемый дизайн
+### Əsas funksiyalar
+- İmtahan taymeri (Qalan vaxt)
+- Bir neçə cavab variantlı suallar (A, B, C, D + Boş burax)
+- Azərbaycan imtahanlarının klassik formatı
+- Sadə və oxunaqlı dizayn
 
-## Скриншот работы сайта
+## Saytın işləmə nümunəsi
 
-![Пример теста](sinaq-example.png)
+![Sınaq nümunəsi](sinaq-example.png)
 
-(Сделай скриншот своей страницы теста, сохрани как `sinaq-example.png` в корне репозитория и запушь)
+(Saytın skrinşotunu çəkin, `sinaq-example.png` adı ilə saxlayın və repozitoriyaya əlavə edin)
 
-## Как запустить локально
+## Yerli olaraq necə işə salmaq
 
-1. Скачай репозиторий: git clone https://github.com/NIKO77FIKO/Sinaq.git
-2. Открой файл `Sinaq.html` в любом браузере (Chrome, Edge, Firefox и т.д.)
+1. Repozitoriyanı yükləyin: git clone https://github.com/NIKO77FIKO/Sinaq.git
+2. `Sinaq.html` faylını istənilən brauzerdə açın (Chrome, Edge, Firefox və s.)
 
-## Планы на развитие
-- Добавить JavaScript для автоматической проверки ответов и подсчёта баллов
-- Сделать несколько разных тестов (по предметам)
-- Добавить выбор сложности и тем
-- Красивый дизайн (CSS-анимации, адаптив под мобильные)
-- Сохранение результатов в LocalStorage
+## Gələcək planlar
+- JavaScript ilə cavabların avtomatik yoxlanılması və bal hesablanması əlavə etmək
+- Fənlər üzrə bir neçə fərqli test hazırlamaq
+- Çətinlik səviyyəsi və mövzuların seçimi
+- Gözəl dizayn (CSS animasiyaları, mobil cihazlara uyğunlaşma)
+- Nəticələri LocalStorage-da saxlamaq
 
-Готов к сотрудничеству и предложениям!    
-Если хочешь помочь — forkни репозиторий и присылай pull request 😊
+Əməkdaşlığa hazıram!  
+Təklifləriniz varsa – repozitoriyanı fork edin və pull request göndərin 😊
 
-## Автор
-- GitHub: [@Nureli001](https://github.com/Nureli001) [@NIKO77FIKO](https://github.com/NIKO77FIKO) 
-- My Telegram: (@Niko66Fiko)
+## Müəllif
+- GitHub: [@Nureli001](https://github.com/Nureli001) [@NIKO77FIKO](https://github.com/NIKO77FIKO)
+- My Telegram: (@niko66fiko)
