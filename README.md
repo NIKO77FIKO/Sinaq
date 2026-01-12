@@ -1,2 +1,2 @@
-# -mtahan-s-na-
+# İmtahan sınağ
 İmtahan üçün sınağ
