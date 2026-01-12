@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crasher Online Sınaq Sistemi</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; }
+        .question-block { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.3s; }
+        .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 4px; border: 1px solid #eee; }
+        .option:hover { background: #f9f9f9; }
+        button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #27ae60; }
+        #result { margin-top: 20px; }
+        .correct-ans { background-color: #d4edda !important; }
+        .wrong-ans { background-color: #f8d7da !important; }
+        .skipped-ans { background-color: #fff3cd !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Online Sınaq İmtahanı</h2>
+    <div id="timer">Yüklənir...</div>
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" onclick="finish()">İmtahanı Bitir</button>
+    <div id="result"></div>
+</div>
+
+<script>
+let TIME = 30 * 60;
+let interval;
+let startScore = 0;
+let currentQuestions = [];
+const QUESTIONS_URL = "questions.json";
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+async function start() {
+    const val = prompt("İmtahana giriş balın neçədir? (0–50)");
+    startScore = parseInt(val) || 0;
+    
+    try {
+        const res = await fetch(QUESTIONS_URL);
+        let allQuestions = await res.json();
+        
+        // Düzgün cavabı olan sualları seç və qarıştır
+        allQuestions = allQuestions.filter(q => q.correct);
+        currentQuestions = shuffle([...allQuestions]).slice(0, 25);
+        
+        const quizDiv = document.getElementById("quiz");
+        quizDiv.innerHTML = "";
+
+        currentQuestions.forEach((q, i) => {
+            let optionsHtml = "";
+            
+            // Database-də həm Object hem Array variantları ola bilər, ona görə yoxlayırıq:
+            if (Array.isArray(q.options)) {
+                // Əgər Massivdirsə (0, 1, 2... indeksi ilə)
+                q.options.forEach((opt, idx) => {
+                    const label = String.fromCharCode(65 + idx); // 0->A, 1->B...
+                    optionsHtml += `
+                        <label class="option">
+                            <input type="radio" name="q${i}" value="${label}"> ${label}) ${opt}
+                        </label>`;
+                });
+            } else {
+                // Əgər Obyektdirsə (A: "...", B: "...")
+                Object.keys(q.options).forEach(key => {
+                    optionsHtml += `
+                        <label class="option">
+                            <input type="radio" name="q${i}" value="${key}"> ${key}) ${q.options[key]}
+                        </label>`;
+                });
+            }
+
+            // "Boşluq" variantı mütləq sonda 1 dəfə əlavə edilir
+            optionsHtml += `
+                <label class="option" style="background: #f1f2f6; border-style: dashed;">
+                    <input type="radio" name="q${i}" value="BOS"> <b>Boşluq (Bal silinmir)</b>
+                </label>`;
+
+            quizDiv.innerHTML += `
+                <div id="block${i}" class="question-block">
+                    <p><b>${i + 1}. ${q.q}</b></p>
+                    ${optionsHtml}
+                    <div id="feedback${i}" style="margin-top:10px;"></div>
+                </div>`;
+        });
+
+        interval = setInterval(updateTimer, 1000);
+    } catch (err) {
+        document.getElementById("quiz").innerHTML = "Xəta: JSON faylı düzgün formatda deyil.";
+    }
+}
+
+function updateTimer() {
+    if (TIME <= 0) { finish(); return; }
+    TIME--;
+    let m = Math.floor(TIME / 60);
+    let s = TIME % 60;
+    document.getElementById("timer").innerText = `Qalan vaxt: ${m}:${s < 10 ? '0'+s : s}`;
+}
+
+function finish() {
+    clearInterval(interval);
+    window.scrollTo(0, 0);
+    document.getElementById("finishBtn").style.display = "none";
+
+    let correctCount = 0;
+    let wrongCount = 0;
+    
+    currentQuestions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const block = document.getElementById(`block${i}`);
+        const feedback = document.getElementById(`feedback${i}`);
+
+        if (selected) {
+            if (selected.value === q.correct) {
+                correctCount++;
+                block.classList.add("correct-ans");
+                feedback.innerHTML = "<b>✅ Doğru (+2 bal)</b>";
+            } else if (selected.value === "BOS") {
+                block.classList.add("skipped-ans");
+                feedback.innerHTML = `<b>⚪ Boş buraxıldı.</b> Düzgün: ${q.correct}`;
+            } else {
+                wrongCount++;
+                block.classList.add("wrong-ans");
+                feedback.innerHTML = `<b>❌ Səhv! (-1 bal).</b> Düzgün: ${q.correct}`;
+            }
+        } else {
+            block.classList.add("skipped-ans");
+            feedback.innerHTML = `<b>⚪ Cavabsız.</b> Düzgün: ${q.correct}`;
+        }
+    });
+
+    let examScore = (correctCount * 2) - (wrongCount * 1);
+    let total = startScore + examScore;
+    
+    document.getElementById("result").innerHTML = `
+        <div style="background:#2c3e50; color:white; padding:20px; border-radius:10px; text-align:center;">
+            <h2>Nəticə</h2>
+            <p>Doğru: ${correctCount} | Səhv: ${wrongCount}</p>
+            <p>Sınaq Balı: ${examScore}</p>
+            <hr>
+            <h3>Yekun Bal: ${total}</h3>
+        </div>`;
+}
+
+start();
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

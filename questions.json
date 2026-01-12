@@ -1,0 +1,2934 @@
+[
+
+  {
+    "q": "DVD diskin yaddaş həcmi?",
+    "options": {
+      "A": "1.44 MB",
+      "B": "4.7 GB",
+      "C": "8.5 MB",
+      "D": "700 MB"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kompüterin sürətini xarakterizə edən göstərici hansıdır?",
+    "options": {
+      "A": "Takt tezliyi",
+      "B": "RAM həcmi",
+      "C": "Disk tutumu",
+      "D": "Monitor dioqanali"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sistem blokunda yerləşən, riyazi, məntiqi əməliyyatları yerinə yetirən qurğu hansıdır?",
+    "options": {
+      "A": "Prasessor",
+      "B": "Videokart",
+      "C": "Qida bloku",
+      "D": "Skaner"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Aşağıdakı fikirlərdən hansılar prosessorun funksiyasına aid edilə bilər? (1. Hesab məntiq əməllərini yerinə yetirir, 2. Qurğular arasında əlaqə yaradır, 3. Bütün qurğuların işini idarə edir, 4. Proqramların yaddaşda saxlanılmasını təmin edir)",
+    "options": {
+      "A": "1,2,4",
+      "B": "1,3",
+      "C": "3,4",
+      "D": "1,4"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Prosessor nə üçündür?",
+    "options": {
+      "A": "İnformasiyanın saxlanması üçün",
+      "B": "İnformasiyanın daxil edilməsi üçün",
+      "C": "İnformasiyanın çıxarılması üçün",
+      "D": "İnformasiyanın emalı üçün"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Prosessor hansı göstəricilərlə xarakterizə olunur?",
+    "options": {
+      "A": "Rəng sayı, piksel ölçüsü, ekran tezliyi",
+      "B": "Port sayı, kabel tipi, şəbəkə sürəti",
+      "C": "Takt tezliyi, mərtəbəlilik, əmrlər toplusu",
+      "D": "Yaddaş həcmi, disk sürəti, monitor ölçüsü"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Mikroprosessorların əsas parametrləri hansılardır?",
+    "options": {
+      "A": "Əmrlər toplusu, mərtəbəlilik, takt tezliyi",
+      "B": "Şəbəkə adapteri, modem tipi, kabel uzunluğu",
+      "C": "Monitor ölçüsü, printer sürəti, skaner qabiliyyəti",
+      "D": "Proqram siyahısı, periferiya qurğuları, yaddaş tipi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Keş yaddaş nədir?",
+    "options": {
+      "A": "Klaviatura girişini idarə etməkdir",
+      "B": "Monitorun təsvir yeniləməsidir",
+      "C": "Xarici diskdə informasiya saxlamaqdır",
+      "D": "Prosessorda bufer sahəsinin yaradılmasıdır"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Müasir videokartlarda videoyaddaşın və videoprosessorun tezliyi nə qədərdir?",
+    "options": {
+      "A": "400÷700 Mhers",
+      "B": "100÷200 Mhers",
+      "C": "800÷1000 Mhers",
+      "D": "50÷100 Mhers"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Alimlərin fikirincə 2011-ci ildə prosessorun daxilində nə qədər tranzistor yerləşə bilər?",
+    "options": {
+      "A": "500 milyonda yaxın",
+      "B": "10 milyarda yaxın",
+      "C": "1,0 milyarda yaxın",
+      "D": "100 milyonda yaxın"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Müasir prosessorların daxilində nə qədər tranzistor yerləşir?",
+    "options": {
+      "A": "100 milyondan az",
+      "B": "28 milyondan çox",
+      "C": "10 milyondan az",
+      "D": "5 milyondan çox"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "İstehsal olunan prosesorun (məsələn, i80486DX-50) adındakı 50 rəqəmi nəyi göstərir?",
+    "options": {
+      "A": "Prosessorun rəng qabiliyyətini",
+      "B": "Prosessorun tranzistor sayını",
+      "C": "Prosessorun yaddaş həcmini",
+      "D": "Prosessorun tipini"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Kompüterlərdə istifadə edilən prosessoru onun nəyi hesab edirlər?",
+    "options": {
+      "A": "Qəlbini",
+      "B": "Beyni",
+      "C": "Ayaqlarını",
+      "D": "Əllərini"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Prosessor bazarlarında tanınmış və lider sayılan, IBM PC kompüterləri üçün mikroprosessor istehsal edən Intel firması mikroprosessoru neçənci ildə istehsal etmişdir?",
+    "options": {
+      "A": "1968-ci ildə",
+      "B": "1980-ci ildə",
+      "C": "2000-ci ildə",
+      "D": "1950-ci ildə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "VI nəsl mikroprosessorlar nəyi dəstəkləyirlər?",
+    "options": {
+      "A": "8 mərtəbəli sistem şinini və monitor sistemini",
+      "B": "16 mərtəbəli sistem şinini və yaddaş sistemini",
+      "C": "64 mərtəbəli sistem şinini və çoxprosessorlu sistemi",
+      "D": "32 mərtəbəli sistem şinini və təkprosessorlu sistemi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Ana kartda prosessorlar toplumundan istifadə edilir. Bu toplumu necə adlandırırılar?",
+    "options": {
+      "A": "GPU",
+      "B": "RAM",
+      "C": "BIOS",
+      "D": "Çipset"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Prosessor hansı parametrlə xarakterizə olunur?",
+    "options": {
+      "A": "Printer sürəti",
+      "B": "Takt tezliyi",
+      "C": "Disk tutumu",
+      "D": "Monitor ölçüsü"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Mikroprosessorların əsas parametrləri hansıdır? (1. proqramların siyahısı, 2. əmrlər toplusu, 3. periferiya qurğuları, 4. mərtəbəlilik, 5. takt tezliyi)",
+    "options": {
+      "A": "2,4,5",
+      "B": "1,3,5",
+      "C": "1,2,3",
+      "D": "3,4,5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kompüterin işinin məhsuldarlığı asılıdır:",
+    "options": {
+      "A": "Monitorun ölçüsündən",
+      "B": "Klaviaturanın düymə sayından",
+      "C": "Mausun sürətindən",
+      "D": "Prosessorun tezliyindən"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Standart monitorlar və videokartlar təsvirin əks olunmasını 800X600, 1024X768, 1152X864 və s. qiymətləri ilə dəstəkləyir. Bu parametrlər nəyi təzahür edir?",
+    "options": {
+      "A": "Birinci rəqəm rəng sayını, ikinci tezliyi",
+      "B": "Birinci rəqəm dioqanalı, ikinci ölçünü",
+      "C": "Birinci rəqəm ekrandakı piksellər sayını, ikinci isə ekrandakı sətrlər sayını",
+      "D": "Birinci rəqəm sətrlər sayını, ikinci piksellər sayını"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Monitor nə üçündür?",
+    "options": {
+      "A": "İnformasiyanı təsvir etmək üçün",
+      "B": "İnformasiyanı daxil etmək üçün",
+      "C": "İnformasiyanı saxlamaq üçün",
+      "D": "İnformasiyanı emal etmək üçün"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Verilənləri əks etdirən qurğu hansıdır?",
+    "options": {
+      "A": "Modem",
+      "B": "Skaner",
+      "C": "Monitor",
+      "D": "Printer"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Təsvirin formalaşdırılması prinsipinə görə monitorlar:",
+    "options": {
+      "A": "ATA, SATA, IDE",
+      "B": "Koaksial, optik, radio",
+      "C": "Matris, lazer, termal",
+      "D": "Elekron-şua borulu, mayekristal, plazma"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Qrafiki rejimdə Super VGA-nin digər monitorlardan fərqləndirən əsas xüsusiyyətlər:",
+    "options": {
+      "A": "Ekranda yerləşən simvolların sayı və şrifti",
+      "B": "Ekranda yerləşən nöqtələrin sayı və ölçü",
+      "C": "Ekranda yerləşən sətrlərin sayı və uzunluğu",
+      "D": "Ekranda yerləşən rənglərin sayı və tipi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Monitorlarda hər bir piksel hansı rənglərlə əks olunur?",
+    "options": {
+      "A": "Qırmızı, göy, yaşıl",
+      "B": "Sarı, qara, ağ",
+      "C": "Yaşıl, mavi, qara",
+      "D": "Qırmızı, sarı, mavi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Fərdi kompüterlərdə istifadə olunan monitorlarda hansı siqnallardan istifadə edilir?",
+    "options": {
+      "A": "Yalnız analoq siqnallardan",
+      "B": "Yalnız rəqəmli siqnallardan",
+      "C": "Analoq və rəqəmli videosiqnallardan",
+      "D": "Audio və video siqnallardan"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "LCD monitorlarının ən geniş yayılmış modelləri hansılardır?",
+    "options": {
+      "A": "ATA, SATA, IDE",
+      "B": "Sadə yastı, qeyri fəal-matris, fəal-matris",
+      "C": "Elektron-şua, plazma, lazer",
+      "D": "Koaksial, optik, termal"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Monitor bazarında ən çox hansi tip monitorlar daha populyardır?",
+    "options": {
+      "A": "ATA, SATA, IDE",
+      "B": "Matris, lazer, termal",
+      "C": "Koaksial, optik, radio",
+      "D": "CRT, LCD, OLED"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitorlar nəyi əks etdirirlər?",
+    "options": {
+      "A": "Yalnız mətn materialları",
+      "B": "Mətn və qrafik materialları  ",
+      "C": "Yalnız audio materialları",
+      "D": "Yalnız video materialları"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Monitorlar hansı parametrlərinə görə bir-birindən fərqlənirlər?",
+    "options": {
+      "A": " Disk tutumuna və şəbəkə sürətinə görə  ",
+      "B": "Printer sürətinə və skaner qabiliyyətinə görə",
+      "C": "Ekran ölçüsünə və ekranda yerləşən nöqtə aralığına görə ",
+      "D": "Prosessor tezliyinə və RAM həcminə görə  "
+    },
+    "correct": "C"
+  },
+  {
+    "q": "İndiki zamanda maye kristal monitorlarının istehsalında neçə tip aktiv matrisadan istifadə edilir?",
+    "options": {
+      "A": "2",
+      "B": "6",
+      "C": "8",
+      "D": "4"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "LCD monitorlarında ekran kimi nədən istifadə olunur?",
+    "options": {
+      "A": "Plazma paneldən  ",
+      "B": " Elektron-şua borudan ",
+      "C": "Aktiv LCD matrisadan  ",
+      "D": "Lazer dioddan"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "LCD monitoru sözü azərbaycan dilində necə səslənir?",
+    "options": {
+      "A": "Elektron şua  ",
+      "B": "Maye kristal  ",
+      "C": "Plazma ekran  ",
+      "D": "Lazer monitor"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Monitorun ekranındakı simvolların yeniləmə sürəti hansı vahidi ilə ölçülür?",
+    "options": {
+      "A": "Piksel",
+      "B": "Bit  ",
+      "C": "Bayt  ",
+      "D": " Hers "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitor və ekran kartı hansı oxunma rejimini dəstəkləyir?",
+    "options": {
+      "A": "Ardıcıl və qarışıq oxunma rejimini  ",
+      "B": "Yalnız ardıcıl rejimi",
+      "C": "Yalnız qarışıq rejimi  ",
+      "D": "Paralel və serial rejimi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Monitorun növlərinə aiddir: (1.LCD, 2.ATA, 3.CRT, 4. Plazma, 5. VGA)",
+    "options": {
+      "A": "2,5 ",
+      "B": "1,3,4  ",
+      "C": "1,2,3  ",
+      "D": "3,4,5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "...... müxtəlif formatlı televiziya verlişlərini qəbul edib, ..... göstərilməsini təmin edən giriş qurğusudur.",
+    "options": {
+      "A": "Plotter, disketdə",
+      "B": "Modem, printerdə  ",
+      "C": "Skaner, klaviaturada ",
+      "D": "TV tüner, monitorda"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitor: (1.xaricetmə qurğusudu, 2.daxili qurğudu, 3.əsas qurğudu, 4.əks etdirmə qurğusudu, 5.yaddaş qurğusudu)",
+    "options": {
+      "A": "1,2,3  ",
+      "B": "2,5  ",
+      "C": "1,3,4 ",
+      "D": "3,4,5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Monitorun ölçü keyfiyyəti nə ilə ölçülür?",
+    "options": {
+      "A": "Dyüm",
+      "B": "Hers  ",
+      "C": " Bayt ",
+      "D": " Piksel  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "CRT, LCD, PDP, LED- nədir?",
+    "options": {
+      "A": "Prosessor növləridir  ",
+      "B": "Monitor növləridir  ",
+      "C": " Disk növləridir  ",
+      "D": " Port növləridir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Monitorun tezliyi (Refrest Rate) 60 Hz-dır. Bu parametr nəyi ifadə edir?",
+    "options": {
+      "A": "1 saniyədə monitorun ekranında kadrların 60 dəfə dəyişməsini  ",
+      "B": "1 saniyədə piksellərin 60 dəfə dəyişməsini ",
+      "C": "1 saniyədə rənglərin 60 dəfə dəyişməsini  ",
+      "D": "1 saniyədə simvolların 60 dəfə dəyişməsini"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Mətn, cədvəl və qrafiki informasiyanı ekrana çıxartılması üçündür?",
+    "options": {
+      "A": "Plotter",
+      "B": "Printer ",
+      "C": " Skaner  ",
+      "D": " Monitor"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "CRT monitorları əsas hansı porta qoşulur?",
+    "options": {
+      "A": "USB ",
+      "B": " VGA  ",
+      "C": " HDMI ",
+      "D": "LPT"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Sistemlə monitor arasında əlaqəni təmin edir?",
+    "options": {
+      "A": "Qida bloku",
+      "B": " Audio plata  ",
+      "C": " Şəbəkə kartı  ",
+      "D": " Videoadapter"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Videokart qurğusunun funksiyası nədir?",
+    "options": {
+      "A": "Şəbəkəni idarə etmək  ",
+      "B": "Səsi idarə etmək  ",
+      "C": " Monitorun qrafikasını idarə etmək  ",
+      "D": "Diski idarə etmək"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Monitor və sistem bloku bir-birinə bağlayan kabel hansıdır?",
+    "options": {
+      "A": "HDMİ  ",
+      "B": " USB ",
+      "C": "LPT",
+      "D": "PS/2"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Monitorun ekranının dioqanalı nə ilə ölçülür?",
+    "options": {
+      "A": "Bayt",
+      "B": "Piksel  ",
+      "C": "Hers ",
+      "D": "Dyüm  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitorun hansı növləri var? (1. Elektron-şüa borulu, 2. Maye kristal, 3. Şırnaqlı, 4. Plazma, 5. Terminal)",
+    "options": {
+      "A": " 1,3,5 ",
+      "B": " 3,5",
+      "C": " 1,2,4  ",
+      "D": " 2,3,4"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "1 düym nəyə bərabərdir?",
+    "options": {
+      "A": "100 mm",
+      "B": " 50 mm ",
+      "C": "10 mm  ",
+      "D": "25,4 mm  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitor və sistem bloku bir-birinə bağlayan kabel hansıdır?",
+    "options": {
+      "A": "VGA",
+      "B": "LPT",
+      "C": "PS/2",
+      "D": "SATA"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dot – matrix hansı qurğunun xüsusiyyətidir?",
+    "options": {
+      "A": "Monitor  ",
+      "B": " Printer  ",
+      "C": "Skaner  ",
+      "D": "Plotter"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Printerin çap etmə sıxlığının ölçü vahidi?",
+    "options": {
+      "A": "1 dyümə düşən rənglərin sayı  ",
+      "B": "1 dyümə düşən sətrlərin sayı ",
+      "C": " 1 dyümə düşən nöqtələrin sayı(dpi)  ",
+      "D": "1 dyümə düşən simvolların sayı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Parallel portlar adətən hansı qurğunun kompüterə qoşulması üçün istifadə edilir?",
+    "options": {
+      "A": " Monitorların  ",
+      "B": " Printerlərin  ",
+      "C": " Klaviaturaların",
+      "D": "Mausların"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Obyektləri 3D formatında çap edən printer hansıdır?",
+    "options": {
+      "A": " 3D printer  ",
+      "B": " Lazer printer  ",
+      "C": "Matris printer  ",
+      "D": " Termal printer"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Əsasən qəbzlərin çapı üçün nəzərdə tutulmuş printer hansıdır?",
+    "options": {
+      "A": "Matris",
+      "B": "Lazer ",
+      "C": " Şırnaqlı  ",
+      "D": "Termal  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Printerlərdə çap keyfiyyəti hansı parametr ilə müəyyən edilir?",
+    "options": {
+      "A": "Printerin sürəti ilə  ",
+      "B": "Printerin buraxma qabiliyyəti ilə ",
+      "C": "Printerin rəng sayı ilə  ",
+      "D": "Printerin kağız tipi ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "İndiki zamanda şirnaqlı printerlərin hansı növlərindən daha çox istifadə olunur?",
+    "options": {
+      "A": "Termal və elektron  ",
+      "B": "Matris və lazer ",
+      "C": " Pezoelektrik və elektrotermik  ",
+      "D": " Koaksial və optik"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Printerlər kompüterin hansı portuna birləşirlər?",
+    "options": {
+      "A": " Əvvəllər LPT portuna, indi isə USB portuna ",
+      "B": " Yalnız VGA portuna  ",
+      "C": " Yalnız HDMI portuna  ",
+      "D": " Yalnız PS/2 portuna"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Matritsalı printerlərin çap sürəti hansı parametrlə ölçülür?",
+    "options": {
+      "A": "Bir dəqiqədə vurulan sətrlər sayı ilə",
+      "B": "Bir dəqiqədə vurulan piksellər sayı ilə ",
+      "C": " Bir dəqiqədə vurulan rənglər sayı ilə  ",
+      "D": " Bir dəqiqədə vurulan işarələr sayı ilə  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Skanerin funksiyası?",
+    "options": {
+      "A": "İnformasiyanın emalını sürətləndirmək  ",
+      "B": " İnformasiyanın sürətini çıxartmaq  ",
+      "C": "nformasiyanın saxlanmasını təmin etmək  ",
+      "D": "İnformasiyanın çapını idarə etmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Skanerin kompüterə qoşulmasında əsasən hansı portdan istifadə olunur?",
+    "options": {
+      "A": " LPT portu  ",
+      "B": "VGA portu  ",
+      "C": " USB portu  ",
+      "D": "HDMI portu"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Skaner ilə kserokopiya aparatının fərqi nədən ibarətdir?",
+    "options": {
+      "A": "Skanerə aparatı üzünü çəkdiyi materialı yaddaşında saxlaya bilir  ",
+      "B": "Skaner yalnız çap edir ",
+      "C": "Kserokopiya aparatı rəqəmli kodlaşdırır  ",
+      "D": " Skaner yalnız kağızdan istifadə edir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Skanerlərdə təsvirin rəqəmlə kodlaşdırılması prinsipi nəyə əsaslanır?",
+    "options": {
+      "A": "Audio siqnalın video siqnalına çevrilməsinə  ",
+      "B": "Rəqəm siqnalın analoq siqnalına çevrilməsinə  ",
+      "C": "Analoq siqnalın rəqəm siqnalına çevrilməsinə  ",
+      "D": "Mətn siqnalının qrafik siqnalına çevrilməsinə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "İnkjet, baraban, elektrostatik, qələm, termal - hansı qurğunun növləridir?",
+    "options": {
+      "A": "Monitor",
+      "B": " Printer  ",
+      "C": "Skaner  ",
+      "D": " Plotter  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Geniş formatlı çaplar üçün nəzərdə tutulan qurğu hansıdır?",
+    "options": {
+      "A": "Printer  ",
+      "B": " Plotter  ",
+      "C": "Skaner  ",
+      "D": " Modem"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Reklam lövhələri, afişalar, bannerlər çap etmək üçün istifadə olunan qurğu hansıdır?",
+    "options": {
+      "A": "3D printer  ",
+      "B": " Plotter  ",
+      "C": "Termal printer  ",
+      "D": " Lazer printer"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kağız, kətan, vinil kimi materiallar üzərində çap etməyə yardım edən qurğu hansıdır?",
+    "options": {
+      "A": " Skaner  ",
+      "B": " Monitor  ",
+      "C": " Plotter  ",
+      "D": " Klaviatura"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Bəzi kompüteri açarkən 4 dəfə bip siqnalının gəlməsi hansı qurğuda olan problemi bildirir?",
+    "options": {
+      "A": " Qida bloku",
+      "B": "Prosessor  ",
+      "C": "Videokart ",
+      "D": " RAM  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "BİOS-da prosessorun temperatoruna, prossesor fanının sürətinə hansı funksiyadan baxmaq olar?",
+    "options": {
+      "A": " Boot Order",
+      "B": " Hardware Monitoring  ",
+      "C": "Power Managment  ",
+      "D": "Date and Time"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kompüterə əməliyyat sistemi yüklənərkən BİOS-un hansı funksiyasında əməliyyat icra olunur?",
+    "options": {
+      "A": " Boot Order  ",
+      "B": "Hardware Monitoring  ",
+      "C": "Power Managment ",
+      "D": "CMOS Setup"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "CMOS batareyasını çıxaranda hansı məlumatlar silinir?",
+    "options": {
+      "A": "Şifrələr",
+      "B": " Proqram faylları  ",
+      "C": "Disk məlumatları  ",
+      "D": "Tarix və saat "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "BİOS şifrəsində olan dəyişiklikləri hansı qurğu yadda saxlayır?",
+    "options": {
+      "A": "RAM  ",
+      "B": " HDD  ",
+      "C": "CMOS ",
+      "D": " BIOS çipi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "CMOS nəyin daxilində yerləşir?",
+    "options": {
+      "A": " Prosessor  ",
+      "B": " BİOS  ",
+      "C": "Videokart  ",
+      "D": "Qida bloku"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Aşağıdakılardan hansı BİOS-a aid deyil?",
+    "options": {
+      "A": "Əməliyyat sistemini yükləyir  ",
+      "B": " Avadanlıqları yoxlayır  ",
+      "C": "Tətbiqi proqramları işə salır  ",
+      "D": " Konfiqurasiyanı saxlayır"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "BİOS nədir?",
+    "options": {
+      "A": "Şəbəkə baza sistemi",
+      "B": "Əməli yaddaş sistemi  ",
+      "C": " Proqram idarə sistemi  ",
+      "D": "Giriş-çıxış baza sistemi  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "BIOS-da kompüterə gələn enerjinin gücünü hansı funksiya göstərir?",
+    "options": {
+      "A": " Power Managment  ",
+      "B": " Hardware Monitoring  ",
+      "C": "Boot Order  ",
+      "D": "Date and Time"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Tarix və Saat (Date and Time) dəyişikliklərini hansı qurğu yadda saxlayır?",
+    "options": {
+      "A": "RAM  ",
+      "B": "CMOS  ",
+      "C": "HDD  ",
+      "D": " BIOS çipi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "BİOS-a hansı düymələr vasitəsilə daxil olmaq olar?",
+    "options": {
+      "A": "Shift  ",
+      "B": "Alt  ",
+      "C": "F10  ",
+      "D": "Ctrl"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Kompüter söndükdən sonra belə enerji qəbul edən qurğu hansıdır?",
+    "options": {
+      "A": " Monitor",
+      "B": "RAM  ",
+      "C": "HDD  ",
+      "D": " CMOS  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "CMOS batareyasını çıxaranda hansı məlumatlar silinir?",
+    "options": {
+      "A": "BOOT Order'də olan dəyişikliklər ",
+      "B": "Proqram faylları  ",
+      "C": "Disk məlumatları  ",
+      "D": " Şifrələr"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "BİOS`un yaddaşını sıfırlamaq üçün nə etmək olar?",
+    "options": {
+      "A": "Power düyməsini basmaqla  ",
+      "B": " Ana plata üzərində olan batareyanı çıxarmaqla  ",
+      "C": "Klaviaturadan F1 basmaqla  ",
+      "D": " Monitoru söndürməklə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "CMOS`un yaddaşını sıfırlamaq üçün nə etmək olar?",
+    "options": {
+      "A": " Proqram quraşdırmaqla  ",
+      "B": "USB qoşmaqla ",
+      "C": " Ana plata üzərində olan batareyanı çıxarmaqla  ",
+      "D": "Disk format etməklə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "BİOS-a hansı düymələr vasitəsilə daxil olmaq olar?",
+    "options": {
+      "A": "Ctrl",
+      "B": "Alt  ",
+      "C": "Shift  ",
+      "D": "Del "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "BİOS-a hansı düymələr vasitəsilə daxil olmaq olar?",
+    "options": {
+      "A": "Esc  ",
+      "B": " Enter  ",
+      "C": " Space  ",
+      "D": "Tab"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "BİOS-a hansı düymələr vasitəsilə daxil olmaq olar?",
+    "options": {
+      "A": "F5  ",
+      "B": " F2  ",
+      "C": " F8  ",
+      "D": " F12"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Bəzi kompüteri açarkən 7 dəfə bip siqnalının gəlməsi hansı qurğuda olan problemi bildirir?",
+    "options": {
+      "A": " Videokart  ",
+      "B": "RAM",
+      "C": "Prossesor (CPU)  ",
+      "D": " Qida bloku"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "BOOT Order`də olan dəyişiklikləri hansı qurğu yadda saxlayır?",
+    "options": {
+      "A": " BIOS çipi",
+      "B": " HDD  ",
+      "C": " RAM  ",
+      "D": " CMOS  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "UEFI-ın BİOS-dan üstün cəhəti hansıdır?",
+    "options": {
+      "A": " 2TB'dan böyük boot disklərini dəstəkliyir ",
+      "B": " Yalnız 1TB diskləri dəstəkliyir  ",
+      "C": " Mausla işləməyi dəstəkləmir",
+      "D": "Daha az enerji sərf edir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "POST zamanı problem olarkən hansı formada özünü bildirir?",
+    "options": {
+      "A": " Ekran rəng dəyişməsi  ",
+      "B": " Müxtəlif sayda bip səsləri  ",
+      "C": " Klaviatura kilidlənməsi  ",
+      "D": " Maus hərəkətsizliyi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "UEFI-ın BİOS-dan üstün cəhəti hansıdır?",
+    "options": {
+      "A": " Daha yavaş yüklənir  ",
+      "B": "Yalnız klaviatura ilə işləyir  ",
+      "C": " Mausla işləmək imkanı yaradır  ",
+      "D": "Az dəstəkləyir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "CMOS-un əsas funksiyası nədir?",
+    "options": {
+      "A": "Təsviri əks etdirir",
+      "B": "Proqramları işə salır  ",
+      "C": "İnformasiyanı emal edir  ",
+      "D": " Kompüterinkonfiqurasiyası, zamanı və tarixi yadda saxlayır  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "POST kompüteri yoxladıqdan sonra hansı əməliyyat icra olunur?",
+    "options": {
+      "A": " Boot Order ",
+      "B": "Hardware Monitoring  ",
+      "C": "Power Managment  ",
+      "D": " CMOS Setup"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kuller hansı qurğunu soyutmağı təmin edir?",
+    "options": {
+      "A": "Monitor  ",
+      "B": "Prosessor  ",
+      "C": " Disk  ",
+      "D": "Klaviatura"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Aşağıdakılardan hansı Şin xətlərinə aid deyil?",
+    "options": {
+      "A": "Ünvan şini  ",
+      "B": "Məlumat şini  ",
+      "C": "Proqramlar şini  ",
+      "D": "İdarə şini"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "VRAM hansı qurğunun yaddaşıdır?",
+    "options": {
+      "A": "Qida bloku",
+      "B": "Audio plata  ",
+      "C": "Şəbəkə kartı  ",
+      "D": "Videoadapter  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Sistem plata üzərində olmayan qurğu hansılardır?",
+    "options": {
+      "A": " Qida bloku  ",
+      "B": "Prosessor  ",
+      "C": "RAM  ",
+      "D": "BIOS"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sistem plata üzərində olmayan qurğu hansılardır?",
+    "options": {
+      "A": "Çipset  ",
+      "B": "Sərt disk  ",
+      "C": "Slotlar  ",
+      "D": " Portlar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Sistem plata üzərində olmayan qurğu hansılardır?",
+    "options": {
+      "A": "Səs kartı  ",
+      "B": "Videoadapter  ",
+      "C": " Disk drive  ",
+      "D": " Şin"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Qida blokunun iş prinsipi nədir?  ",
+    "options": {
+      "A": "Enerjini emal edir",
+      "B": " Sabit enerjini dəyişkən enerjiyə çevirir  ",
+      "C": "Enerjini saxlayır ",
+      "D": "Dəyişkən enerjini sabit enerjiyə çevirir  "
+    },
+    "correct": "D"
+  },
+  {
+    "q": "DVD disklerin yaddas hecmi ne qederdir? ",
+    "options": {
+      "A": "4,7GB",
+      "B": "700MB",
+      "C": "8,5GB",
+      "D": "1,44MB"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "FLoppi disklerin yaddas hecmi ne qederdi?",
+    "options": {
+      "A": "1,44MB",
+      "B": "720KB",
+      "C": "4,7GB",
+      "D": "700MB"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Hansi xarici yaddas qurgusu deyil?",
+    "options": {
+      "A": "HDD",
+      "B": "DVD",
+      "C": "Kesh yaddash",
+      "D": "Flash yaddas"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "SSD-nin HDD-den esas ferqi nedir?",
+    "options": {
+      "A": "Mexaniki islemesi",
+      "B": "Çiplerden teskil olunmasi",
+      "C": "Daha sesli olmasi",
+      "D": "Daha ağır olması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı daxili yaddaş daha süretlidir?",
+    "options": {
+      "A": "Flash disk",
+      "B": "HDD",
+      "C": "M.2 SSD",
+      "D": "DVD-Rom"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Çipsetlerden teşkil olunan yaddaş hansıdır?",
+    "options": {
+      "A": "HDD",
+      "B": "CD",
+      "C": "DVD",
+      "D": "SSD"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Hansı diske informasiyanı defelerle yazmaq olar?",
+    "options": {
+      "A": "CD-RW",
+      "B": "CD-R",
+      "C": "DVD-ROM",
+      "D": "CD-ROM"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Virtual yaddash nedir?",
+    "options": {
+      "A": "kesh yaddash",
+      "B": "Disk ve RAM arasında mübadile sahesi",
+      "C": "Prosessor registrleri",
+      "D": "Video yaddash"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Prosessorun süretini artıran yaddash?",
+    "options": {
+      "A": "HDD",
+      "B": "Flash",
+      "C": "kesh yaddash",
+      "D": "DVD"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Funksional baxımdan yaddash nece bölünür?",
+    "options": {
+      "A": "Daxili ve xarici",
+      "B": "Aktiv ve passiv",
+      "C": "Fiziki ve mentiqi",
+      "D": "Lokal ve şebeke"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "En suretli yaddash hansıdır?",
+    "options": {
+      "A": "RAM",
+      "B": "SSD",
+      "C": "HDD",
+      "D": "Registr Yaddash"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Hansı informasiya daşıyıcı deyil?",
+    "options": {
+      "A": "DVD",
+      "B": "RAM",
+      "C": "Flash",
+      "D": "HDD"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "CD ve DVD-nin esas ferqi nedir?",
+    "options": {
+      "A": "ölçüsü",
+      "B": "Rengi",
+      "C": "Yaddash hecmi",
+      "D": "Forması"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Standart CD-ROM-un hecmi?",
+    "options": {
+      "A": "700MB",
+      "B": "4,7GB",
+      "C": "1,44MB",
+      "D": "250MB"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "HDD süreti hansı vahidle ölçülür?",
+    "options": {
+      "A": "Hertz",
+      "B": "Bit",
+      "C": "Byte",
+      "D": "Dövr/deqiqe"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Maqnit lentine yazan qurğu?",
+    "options": {
+      "A": "Printer",
+      "B": "Strimer",
+      "C": "Plotter",
+      "D": "Skaner"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "MultiMEdia qurğusu hansıdır?",
+    "options": {
+      "A": "Akustik Kolonka",
+      "B": "RAM",
+      "C": "HDD",
+      "D": "BIOS"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "ELLE çekilen şekillerin komputere daxil eden qurğu?",
+    "options": {
+      "A": "Skaner",
+      "B": "Printer",
+      "C": "Qrafik planşet",
+      "D": "Plotter"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Periferik qurğuların funksiyası?",
+    "options": {
+      "A": "Emal olunması",
+      "B": "İnformasiyanın daxil ve xaric edilmesi",
+      "C": "Saxlanması",
+      "D": "Şifrelenmesi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı çıxış qurğusu deyil?",
+    "options": {
+      "A": "Skaner",
+      "B": "Reshad",
+      "C": "Printer",
+      "D": "Plotter"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Hansı printerde iyneler istifade olunur?",
+    "options": {
+      "A": "Lazer Printer",
+      "B": "Şırnaqlı printer",
+      "C": "Termal printer",
+      "D": "Matris Printer"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "İstenilen informasiyanı skaner hansı informasiya kimi qebul edir?",
+    "options": {
+      "A": "Metn informasiya",
+      "B": "Ses informasiyası",
+      "C": "Qrafik informasiya",
+      "D": "Video informasiyası"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Aşağıdakılardan hansı periferiya qurğusu deyil",
+    "options": {
+      "A": "Printer",
+      "B": "RAM",
+      "C": "Skaner",
+      "D": "Monitor"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Elektron poçtla gelen şekili kağız üzerinde çıxarmaq üçün hansı qurğu lazımdır?",
+    "options": {
+      "A": "Skaner",
+      "B": "Printer",
+      "C": "Monitor",
+      "D": "Plotter"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Aşağıdakı qurğulardan hansı ne giriş nede çıxış qurğusu deyil?",
+    "options": {
+      "A": "Klaviatura",
+      "B": " Monitor",
+      "C": "Printer",
+      "D": "Splitter"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Hansı daxiletme qurğusudur?",
+    "options": {
+      "A": "Vep-Kamera",
+      "B": "Monitor",
+      "C": " Printer",
+      "D": " Plotter"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "aşağıdakılardan hansı komputerin periperik qurğusu deyil",
+    "options": {
+      "A": "Mouse",
+      "B": "Ana plata",
+      "C": "Printer",
+      "D": "Skaner"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Bütün komputerlere mexsus olmayan vasiteler hansılardır",
+    "options": {
+      "A": "Sistem bloku",
+      "B": "Klaviatura",
+      "C": "Xüsusi periferiya qurğuları",
+      "D": "Monitor"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Kontekst menyunun esas vezifesi nedir?",
+    "options": {
+      "A": "Kompüteri söndürmek",
+      "B": "Faylları silmek",
+      "C": "Obyektin emrlerine ve xasselerine tez giriş",
+      "D": "Program quraşdırmaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Windows da Tast Manager Hansı düymelerle açılır?",
+    "options": {
+      "A": "Ctrl+Shift+Esc",
+      "B": "Ctrl+Alt+Del",
+      "C": "Alt+F4",
+      "D": "Ctrl+Esc"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "windows 10u yeniden yuklemek ucun hansi emrden istifade olunur",
+    "options": {
+      "A": "Shut down",
+      "B": "Restart",
+      "C": "Sleep",
+      "D": "Log off"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Əməliyyat sistemini periferik qurğularla əlaqələndirən proqram? ",
+    "options": {
+      "A": "Drayver",
+      "B": "Antivirus",
+      "C": "Utilit",
+      "D": "Arxivator"
+    },
+    "correct": "A"
+  },
+  {
+    "q": " Konkret qurğunun ƏS-lə işləməsini təmin edən proqram?",
+    "options": {
+      "A": "BIOS",
+      "B": "Explorer",
+      "C": "Compiler",
+      "D": "Drayver"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Task Manager-də prosessorun sürətinə haradan baxılır?",
+    "options": {
+      "A": "Processes",
+      "B": "Startup",
+      "C": "Performance bölməsi",
+      "D": "Services"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Task Manager-də RAM istifadəsinə haradan baxılır?",
+    "options": {
+      "A": "Users",
+      "B": "Performance bölməsi",
+      "C": "Details",
+      "D": "Details"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Windows 10-da sağ düymə ilə açılan menyu necə adlanır?",
+    "options": {
+      "A": "Kontekst menyu",
+      "B": "Əsas menyu",
+      "C": "Start menyu",
+      "D": "Sistem menyu"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Windows 10-da C və D diskindən əlavə disk yaratmaq üçün hansı menyu?",
+    "options": {
+      "A": "Device Manager",
+      "B": "Control Panel",
+      "C": "Task Manager",
+      "D": "Disk Management"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Drag and Drop texnologiyası nədir?",
+    "options": {
+      "A": "Obyektin silinməsi",
+      "B": "Proqramın bağlanmas",
+      "C": "Faylın arxivlənməsi",
+      "D": "Obyektin siçanla yerinin dəyişdirilməsi"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Windows-da proqramlar susmaya görə hansı qovluğa yazılır?",
+    "options": {
+      "A": "Windows",
+      "B": "Program Files",
+      "C": "System32",
+      "D": "Users"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "İş masasının hansı obyektini silmək olmaz?",
+    "options": {
+      "A": "Fayl",
+      "B": "Qovluq",
+      "C": "Recycle Bin (Səbət)",
+      "D": "Qısayol"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Maus, klaviatura, proqram quraşdırma/silmə haradadır?",
+    "options": {
+      "A": "Control Panel",
+      "B": "Task Manager",
+      "C": "File Explorer",
+      "D": "Start Menu"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Proqramlardakı Support bölməsi nə üçündür?",
+    "options": {
+      "A": "Proqramı silmək üçün",
+      "B": "Serverdən texniki dəstək almaq üçün",
+      "C": "Fayl saxlamaq üçün",
+      "D": "Antivirus yoxlaması üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kompüter hansı iki aspektin vəhdətidir?",
+    "options": {
+      "A": "Yaddaş və disk",
+      "B": "Şəbəkə və server",
+      "C": "Aparat və proqram təminatı",
+      "D": "Giriş və çıxış"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Videoverilənləri emal edən və monitoru idarə edən qurğu?",
+    "options": {
+      "A": "Prosessor",
+      "B": "RAM",
+      "C": "Videoadapter",
+      "D": "Səs kartı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Qrafika və diaqramları çəkən qurğu?",
+    "options": {
+      "A": "Plotter",
+      "B": "Printer",
+      "C": "Skaner",
+      "D": "Monitor"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Məntiq tipli verilənlər hansı kodlaşdırmadır?",
+    "options": {
+      "A": "Onluq",
+      "B": "Səkkizlik",
+      "C": "Onaltılıq",
+      "D": "İkilik"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "PS/2 portu nə üçündür?",
+    "options": {
+      "A": "Monitor üçün",
+      "B": "Maus və klaviatura üçün",
+      "C": "Printer üçün",
+      "D": "Şəbəkə üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "TV-tünerin funksiyası nədir?",
+    "options": {
+      "A": "İnterneti paylaşmaq",
+      "B": "Səsi gücləndirmək",
+      "C": "Video montaj etmək",
+      "D": "TV siqnallarını qəbul edib monitora çıxarmaq"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Ən mürəkkəb riyazi hesablamaları yerinə yetirən?",
+    "options": {
+      "A": "RAM",
+      "B": "HDD",
+      "C": "Soprosessor",
+      "D": "BIOS"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Ana platanın əsas funksiyası nədir?",
+    "options": {
+      "A": "Qurğular arasında əlaqə yaratmaq",
+      "B": "İnformasiyanı saxlamaq",
+      "C": "Çap etmək",
+      "D": "Şəbəkə yaratmaq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "RAM-ın sürəti nə ilə ölçülür?",
+    "options": {
+      "A": "GB",
+      "B": "Bit",
+      "C": "Volt",
+      "D": "MHz"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Hansı məlumat daşıyıcısı deyil?",
+    "options": {
+      "A": "DVD",
+      "B": "Audio plata",
+      "C": "HDD",
+      "D": "Flash yaddaş"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı həm giriş, həm çıxış qurğusudur?",
+    "options": {
+      "A": "Monitor",
+      "B": "Printer",
+      "C": "Səs kartı",
+      "D": "Klaviatura"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Kompüterin sürətini xarakterizə edən göstərici?",
+    "options": {
+      "A": "Prosessorun takt tezliyi",
+      "B": "RAM həcmi",
+      "C": "Disk tutumu",
+      "D": "Monitor ölçüsü"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Skanerin aktiv imkanları nə ilə ölçülür?",
+    "options": {
+      "A": "Hertz",
+      "B": "MB",
+      "C": "Bit",
+      "D": "1 dyümdə ölçü vahidi (dpi)"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "PS/2 portuna hansı qurğular qoşulur?",
+    "options": {
+      "A": "Skaner və kamera",
+      "B": "Maus və klaviatura",
+      "C": "Modem və router",
+      "D": "Monitor və printer"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Sistem diski nə üçündür?",
+    "options": {
+      "A": "Faylların arxivlənməsi üçün",
+      "B": "Əməliyyat sisteminin yüklənməsi üçün",
+      "C": "Antivirus üçün",
+      "D": "Video saxlanması üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kompüterin şini hansı funksiyanı yerinə yetirir?",
+    "options": {
+      "A": "Enerji ötürür",
+      "B": "İnformasiyanı saxlayır",
+      "C": "Qurğuları bir-biri ilə birləşdirir",
+      "D": "Çap edir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "1 saniyədə icra olunan əməliyyatlar nəyi göstərir?",
+    "options": {
+      "A": "Rezolyusiyanı",
+      "B": "Enerji sərfini",
+      "C": "Yaddaş tutumunu",
+      "D": "İşləmə sürətini"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Ana platada nə yerləşir?",
+    "options": {
+      "A": "Modem və router",
+      "B": "Prosessor, RAM, ROM",
+      "C": "Printer və skaner",
+      "D": "Monitor və klaviatura"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı mühakimə doğrudur?",
+    "options": {
+      "A": "Monitor giriş qurğusudur",
+      "B": "HDD çıxışdır",
+      "C": "Printer daxiletmədir",
+      "D": "Klaviatura giriş qurğusudur"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "COM hansı portdur?",
+    "options": {
+      "A": "Universal",
+      "B": "Paralel",
+      "C": "Ardıcıl",
+      "D": "Optik"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "LPT hansı portdur?",
+    "options": {
+      "A": "Paralel",
+      "B": "Ardıcıl",
+      "C": "USB",
+      "D": "HDMI"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kuller nə üçündür?",
+    "options": {
+      "A": "Prosessoru soyutmaq üçün",
+      "B": "Enerji vermək üçün",
+      "C": "Səs artırmaq üçün",
+      "D": "Şəbəkə yaratmaq üçün"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kompüter donduqda nə etmək lazımdır?",
+    "options": {
+      "A": "Kabeli çıxarmaq",
+      "B": "Yenidən yükləmək",
+      "C": "Monitoru söndürmək",
+      "D": "Disk silmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "İşləyən kompüterdə nə məsləhət deyil?",
+    "options": {
+      "A": "Proqram bağlamaq",
+      "B": "Fayl saxlamaq",
+      "C": "Power düyməsi ilə söndürmək",
+      "D": "Pəncərə bağlamaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "RAM-ın ən son versiyası?",
+    "options": {
+      "A": "DDR5",
+      "B": "DDR4",
+      "C": "DDR3",
+      "D": "DDR2"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "HDMI kabeli hansı qurğuları birləşdirir?",
+    "options": {
+      "A": "Printer və kompüter",
+      "B": "Maus və klaviatura",
+      "C": "Modem və router",
+      "D": "Sistem bloku və monitor"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Aparat təminatı necə adlanır?",
+    "options": {
+      "A": "Firmware",
+      "B": "Hardware",
+      "C": "Shareware",
+      "D": "Software"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kompüterin əsas qurğuları?",
+    "options": {
+      "A": "Modem, router",
+      "B": "Plotter, kamera",
+      "C": "Monitor, siçan, klaviatura, sistem bloku",
+      "D": "Printer, skaner"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "F1–F10 düymələri necə adlanır?",
+    "options": {
+      "A": "İdarəetmə düymələri",
+      "B": "Rəqəm düymələri",
+      "C": "Mətn düymələri",
+      "D": "Funksional düymələr"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "DDR1 RAM sürəti?",
+    "options": {
+      "A": "533–800 MHz",
+      "B": "1066–1600 MHz",
+      "C": "2133–3200 MHz",
+      "D": "266–400 MHz"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "DDR2 RAM sürəti?",
+    "options": {
+      "A": "266–400 MHz",
+      "B": "533–800 MHz",
+      "C": "1066–1600 MHz",
+      "D": "3200–4800 MHz"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "DDR3 RAM sürəti?",
+    "options": {
+      "A": "1066–1600 MHz",
+      "B": "2133–3200 MHz",
+      "C": "400–600 MHz",
+      "D": "533–800 MHz"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "DDR4 RAM sürəti?",
+    "options": {
+      "A": "1066–1600 MHz",
+      "B": "3200–8400 MHz",
+      "C": "2133–3200 MHz",
+      "D": "533–800 MHz"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "DDR4 RAM sürəti?",
+    "options": {
+      "A": "1066–1600 MHz",
+      "B": "3200–8400 MHz",
+      "C": "2133–3200 MHz",
+      "D": "533–800 MHz"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "DDR4 RAM sürəti?",
+    "options": {
+      "A": "1066–1600 MHz",
+      "B": "3200–8400 MHz",
+      "C": "2133–3200 MHz",
+      "D": "533–800 MHz"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "CPU nədir?",
+    "options": {
+      "A": "Prosessor",
+      "B": "Yaddaş",
+      "C": "Videokart",
+      "D": "Ana plata"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "GPU nədir?",
+    "options": {
+      "A": "Prosessor",
+      "B": "Videoadapter",
+      "C": "Disk",
+      "D": "RAM"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "DDR5 RAM sürəti?",
+    "options": {
+      "A": "2133–3200 MHz",
+      "B": "533–800 MHz",
+      "C": "1066–1600 MHz",
+      "D": "3200–8400 MHz"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "DDR4 masaüstü RAM neçə pinlidir?",
+    "options": {
+      "A": "200",
+      "B": "240",
+      "C": "260",
+      "D": "288"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Verilənləri mübadilə edən qurğu?",
+    "options": {
+      "A": "Modem",
+      "B": "Printer",
+      "C": "Monitor",
+      "D": "Skaner"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Periferik uyğunluğu təmin edən plata?",
+    "options": {
+      "A": "HDD",
+      "B": "BIOS",
+      "C": "RAM",
+      "D": "Şin"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Rəqəmli ↔ analoq çevirən qurğu?",
+    "options": {
+      "A": "Router",
+      "B": "Modem",
+      "C": "Switch",
+      "D": "Hub"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Riyazi və məntiqi əməliyyatları yerinə yetirən?",
+    "options": {
+      "A": "HDD",
+      "B": "RAM",
+      "C": "Mikroprosessor",
+      "D": "Videokart"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Vinçesterin şərti adı?",
+    "options": {
+      "A": "A",
+      "B": "D",
+      "C": "E",
+      "D": "C"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Takt tezliyi nədir?",
+    "options": {
+      "A": "Enerji gücü",
+      "B": "Rezolyusiya",
+      "C": "Vahid zamanda icra olunan əməliyyat sayı",
+      "D": "Yaddaş həcmi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Sistem blokunun əsas elementləri?",
+    "options": {
+      "A": "Ana plata, qida bloku, disk, adapterlər",
+      "B": "Maus, klaviatura",
+      "C": "Router, modem",
+      "D": "Monitor, printer"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Analoq kodlaşdırmanı reallaşdıran sistem?",
+    "options": {
+      "A": "Printerlər",
+      "B": "Radio siqnalları ötürən qurğular",
+      "C": "Monitorlar",
+      "D": "Disklər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Flash yaddaş nədir?",
+    "options": {
+      "A": "Operativ yaddaş",
+      "B": "Video yaddaş",
+      "C": "Keş yaddaş",
+      "D": "Enerjidən asılı olmayan yaddaş"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "HDD ana plataya hansı kabel ilə qoşulur?",
+    "options": {
+      "A": "USB",
+      "B": "HDMI",
+      "C": "VGA",
+      "D": "SATA"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Cari disk nədir?",
+    "options": {
+      "A": "Sistem diski",
+      "B": "İstifadəçinin hazırda işlətdiyi disk",
+      "C": "Virtual disk",
+      "D": "Ehtiyat disk"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "II səviyyəli keş harada yerləşir?",
+    "options": {
+      "A": "Prosessorla RAM arasında",
+      "B": "Videokartda",
+      "C": "Ana platada ayrıca",
+      "D": "HDD daxilində"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Hansı əməli yaddaşdır?",
+    "options": {
+      "A": "ROM",
+      "B": "SSD",
+      "C": "HDD",
+      "D": "RAM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "DVD diskin yaddaş həcmi?",
+    "options": {
+      "A": "1.44 MB",
+      "B": "4.7 GB",
+      "C": "8.5 MB",
+      "D": "700 MB"
+    },
+    "correct": ""
+  },
+  {
+    "q": "PCİ şini ilə kompüterə qoşulan bütün püriferiya qurğularının işinə cavabdeh olun körpü necə adlandır?",
+    "options": {
+      "A": "“Şimal” körpüsü",
+      "B": "“Qərb” körpüsü",
+      "C": "“Cənub” körpüsü",
+      "D": "“Şərq” körpüsü"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Əməli yaddaşı (RAM-ı) yerləşdirmək üçün slotların sayı nə qədər olur?",
+    "options": {
+      "A": "1-dən 2-yə qədər",
+      "B": "5-dən 6-ya qədər",
+      "C": "2-dən 4-ə qədər",
+      "D": "7-dən 8-ə qədər"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Maşındaxili sistem interfeysi dedikdə, ...",
+    "options": {
+      "A": "Kompüter bloklarını birləşdirən rabitə sistemi nəzərdə tutulur",
+      "B": "Monitoru idarə edən sistem nəzərdə tutulur",
+      "C": "Printeri bağlayan kabel nəzərdə tutulur",
+      "D": "Klaviaturanın düymələri nəzərdə tutulur"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Prosessorun temperaturunu stabil saxlamaq üçün hansı qurğudan istifadə edilir?",
+    "options": {
+      "A": "Monitor",
+      "B": "Printer",
+      "C": "Kullerdən",
+      "D": "Skaner"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "CD-ROM –larda informasiya diskə necə yazılır?",
+    "options": {
+      "A": "Kənardan mərkəzə doğru",
+      "B": "Yalnız mərkəzdə",
+      "C": "Aşağıdan yuxarıya",
+      "D": "Mərkəzdən kənara doğru"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "USB (Universal Serial Bus) portu necə portdur?",
+    "options": {
+      "A": "Universal paralel",
+      "B": "Universal ardıcıl",
+      "C": "Universal rəqəmsal",
+      "D": "Universal analoq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Aşağıdakılardan hansılar verilənlərin ötürülmə vasitələridir? 1. peyk, telefon.  2. Printer, skaner,  3. lifli-optik, radio,  4. bir-birilə kabellə əlaqələndirilən kompüterlər,  5. Fərdi kompyuter",
+    "options": {
+      "A": "2,4,5",
+      "B": "1,2,3",
+      "C": "1,3,4",
+      "D": "3,4,5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Fiberoptik rabitə kanalında ötürücü mühit aşağıdakılardan hansıdır?",
+    "options": {
+      "A": "Metal",
+      "B": "Plastik",
+      "C": "Şüşə",
+      "D": "Kağız"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Telefon əlaqə xətti ilə verilənlərin ötürülməsi üçün hansı qurğudan istifadə edilir?",
+    "options": {
+      "A": "USB TPC",
+      "B": "Skaner",
+      "C": "Printer",
+      "D": "Modem"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Aşağıdakılardan hansılar transmissiya avadanlıqlarına aiddirlər? 1. şəbəkə adapter,  2. Modem,  3. qovşaq,  4. rəqəmli kameralar,  5. körpü",
+    "options": {
+      "A": "2,4,5",
+      "B": "1,2,3",
+      "C": "1,3,5",
+      "D": "3,4,5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Telefon kanalı vasitəsilə verilənlərin ötürülməsi və qəbul edilməsi imkanına malik olan qurğu hansıdır?",
+    "options": {
+      "A": "Skaner",
+      "B": "Printer",
+      "C": "Klaviatura",
+      "D": "Modem"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Aşağıdakılardan hansı Modemin tipləri deyil?",
+    "options": {
+      "A": "Daxili",
+      "B": "Modern",
+      "C": "Modern",
+      "D": "Simsiz"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Modemin funksiyası nədir?",
+    "options": {
+      "A": "Rəqəmsal verilənləri analoq siqnallarına çevirir",
+      "B": "Şəkilləri çap edir",
+      "C": "Səsi qeyd edir",
+      "D": "Mətni redaktə edir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Modemin funksiyası nədir?",
+    "options": {
+      "A": "Səsi çıxarır",
+      "B": "Analoq verilənləri rəqəmsal verilənlərə çevirir",
+      "C": "Mətni çap edir",
+      "D": "Şəkilləri skan edir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Şəbəkə kartının neçə növü var?",
+    "options": {
+      "A": "1",
+      "B": "3",
+      "C": "2",
+      "D": "4"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Şəbəkə kartının hansı növləri var?",
+    "options": {
+      "A": "Simsiz və simli",
+      "B": "Yalnız xarici",
+      "C": "Yalnız daxili",
+      "D": "Daxili və xarici"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Daxili şəbəkə kartı ana plata üzərinə hansı slota taxılır?",
+    "options": {
+      "A": "USB slotuna",
+      "B": "PSİ slotuna",
+      "C": "VGA slotuna",
+      "D": "HDMI slotuna"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı qurğu lokal şəbəkədə istifadəçinin əlaqə kanalına və kompüterə qoşulması üçün xidmət edir?",
+    "options": {
+      "A": "Şəbəkə kartı",
+      "B": "Printer",
+      "C": "Modem",
+      "D": "Skaner"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Xarici şəbəkə kartları hansı porta taxılır?",
+    "options": {
+      "A": "VGA",
+      "B": "HDMI",
+      "C": "USB",
+      "D": "PS/2"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Masaüstü kompüterlərin internet şəbəkəsinə simsiz qoşulması üçün hansı qurğudan istifadə edilir?",
+    "options": {
+      "A": "Wi-fi adapter",
+      "B": "Skaner",
+      "C": "Printer",
+      "D": "Modem"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İşçi stansiyaları yoğun koaksial kabelə qoşan qurğu hansıdır?",
+    "options": {
+      "A": "Modem",
+      "B": "Switch",
+      "C": "Router",
+      "D": "Transiver"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Switch-in əsas neçə növü var?",
+    "options": {
+      "A": "4",
+      "B": "2",
+      "C": "3",
+      "D": "1"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Şəbəkə kartı kompüterə nə ilə birləşdirilir?",
+    "options": {
+      "A": "VGA vasitəsilə",
+      "B": "HDMI vasitəsilə",
+      "C": "Xüsusi şin PCİ vasitəsilə",
+      "D": "PS/2 vasitəsilə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Şəbəkə kartları neçə mərtəbəli olurlar?",
+    "options": {
+      "A": "8,16,32,64 mərtəbəli",
+      "B": "1,2,3,4 mərtəbəli",
+      "C": "2,4,6,8 mərtəbəli",
+      "D": "4,8,12,16 mərtəbəli"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Şəbəkə resurslarını idarə edən kompyuter necə adlanır?",
+    "options": {
+      "A": "Müştəri",
+      "B": "Router",
+      "C": "Switch",
+      "D": "Server"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Serverin idarə etdiyi resurslardan istifadə edən kompyuter necə adlanır?",
+    "options": {
+      "A": "Server",
+      "B": "Müştəri",
+      "C": "Router",
+      "D": "Hub"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Takt tezliyinin ölçü vahidi:",
+    "options": {
+      "A": "Gegahers",
+      "B": "Bayt",
+      "C": "Bit",
+      "D": "Volt"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Takt tezliyinin ölçü vahidi hansıdır?",
+    "options": {
+      "A": "Volt",
+      "B": "Amp",
+      "C": "Gegahers",
+      "D": "Ohm"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "İlk cəmləyici maşın kim tərəfindən hazırlanmışdır?",
+    "options": {
+      "A": "Con Fon Neyman",
+      "B": "Ada Lavleys",
+      "C": "Çarlz Bebbic",
+      "D": "Blez Paskal"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "İlk kompüter proqramı kim tərəfindən yazılmışdır?",
+    "options": {
+      "A": "Ada Lavleys",
+      "B": "Blez Paskal",
+      "C": "Çarlz Bebbic",
+      "D": "Alan Tyurinq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Müasir kompüterlərin arxitekturasını kim təklif etmişdir?",
+    "options": {
+      "A": "Con Fon Neyman",
+      "B": "Blez Paskal",
+      "C": "Çarlz Bebbic",
+      "D": "Ada Lavleys"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İlk universal kompüter necə adlanırdı?",
+    "options": {
+      "A": "EDSAC",
+      "B": "MARK I",
+      "C": "ENIAC",
+      "D": "UNIVAC"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Analitik maşın ideyasını kim irəli sürmüşdür?",
+    "options": {
+      "A": "Ada Lavleys",
+      "B": "Çarlz Bebbic",
+      "C": "Con Fon Neyman",
+      "D": "Blez Paskal"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "EHM-lərin hansı nəslində alqoritmik dillərdən istifadə edilməyə başlanmışdır?",
+    "options": {
+      "A": "4",
+      "B": "3",
+      "C": "2",
+      "D": "1"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "EHM-lərin dördüncü nəslinin element bazası nə olmuşdur?",
+    "options": {
+      "A": "Vakuum lampalar",
+      "B": "Tranzistorlar",
+      "C": "BİS və ÇBİS",
+      "D": "İntegral sxemlər"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Kompüter arxitekturasının əsas tərkib hissələri hansılardır? 1. Hesablama və məntiqi imkanları;  2. Əməliyyat sistemi;  3. Aparat vasitələri;  4. Proqram vasitələri;  5. Əməli yaddaş ",
+    "options": {
+      "A": "1,3,5",
+      "B": "2,4,6",
+      "C": "1,2,4",
+      "D": "3,4,5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kompüterlər nəyə görə nəsillərə bölünür?",
+    "options": {
+      "A": "Qiymətlərinə görə",
+      "B": "Element bazalarına görə",
+      "C": "Rənglərinə görə",
+      "D": "Ölçülərinə görə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Neyman arxitekturasına görə computer hansı hissələrdən ibarətdir?",
+    "options": {
+      "A": "Yuxarı və aşağı",
+      "B": "Mərkəzi və periferiya",
+      "C": "Daxili və xarici",
+      "D": "Sol və sağ"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Sərt maqnit diski nədir?",
+    "options": {
+      "A": "Daxili yaddaş",
+      "B": "Xarici yaddaş",
+      "C": "Keş yaddaş",
+      "D": "Virtual yaddaş"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kompüterin mərkəzi və periferiya hissələrini əlaqələndirən vasitə necə adlanır?",
+    "options": {
+      "A": "Modem",
+      "B": "Printer",
+      "C": "Skaner",
+      "D": "Sistem interfeysi"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Fərdi kompüterin əsas tərkib hissələri hansılardır? 1. Klaviatura;  2. Monitor;  3. Modem;  4. Mouse;  5. Sistem bloku",
+    "options": {
+      "A": "2,3,4",
+      "B": "1,3,5",
+      "C": "3,4,5",
+      "D": "1,2,5"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Kompüterin düzgün işləməsini yoxlayan proqramlar hansı yaddaşda yerləşir?",
+    "options": {
+      "A": "RAM",
+      "B": "HDD",
+      "C": "ROM",
+      "D": "SSD"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Fərdi kompüterin daimi yaddaşında kompüter avadanlıqlarının işini yoxlayan, əməliyyat sisteminin yüklənməsini təmin edən proqramlar toplusu necə adlanır?",
+    "options": {
+      "A": "Antivirus",
+      "B": "BIOS",
+      "C": "Driver",
+      "D": "OS"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "İnformasiyanın maqnit lentinə yazılmasını təmin edən qurğunnun adı nədir?",
+    "options": {
+      "A": "Strimer",
+      "B": "Printer",
+      "C": "Skaner",
+      "D": "Plotter"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Proqram yerinə yetirilərkən harada saxlanılır?",
+    "options": {
+      "A": "ROM",
+      "B": "HDD",
+      "C": "CD",
+      "D": "RAM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "BIOS harada yerləşir?",
+    "options": {
+      "A": "HDD",
+      "B": "SSD",
+      "C": "RAM",
+      "D": "ROM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Disketin ölçüsü nə qədərdir?",
+    "options": {
+      "A": "700 Mb",
+      "B": "1,44 Mb",
+      "C": "4.7 Gb",
+      "D": "1 Tb"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Aşağıdakılardan hansı funksional düymədir?",
+    "options": {
+      "A": "F11",
+      "B": "1",
+      "C": "A",
+      "D": "Space"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Bunlardan hansı yaddaş qurğusunun cərgəsidir?",
+    "options": {
+      "A": " Monitor, Printer, Skaner, Maus  ",
+      "B": "HDD, DVD ROM, FDD, RAM  ",
+      "C": "Prosessor, Modem, Switch, Router  ",
+      "D": " Klaviatura, Maus, Joystick, Trackpad  "
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Kursordan soldakı simvolların silinməsi üçün hansı düymədən istifadə olunur?",
+    "options": {
+      "A": "Delete",
+      "B": "Backspace",
+      "C": "Enter",
+      "D": "Esc"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Klaviaturanın hansı düyməsi kursordan sağda olan informasiyanı silmək üçündür?",
+    "options": {
+      "A": "Backspace  ",
+      "B": "Enter ",
+      "C": "Shift",
+      "D": "Delete"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Kabel tipləri hansıdır? 1. Koaksial 2.optik-lifli3 3.peyk 4.burulmuş cüt 5.radiokanal",
+    "options": {
+      "A": "2,3,5  ",
+      "B": " 1,3,5  ",
+      "C": " 1,2,4  ",
+      "D": " 3,4,5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Lokal şəbəkədə resursların işini təmin edən proqram təminatı necə adlanır?",
+    "options": {
+      "A": " Tətbiqi proqram  ",
+      "B": "Drayver ",
+      "C": "Şəbəkə ƏS ",
+      "D": "Antivirus  "
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Lokal kompüter şəbəkəsi necə adlanır?",
+    "options": {
+      "A": "WAN  ",
+      "B": "LAN",
+      "C": "MAN",
+      "D": "PAN"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı topologiyada bütün kompüterlər bir mərkəzi qovşaqla birləşdirilir?",
+    "options": {
+      "A": "Halqa ",
+      "B": " Xətt  ",
+      "C": "Ulduz  ",
+      "D": "Mesh  "
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Ana plata ilə birləşmə üsuluna görə HDD-lərin növləri hansılardır?",
+    "options": {
+      "A": "USB, HDMI, VGA  ",
+      "B": "ATA, SATA, IDE  ",
+      "C": " PS/2, COM, LPT ",
+      "D": "Wi-Fi, Bluetooth, NFC  "
+    },
+    "correct": "B"
+  },
+  {
+    "q": "MS DOS sistemində faylın genişlənməsində simvolların maksimal sayı nə qədər ola bilər?",
+    "options": {
+      "A": "1",
+      "B": "5",
+      "C": "3",
+      "D": "8"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "MS DOS sistemində aşağıdakı hansı faylın adı düzgün verilməyib?",
+    "options": {
+      "A": "Test.txt  ",
+      "B": "File.doc",
+      "C": "Malikmammad.txt  ",
+      "D": " Data.bat "
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Hansı əməliyyat sistemi birməsələli əməliyyat sistemidir?",
+    "options": {
+      "A": " Windows  ",
+      "B": "Linux  ",
+      "C": "MS DOS  ",
+      "D": "macOS  "
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Arxivləşdirmə proqramlarına məxsus fayl genişlənmələrini seçin. 1. arj 2. zip 3. mdb 4. rar 5. rtf 6. psd",
+    "options": {
+      "A": "3,5,6",
+      "B": "1,2,4",
+      "C": "2,4,5",
+      "D": "1,3,5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "MS DOS-da faylın adında ən çox neçə simvol istifadə oluna bilər?",
+    "options": {
+      "A": "3",
+      "B": "255",
+      "C": "8",
+      "D": "16"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Faylın tam yolu verilmişdir: C:DOCSXEM.BMP Faylın genişlənməsi necədir?",
+    "options": {
+      "A": "DOC",
+      "B": "XEM",
+      "C": "BMP",
+      "D": "C"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Mətn faylının adının düzgün yazılışını seçin.",
+    "options": {
+      "A": "sigma:txt",
+      "B": " sigma txt",
+      "C": " sigma.txt",
+      "D": " sigma/txt"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Hansı tətbiqi proqramdır?",
+    "options": {
+      "A": "Əməliyyat sistemi",
+      "B": "Drayver",
+      "C": "Nəşriyyat sistemləri",
+      "D": "BIOS"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Əməliyyat sisteminin yazıldığı məntiqi disk necə adlanır?",
+    "options": {
+      "A": "Cari disk",
+      "B": " Virtual disk",
+      "C": "Sistem diski",
+      "D": "Keş disk"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "İstifadəçi interfeysinin növləri hansılardır?",
+    "options": {
+      "A": "1,4  ",
+      "B": "2,3",
+      "C": "3,4 ",
+      "D": " 1,2"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Konfiqurasiya faylları:",
+    "options": {
+      "A": "Şəkilləri saxlayır",
+      "B": "Videoları saxlayır",
+      "C": " Proqramların işi üçün zəruri olan xüsusi parametrləri saxlayır",
+      "D": "Səsləri saxlayır"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Aşağıdakılardan hansı MS DOS-da faylın adı ola bilməz?",
+    "options": {
+      "A": " Test1.ppt",
+      "B": "Sinaq:1.ppt",
+      "C": "File.doc",
+      "D": " Data.bat"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Fayl sistemləri verilmiş cərgəni göstərin.",
+    "options": {
+      "A": " DOC, TXT, PPT",
+      "B": " RAM, ROM, HDD",
+      "C": " FAT16, FAT32, NTFS",
+      "D": "BIOS, CMOS, POST"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Bir faylın bütövlükdə yerləşə bilməsi üçün ayrılan sektorlar qrupu necə adlanır?",
+    "options": {
+      "A": " Sektor",
+      "B": "Bayt",
+      "C": " Klaster",
+      "D": "Bit"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Kompüteri işə salarkən əməliyyat sistemi sərt diskdən hara yüklənir?",
+    "options": {
+      "A": "ROM",
+      "B": "Keş yaddaşa",
+      "C": "Əməli yaddaşa",
+      "D": "Virtual yaddaşa"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Faylın həcmi 10 Kbaytdır. Bu fayl 4 Kb-lıq klasterə malik diskdə neçə Kbayt yer tutar?",
+    "options": {
+      "A": "12",
+      "B": "10",
+      "C": "8",
+      "D": "16"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Kompüterin işini idarə edən əsas vasitə nədir?",
+    "options": {
+      "A": "Proqram təminatı",
+      "B": "Əməliyyat sistemi",
+      "C": "Aparat təminatı",
+      "D": "Drayver"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Windows əməliyyat sisteminin daxil olduğu proqramlar qrupu hansıdır?",
+    "options": {
+      "A": "Tətbiqi proqramlar",
+      "B": "Sistem proqramlar",
+      "C": "Nəşriyyat proqramlar",
+      "D": "Qrafik proqramlar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Klaster nədir?",
+    "options": {
+      "A": "Bir faylın və ya onun hissələrinin bütövlükdə yerləşə bilməsi üçün ayrılan sektorlar qrupu",
+      "B": "Bir bayt",
+      "C": "Bir bit",
+      "D": "Bir sektor"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Əməliyyat sisteminin periferiya qurğuları ilə (printer, skaner, plotter və s.) qarşılıqlı əlaqəsini təmin edən proqram necə adlanır?",
+    "options": {
+      "A": "Antivirus",
+      "B": "Editor",
+      "C": "Browser",
+      "D": "Drayver"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Kompüterin xarici yaddaşında informasiyanın fayllar şəklində saxlanılması və onlarla iş sistemi necə adlanır?",
+    "options": {
+      "A": "Klaster sistemi",
+      "B": "Fayl sistemi",
+      "C": "Sektor sistemi",
+      "D": "Bit sistemi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Diskin defraqmentlənməsi nə üçündür?",
+    "options": {
+      "A": "Diski silmək",
+      "B": "Diski təmizləmək",
+      "C": "Hissələri diskə səpələnmiş faylları optimal şəkildə yeni yerlərə yazır",
+      "D": "Diski formatlaşdırmaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Faylın həcmi 801 Kb olarsa, o, diskdə neçə klaster yer tutacaq (NTFS)?",
+    "options": {
+      "A": "150",
+      "B": "100",
+      "C": "250",
+      "D": "200"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Aşağıdakılardan hansı qovluğun kontekst menyusuna aid deyil(Windows 10)?",
+    "options": {
+      "A": "Print (Печать/Çap)",
+      "B": "Delete",
+      "C": "Paste",
+      "D": "Copy"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Windows 10 ƏS Start (Пуск/Başlat) düyməsi olan zolaq necə adlanır?",
+    "options": {
+      "A": "Control Panel",
+      "B": "Məsələlər paneli(Taskbar)",
+      "C": "Start Menu",
+      "D": "Desktop"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Faylların hansı atributları var?",
+    "options": {
+      "A": "Read, Write, Execute",
+      "B": "Open, Close, Save",
+      "C": "System, archive, hidden",
+      "D": "Copy, Paste, Cut"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Fayllar və qovluqlar yaddaşda hansı şəkildə yerləşir?",
+    "options": {
+      "A": "Xətti",
+      "B": "Dairəvi",
+      "C": "İyerarxik",
+      "D": "Paralel"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "İnformasiya resurslarından istifadənin tipinə görə əməliyyat sistemləri:",
+    "options": {
+      "A": "Şəbəkə və lokal",
+      "B": "Təkistifadəçi və çoxistifadəçi",
+      "C": "Qrafik və mətn",
+      "D": "Daxili və xarici"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Windows əməliyyat sistemində faylların adındakı simvolların maksimal sayı nə qədər ola bilər?",
+    "options": {
+      "A": "8",
+      "B": "255",
+      "C": "3",
+      "D": "16"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Hansı mövqesiz say sistemidir?",
+    "options": {
+      "A": "İkilik",
+      "B": "Onluq",
+      "C": "Səkkizlik",
+      "D": "Rum"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "On altılıq say sistemində verilmiş 1D ədədi 2-lik say sistemində nəyə bərabərdir?",
+    "options": {
+      "A": "10000",
+      "B": "11011",
+      "C": "11101",
+      "D": "10110"
+    },
+    "correct": "С"
+  },
+  {
+    "q": "Səkkizlik say sistemində hər bir rəqəm neçə bitlə ifadə olunur?",
+    "options": {
+      "A": "4",
+      "B": "3",
+      "C": "2",
+      "D": "1"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "Onluq say sistemində verilmiş 251 ədədi 16-lıq say sistemində nəyə bərabərdir?",
+    "options": {
+      "A": "FA",
+      "B": "FC",
+      "C": "FB",
+      "D": "FD"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Onluq say sistemində verilmiş 17 ədədi 2-lik say sistemində nəyə bərabərdir?",
+    "options": {
+      "A": "10001",
+      "B": "10010",
+      "C": "10000",
+      "D": "10100"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İkilik say sistemində verilmiş 111011 ədədi kompüterin yaddaşında neçə bit yer tutur?",
+    "options": {
+      "A": "8",
+      "B": "5",
+      "C": "7",
+      "D": "6"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Monitoru qoşmaq üçün hansı portdan istifadə edilir?",
+    "options": {
+      "A": "USB",
+      "B": "COM",
+      "C": "PS/2",
+      "D": "VGA"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "Lüminofor hansı üç əsas rənglərin yığımından təşkil olunmuşdur?",
+    "options": {
+      "A": "Qırmızı, göy, yaşıl",
+      "B": "Qırmızı, sarı, mavi",
+      "C": "Yaşıl, mavi, sarı",
+      "D": "Qara, ağ, qırmızı"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Monitorda ekranım ayırdetmə qabiliyyəti deyildikdə nə başa düşülür?",
+    "options": {
+      "A": "Ekranın ölçüsü",
+      "B": "Ekrandakı piksel sayı və aralığı",
+      "C": "Ekranın rəng sayı",
+      "D": "Ekranın tezliyi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "CRT monitorun əsas elementi?",
+    "options": {
+      "A": "Matrisa",
+      "B": "Plazma",
+      "C": "Kineskop",
+      "D": "LED"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "Hansı xarici yaddaş deyil?",
+    "options": {
+      "A": "Keş-yaddaş",
+      "B": "USB flash",
+      "C": "HDD",
+      "D": "SSD"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Proqram yerinə yetirilərkən harda saxlanılır?",
+    "options": {
+      "A": "HDD",
+      "B": "RAM",
+      "C": "ROM",
+      "D": "CD"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "CRT monitorunda nöqtə aralığı nə ilə idarə edilir?",
+    "options": {
+      "A": "kölgələndirmə maskası ilə",
+      "B": "işıqlandırma lövhəsi ilə",
+      "C": "kölgələndirmə qutusu ilə",
+      "D": "heç biri ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İxtisaslaşdırılmış prosessor nədir?",
+    "options": {
+      "A": "Çıxış qurğusu",
+      "B": "İnformasiyanı çıxışa verən qurğu",
+      "C": "Yalnız informasiyanı oxumağa imkan verən qurğ",
+      "D": "Müəyyən tip məsələlərin həlli üçün düzəldilmiş prosessor"
+    },
+    "correct": "D"
+  }
+]
+
