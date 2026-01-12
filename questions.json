@@ -1,0 +1,403 @@
+[
+
+  {
+    "q": "Dövrlər nəzəriyyəsi fənni nədən bəhs edir?",
+    "options": {
+      "A": "Elektrik yükünün yaratdığı fiziki, elektrik və maqnit hadisələrindən",
+      "B": "İstehsalat mədəniyyətinin artırılmasında elektrik enerjisinin rolundan",
+      "C": "Elektrik dövrəsində elektrik enerjisinin tətbiq sahələrindən",
+      "D": "Elektrik dövrəsində elektrik enerjisinin fiziki xüsusiyyətlərindən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dövrlər nəzəriyyəsinə hansı məsələlər daxildir?",
+    "options": {
+      "A": "Elektrik enerjisinin hasil edilməsi",
+      "B": "Elektrik qurğularının quruluşu",
+      "C": "Elektrotexniki proseslərin avtomatlaşdırılması",
+      "D": "Elektrik enerjisinin tətbiq sahələri"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Hansı xüsusiyyətlərinə görə elektrik enerjisindən daha geniş istifadə edilir?",
+    "options": {
+      "A": "Başqa növ enerjiyə çevrilə bilməsi və uzaq məsafəyə ötürülə bilməsi",
+      "B": "Mexaniki istilik, atom, kimyəvi və s. enerjilərin elektrik enerjisininə çevrilməsi",
+      "C": "Elektrotexniki qurğuların f.i.ə. böyük olmasına",
+      "D": "Elektrikləşmənin istehsalat mədəniyyətinə müsbət təsirinə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik enerjisinin uzaq məsafəyə ötürülməsinə nələr kömək etdi?",
+    "options": {
+      "A": "Fırlanan maqnit sahəsinin və çoxfazalı dövrələrin kəşfi",
+      "B": "Uzaq məsafəyə ötürülən elektrik enerjisinin iqtisadi effektivliyi",
+      "C": "Elektrik şamının kəşfi",
+      "D": "Öz – özünə təsirlənən elektrik generatorunun kəşfi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsi nəyə deyilir?",
+    "options": {
+      "A": "Enerjinin mənbədən işlədicilərə ötürülməsinə imkan verən qurğulara",
+      "B": "Elektrik enerjisini ölçən elektrik ölçü cihazlarına nəzarət edən qurğulara",
+      "C": "Sabit cərəyan maşınlarında cərəyan şiddətini və gərginliyi təyin edən qurğulara",
+      "D": "Dəyişən cərəyan generatorlarında müqaviməti hesablayan qurğulara"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik enerjisinin istehsalı, istifadəsi və ötürülməsi hansı dövrələrdə həyata keçirilir?",
+    "options": {
+      "A": "Qapalı elektrik dövrələrində",
+      "B": "Sabit cərəyan maşınlarında",
+      "C": "Transformator qoşulmuş dövrədə",
+      "D": "Dəyişən cərəyan mühərriklərində"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsi sadəcə olaraq necə adlanır?",
+    "options": {
+      "A": "sxem",
+      "B": "qurğu",
+      "C": "şəbəkə",
+      "D": "cihazlar yığımı"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Ən sadə elektrik dövrəsi nədən ibarətdir?",
+    "options": {
+      "A": "Mənbə,işlədici və birləşdirici naqillərdən",
+      "B": "Kondensatorlardan və akkumlyatorlardan",
+      "C": "Birləşdirici naqillər və kondensatorlardan",
+      "D": "Akkumulyatordan və elektrik maşınından"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrələrində elementlər necə göstərilir?",
+    "options": {
+      "A": "Şərti işarələrlə",
+      "B": "Cihazların sistemi ilə",
+      "C": "Elektrik avadanlıqlarının zavod nömrəsi ilə",
+      "D": "Cihazların dəqiqlik sinfi ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsinin daxilində enerji mənbəyi və işlədicilərin sayı neçə ola bilər?",
+    "options": {
+      "A": "Bir və yaxud bir neçə",
+      "B": "Üçdən çox",
+      "C": "Bir mənbə üç işlədici",
+      "D": "İki mənbə üç işlədici"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsini təşkil edən qurğu və elementləri vəzifələrinə görə neçə qrupa bölmək olar?",
+    "options": {
+      "A": "3",
+      "B": "4",
+      "C": "2",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsinin elementləri necə adlanır?",
+    "options": {
+      "A": "Elektrik enerji mənbəyi aktiv işlədicilər, passiv işlədicilər",
+      "B": "Dövrədəki elektrik cihazları aktiv, birləşdirici naqillər passiv",
+      "C": "Elektrik açarları aktiv, cihazlar passiv",
+      "D": "Birləşdirici naqillər aktiv, ölçü cihazları passiv"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İşlədicilərin göstəricisi nədən aslıdır?",
+    "options": {
+      "A": "Müqavimət, induktivlik və tutumdan",
+      "B": "Cihazların dəqiqlik sinfindən",
+      "C": "İşlədicilərin sayından",
+      "D": "Dövrədən axan cərəyanın qiymətindən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İşlədicilərin növündən asılı olaraq elektrik dövrəsi necə adlanır?",
+    "options": {
+      "A": "Aktiv, induktiv və tutum müqavimətli elektrik dövrəsi",
+      "B": "Dəyişən cərəyanlı tutum müqavimətli elektrik dövrəsi",
+      "C": "Sabit cərəyanlı aktiv müqavimətli elektrik dövrəsi",
+      "D": "Qeyri – sinusoidal cərəyanlı induktiv müqavimətli elektrik dövrəsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Nə üçün keçirici qızır?",
+    "options": {
+      "A": "Elektronlar keçiricinin atomları ilə toqquşaraq kinetik enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+      "B": "Müqavimətin böyük olmasına görə potensial enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+      "C": "Müqavimət az olduğuna görə kinetik enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+      "D": "Gərginliyin böyük olmasına görə potensial enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsində enerjinin mənbədən işlədiciyə ötürülməsini qiymətcə xarakterizə edən fiziki kəmiyyət nədir?",
+    "options": {
+      "A": "Cərəyan",
+      "B": "Müqavimət",
+      "C": "Gərginlik",
+      "D": "Tezlik"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sabit cərəyan dövrəsi nəyə deyilir?",
+    "options": {
+      "A": "Zamandan asılı olmayaraq qiymət və istiqamətcə dəyişməz qalana",
+      "B": "Zamandan asılı olaraq qiymətcə sabit , istiqamətcə dəyişənə",
+      "C": "Zamandan asılı olmayaraq qiymətcə maksimum olana",
+      "D": "Zamandan asılı olmayaraq qiymətcə əks fazada olana"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Cərəyanın sabit yaxud dəyişən olması nədən asılıdır?",
+    "options": {
+      "A": "E.h.q – nin sabit yaxud dəyişən olmasından",
+      "B": "İşlədicilərin müqavimətinin xarakterindən",
+      "C": "Dövrədəki işlədicilərin sayından",
+      "D": "Dövrədəki avadanlığın keyfiyyətindən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sabit cərəyan dövrəsinin elementləri hansılardır?",
+    "options": {
+      "A": "Enerji mənbəyi, ölçü cihazları",
+      "B": "Ölçü cihazları, induktiv sarğac",
+      "C": "Drossel, batareya",
+      "D": "İnduktiv sarğac"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsində elektrik cərəyanı nə ilə ölçülür?",
+    "options": {
+      "A": "Amper",
+      "B": "Volt",
+      "C": "Om",
+      "D": "Vatt"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Ohm qanununa görə, bir elektrik dövrəsində cərəyanın gücü aşağıdakılardan hansı ilə düzgün mütənasibdir?",
+    "options": {
+      "A": "Gərginliyin",
+      "B": "Rəngin",
+      "C": "Təzyiqin",
+      "D": "Qarşılıqlı qüvvənin"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Qarşılıqlı maqnit əlaqəsində olan və maqnit selləri eyni istiqamətdə olan iki qapalı dövrədə yaranan yekun induksiya e.h.q. nəyə bərabərdir?",
+    "options": {
+      "A": "hər dövrədə induksiyalanan e.h.q.-in cəminə",
+      "B": "hər dövrədə induksiyalanan e.h.q.-in fərqinə",
+      "C": "yalnız I konturda yaranan e.h.q.-nə",
+      "D": "yalnız II konturda yaranan e.h.q.-nə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektromaqnit induksiya cərəyanının istiqamətini müəyyən edən qayda neçənci ildə kim tərəfindən ixtira edilmişdir?",
+    "options": {
+      "A": "1833-cü ildə Lens tərəfindən",
+      "B": "1835-ci ildə Nyuton tərəfindən",
+      "C": "1837-ci ildə Coul tərəfindən",
+      "D": "1845-ci ildə Zodigin tərəfindən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik dövrəsində elektrik cərəyanının istiqaməti necə təyin edilir?",
+    "options": {
+      "A": "Müsbət yükün hərəkət etdiyi istiqamət",
+      "B": "Elektronların hərəkət etdiyi istiqamət",
+      "C": "Mənfi yükün hərəkət etdiyi istiqamət",
+      "D": "Keçirici materialın istinad istiqamətində"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dəyişən cərəyanı almaq üçün nədən istifadə olunur?",
+    "options": {
+      "A": "sinxron generatordan",
+      "B": "mühərrikdən",
+      "C": "transformatordan",
+      "D": "akkumulyator batareyasından"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Qarşılıqlı maqnit əlaqəsində olan və maqnit selləri əks istiqamətdə olan iki qapalı dövrədə yaranan yekun induksiya e.h.q. nəyə bərabərdir?",
+    "options": {
+      "A": "hər konturda yaranan induksiya e.h.q.-in fərqinə",
+      "B": "hər konturda yaranan induksiya e.h.q.-in cəminə",
+      "C": "yalnız I konturda yaranan e.h.q – nə",
+      "D": "yalnız II konturda yaranan e.h.q – nə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dəyişən cərəyan nəyə deyilir?",
+    "options": {
+      "A": "Vahid zaman müddətində bütün kəmiyyətləri təkrarlanan cərəyana",
+      "B": "Vahid zaman müddətində amplitud qiyməti maksimum olan cərəyana",
+      "C": "Vahid zaman müddətində tezliyi sabit qalan cərəyana",
+      "D": "Vahid zaman müddətində faza sürüşməsi 90o bərabər olan cərəyana"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Hansı elektrik dövrəsi elementinin ölçü vahidi \"Om\" ilə ifadə edilir?",
+    "options": {
+      "A": "Elektrik müqaviməti",
+      "B": "Elektrik gərginliyi",
+      "C": "Elektrik cərəyanı",
+      "D": "Elektrik gücü"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Bir dövrədə 12 V gərginlik tətbiq edildikdə və 4 A cərəyan keçdikdə, dövrənin müqaviməti nə qədərdir?",
+    "options": {
+      "A": "3 Ohm",
+      "B": "48 Ohm",
+      "C": "16 Ohm",
+      "D": "3 V"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Bir dövrədə cərəyanın ölçülməsi üçün istifadə edilən cihaz hansıdır?",
+    "options": {
+      "A": "Ampermetr",
+      "B": "Voltmetr",
+      "C": "Ommetr",
+      "D": "Termometr"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Aşağıdakılardan hansı elektrik dövrəsində gücün ölçü vahidi olaraq istifadə olunur?",
+    "options": {
+      "A": "Vatt",
+      "B": "Volt",
+      "C": "Amper",
+      "D": "Coul"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Bir elektrik dövrəsində 60 V gərginlik və 20 A cərəyan varsa, dövrənin müqaviməti nə qədərdir?",
+    "options": {
+      "A": "3 Ohm",
+      "B": "4 Ohm",
+      "C": "5 Ohm",
+      "D": "12 Ohm"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Elektrik cərəyanı nə zaman bərabər ölçü vahidində olacaqdır?",
+    "options": {
+      "A": "Cərəyanın maksimum olduğu zaman",
+      "B": "Cərəyanın sıfır olduğu zaman",
+      "C": "Müqavimətin sonsuz olduğu zaman",
+      "D": "Müqavimətin sıfır olduğu zaman"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "İki müqavimət birləşdirildikdə onların ümumi müqaviməti aşağıdakı hallardan hansında ən yüksək olur?",
+    "options": {
+      "A": "Seriya birləşmə",
+      "B": "Paralel birləşmə",
+      "C": "Cərəyanın sürətinə bağlıdır",
+      "D": "Cərəyanın intensivliyinə bağlıdır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Ayrı-ayrı elementlərin və ya bütövlükdə elektrik dövrəsinin iş rejimini xarakterizə edən nədir?",
+    "options": {
+      "A": "cərəyan və gərginliyin qiymətləri",
+      "B": "müqavimətin qiyməti",
+      "C": "elementin tutumu",
+      "D": "elementin induktivliyi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dəyişən cərəyanı hasil etmək üçün nədən istifadə edilir?",
+    "options": {
+      "A": "Sinxron generatordan",
+      "B": "Asinxron mühərrikdən",
+      "C": "Transformatordan",
+      "D": "Müqavimələr maqazasından"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sinusoidal dəyişən cərəyanın tezliyi nədən aslıdır?",
+    "options": {
+      "A": "generatorun dövr etmə sürətindən",
+      "B": "statorun hərəkət sürətindən",
+      "C": "stator dolaqlarının sarğılar sayından",
+      "D": "elektromaqnitin təsirlənmə dolağından"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Period müddətində cərəyanın istiqaməti necə dəyişər?",
+    "options": {
+      "A": "Periodun birinci yarısında “ müsbət ”, ikinci yarısında isə “ mənfi ” olur",
+      "B": "Periodun hər iki yarısında “ müsbət ” olur",
+      "C": "Periodun birinci yarısında “ mənfi ”, ikinci yarısında isə “ müsbət ” olur",
+      "D": "Periodun hər iki yarısında “ mənfi ” olur"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Dəyişən cərəyanın zamanın istənilən anındakı qiyməti necə adlanır?",
+    "options": {
+      "A": "Ani",
+      "B": "Həqiqi",
+      "C": "Xəyali",
+      "D": "Başlanğıc"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "Sinusoidal dəyişən cərəyan dövrələrinin hesablanmasında cərəyan, gərginlik və e.h.q – nin hansı qiymətlərindən istifadə edilir?",
+    "options": {
+      "A": "Təsiredici I, U, E",
+      "B": "Ani i, u, e",
+      "C": "Amplitud Im , Um , Em",
+      "D": "Orta Ior , Uor , Eor"
+    },
+    "correct": "A"
+  }
+]
