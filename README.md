@@ -23,8 +23,6 @@ Fərqli fənlər üzrə imtahanlara hazırlaşmaq üçün uyğundur (Riyaziyyat,
 
 ![Sınaq nümunəsi](sinaq-example.png)
 
-(Saytın skrinşotunu çəkin, `sinaq-example.png` adı ilə saxlayın və repozitoriyaya əlavə edin)
-
 ## Yerli olaraq necə işə salmaq
 
 1. Repozitoriyanı yükləyin: git clone https://github.com/NIKO77FIKO/Sinaq.git
