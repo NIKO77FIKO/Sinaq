@@ -6,7 +6,7 @@ Onlayn sınaq imtahan sistemi (testlər üçün)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/az/docs/Web/CSS)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/az/docs/Web/JavaScript)
 
-Canlı sayt: [Sınaq sistemi](https://niko77fiko.github.io/Sinaq/Sinaq_hazir_final_bos.html)
+Canlı sayt: [Sınaq sistemi](https://niko77fiko.github.io/Sinaq/Sinaq_hazir_final_bos_duzeltilmis.html)
 
 ## Təsvir
 
