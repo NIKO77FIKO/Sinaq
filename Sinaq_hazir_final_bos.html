@@ -3300,18 +3300,24 @@ function finish(auto=false) {
   });
 
   const result = document.getElementById("result");
-  result.innerHTML = `
-    <hr />
-    <h3>Nəticə</h3>
-    <div class="row">
-      <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
-      <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
-      <div><b>Boş:</b> ${skipped}</div>
-    </div>
-    <p><b>Giriş balı:</b> ${baseScore}</p>
-    <p style="font-size: 18px;"><b>Yekun bal:</b> ${score}</p>
-    <button type="button" onclick="location.reload()">Yenidən başla</button>
-  `;
+  const examScore = (correct * SCORE_CORRECT) + (wrong * SCORE_WRONG);
+  const result = document.getElementById("result");
+result.innerHTML = `
+  <hr />
+  <h3>Nəticə</h3>
+
+  <div class="row">
+    <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
+    <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
+    <div><b>Boş:</b> ${skipped}</div>
+  </div>
+
+  <p><b>Sınaq balı:</b> ${examScore}</p>
+  <p><b>Giriş balı:</b> ${baseScore}</p>
+  <p style="font-size:18px"><b>Yekun bal:</b> ${score}</p>
+
+  <button type="button" onclick="location.reload()">Yenidən başla</button>
+`;
 
   if (auto) {
     const warn = document.createElement("p");
