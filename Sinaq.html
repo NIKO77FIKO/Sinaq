@@ -1,0 +1,3082 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Sınaq Sistemi</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; }
+        #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; }
+        .question-block { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.3s; }
+        .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 4px; border: 1px solid #eee; }
+        .option:hover { background: #f9f9f9; }
+        button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #27ae60; }
+        #result { margin-top: 20px; }
+        .correct-ans { background-color: #d4edda !important; }
+        .wrong-ans { background-color: #f8d7da !important; }
+        .skipped-ans { background-color: #fff3cd !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Online Sınaq İmtahanı</h2>
+    <div id="timer">Qalan vaxt: 30:00</div>
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" onclick="finish()" style="display:none;">İmtahanı Bitir</button>
+    <div id="result"></div>
+</div>
+
+<script>
+const TIME_LIMIT = 30 * 60; // 30 dəqiqə
+let TIME = TIME_LIMIT;
+let interval;
+let startScore = 0;
+let currentQuestions = [];
+
+// JSON məlumatlarını hardcoded edirik (fetch yoxdur)
+const allQuestions = [
+    {
+  "q": "1. Dövrlər nəzəriyyəsi fənni nədən bəhs edir?",
+  "options": {
+    "A": "İstehsalat mədəniyyətinin artırılmasında elektrik enerjisinin rolundan",
+    "B": "Elektrik dövrəsində elektrik enerjisinin tətbiq sahələrindən",
+    "C": "Elektrik yükünün yaratdığı fiziki, elektrik və maqnit hadisələrindən",
+    "D": "Elektrik dövrəsində elektrik enerjisinin fiziki xüsusiyyətlərindən"
+  },
+  "correct": "C"
+},
+{
+  "q": "2. Dövrlər nəzəriyyəsinə hansı məsələlər daxildir?",
+  "options": {
+    "A": "Elektrotexniki proseslərin avtomatlaşdırılması",
+    "B": "Elektrik enerjisinin hasil edilməsi",
+    "C": "Elektrik qurğularının quruluşu",
+    "D": "Elektrik enerjisinin tətbiq sahələri"
+  },
+  "correct": "B"
+},
+{
+  "q": "3. Hansı xüsusiyyətlərinə görə elektrik enerjisindən daha geniş istifadə edilir?",
+  "options": {
+    "A": "Mexaniki istilik, atom, kimyəvi və s. enerjilərin elektrik enerjisinə çevrilməsi",
+    "B": "Başqa növ enerjiyə çevrilə bilməsi və uzaq məsafəyə ötürülə bilməsi",
+    "C": "Başqa növ enerjiyə nəzərən iqtisadi cəhətdən daha sərfəli olduğuna görə",
+    "D": "Elektrotexniki qurğuların f.i.ə. böyük olmasına"
+  },
+  "correct": "B"
+},
+{
+  "q": "4. Elektrik enerjisinin uzaq məsafəyə ötürülməsinə nələr kömək etdi?",
+  "options": {
+    "A": "Elektrik şamının kəşfi",
+    "B": "Uzaq məsafəyə ötürülən elektrik enerjisinin iqtisadi effektivliyi",
+    "C": "Üçfazalı transformatorun kəşfi",
+    "D": "Fırlanan maqnit sahəsinin və çoxfazalı dövrələrin kəşfi"
+  },
+  "correct": "D"
+},
+{
+  "q": "5. Elektrik dövrəsi nəyə deyilir?",
+  "options": {
+    "A": "Elektrik enerjisini ölçən elektrik ölçü cihazlarına nəzarət edən qurğulara",
+    "B": "Dəyişən cərəyan generatorlarında müqaviməti hesablayan qurğulara",
+    "C": "Enerjinin mənbədən işlədicilərə ötürülməsinə imkan verən qurğulara",
+    "D": "Sabit cərəyan maşınlarında cərəyan şiddətini və gərginliyi təyin edən qurğulara"
+  },
+  "correct": "C"
+},
+{
+  "q": "6. Elektrik enerjisinin istehsalı, istifadəsi və ötürülməsi hansı dövrələrdə həyata keçirilir?",
+  "options": {
+    "A": "Qapalı elektrik dövrələrində",
+    "B": "Sabit cərəyan maşınlarında",
+    "C": "Transformator qoşulmuş dövrədə",
+    "D": "Dəyişən cərəyan mühərriklərində"
+  },
+  "correct": "A"
+},
+{
+  "q": "7. Elektrik dövrəsi sadəcə olaraq necə adlanır?",
+  "options": {
+    "A": "qurğu",
+    "B": "şəbəkə",
+    "C": "sxem",
+    "D": "cihazlar yığımı"
+  },
+  "correct": "C"
+},
+{
+  "q": "8. Ən sadə elektrik dövrəsi nədən ibarətdir?",
+  "options": {
+    "A": "Elektrik maşınlarından",
+    "B": "Mənbə,işlədici və birləşdirici naqillərdən",
+    "C": "Birləşdirici naqillər və kondensatorlardan",
+    "D": "Akkumulyatordan və elektrik maşınından"
+  },
+  "correct": "B"
+},
+{
+  "q": "9. Elektrik dövrələrində elementlər necə göstərilir?",
+  "options": {
+    "A": "Şərti işarələrlə",
+    "B": "Elektrik avadanlıqlarının zavod nömrəsi ilə",
+    "C": "Birləşdirici naqillərin markası ilə",
+    "D": "Cihazların sistemi ilə"
+  },
+  "correct": "A"
+},
+{
+  "q": "10. Elektrik dövrəsinin daxilində enerji mənbəyi və işlədicilərin sayı neçə ola bilər?",
+  "options": {
+    "A": "Bir mənbə üç işlədici",
+    "B": "İki mənbə üç işlədici",
+    "C": "Üç mənbə iki işlədici",
+    "D": "Bir və yaxud bir neçə"
+  },
+  "correct": "D"
+},
+{
+  "q": "11. Elektrik dövrəsini təşkil edən qurğu və elementləri vəzifələrinə görə neçə qrupa bölmək olar?",
+  "options": {
+    "A": "4",
+    "B": "3",
+    "C": "6",
+    "D": "2"
+  },
+  "correct": "B"
+},
+{
+  "q": "12. Elektrik dövrəsinin elementləri necə adlanır?",
+  "options": {
+    "A": "Elektrik açarları aktiv, cihazlar passiv",
+    "B": "Dövrədəki elektrik cihazları aktiv, birləşdirici naqillər passiv",
+    "C": "Müqavimət, induktivlik və tutumdan",
+    "D": "Elektrik enerji mənbəyi aktiv işlədicilər, passiv işlədicilər"
+  },
+  "correct": "D"
+},
+{
+  "q": "13. İşlədicilərin göstəricisi nədən aslıdır?",
+  "options": {
+    "A": "Cihazların dəqiqlik sinfindən",
+    "B": "İşlədicilərin sayından",
+    "C": "Müqavimət, induktivlik və tutumdan",
+    "D": "Dövrədəki gərginlikdən"
+  },
+  "correct": "C"
+},
+{
+  "q": "14. İşlədicilərin növündən asılı olaraq elektrik dövrəsi necə adlanır?",
+  "options": {
+    "A": "Sinusoidal cərəyanlı elektrik dövrəsi",
+    "B": "Aktiv, induktiv və tutum müqavimətli elektrik dövrəsi",
+    "C": "Qeyri – sinusoidal cərəyanlı  induktiv müqavimətli elektrik dövrəsi",
+    "D": "Dəyişən cərəyanlı tutum müqavimətli elektrik dövrəsi"
+  },
+  "correct": "B"
+},
+{
+  "q": "15. Nə üçün keçirici qızır?",
+  "options": {
+    "A": "Gərginliyin kiçik olmasına görə kinetik enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+    "B": "Müqavimətin böyük olmasına görə potensial enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+    "C": "Gərginliyin böyük olmasına görə potensial enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır",
+    "D": "Elektronlar keçiricinin atomları ilə toqquşaraq kinetik enerjini istilik enerjisinə çevirərək keçiricini və ətraf mühiti qızdırır"
+  },
+  "correct": "D"
+},
+{
+  "q": "16. Elektrik dövrəsində enerjinin mənbədən işlədiciyə ötürülməsini qiymətcə xarakterizə edən fiziki kəmiyyət nədir?",
+  "options": {
+    "A": "Müqavimət",
+    "B": "Gərginlik",
+    "C": "Tezlik",
+    "D": "Cərəyan"
+  },
+  "correct": "D"
+},
+{
+  "q": "17. Sabit cərəyan dövrəsi nəyə deyilir?",
+  "options": {
+    "A": "Zamandan asılı olaraq qiymətcə sabit , istiqamətcə dəyişənə",
+    "B": "amandan asılı olmayaraq qiymətcə maksimum olana",
+    "C": "Zamandan asılı olmayaraq qiymət və istiqamətcə dəyişməz qalana",
+    "D": "Zamandan asılı olmayaraq qiymətcə sabit, istiqamət və tezliyini dəyişənə "
+  },
+  "correct": "C"
+},
+{
+  "q": "18 .Cərəyanın sabit yaxud dəyişən olması nədən asılıdır?",
+  "options": {
+    "A": "Dövrədəki işlədicilərin sayından",
+    "B": "E.h.q – nin sabit yaxud dəyişən olmasından",
+    "C": "Dövrənin sıxaclarına tətbiq edilən gərginliyin qiymətindən",
+    "D": "Dövrədəki avadanlığın keyfiyyətindən"
+  },
+  "correct": "B"
+},
+{
+  "q": "19. Sabit cərəyan dövrəsinin elementləri hansılardır?",
+  "options": {
+    "A": "Ölçü cihazları, induktiv sarğac",
+    "B": "Enerji mənbəyi, ölçü cihazları ",
+    "C": "Kondensator batareyası",
+    "D": "İnduktiv sarğac"
+  },
+  "correct": "B"
+},
+{
+  "q": "20. Elektrik dövrəsində elektrik cərəyanı nə ilə ölçülür?",
+  "options": {
+    "A": "Volt",
+    "B": "Om",
+    "C": "Coul",
+    "D": "Amper"
+  },
+  "correct": "D"
+},
+{
+  "q": "21. Ohm qanununa görə, bir elektrik dövrəsində cərəyanın gücü aşağıdakılardan hansı ilə düzgün mütənasibdir?",
+  "options": {
+    "A": "Təzyiqin",
+    "B": "Qarşılıqlı qüvvənin",
+    "C": " Gərginliyin",
+    "D": "İstiliyin"
+  },
+  "correct": "C"
+},
+{
+  "q": "22. Qarşılıqlı maqnit əlaqəsində olan və maqnit selləri eyni istiqamətdə olan iki qapalı dövrədə yaranan yekun induksiya e.h.q. nəyə bərabərdir?",
+  "options": {
+    "A": "hər dövrədə induksiyalanan e.h.q.-in fərqinə",
+    "B": "yalnız I konturda yaranan e.h.q.-nə",
+    "C": "hər dövrədə induksiyalanan e.h.q.-in cəminə",
+    "D": "konturlarda yaranan e.h.q.-dən 2 dəfə çox"
+  },
+  "correct": "C"
+},
+{
+  "q": "23. Elektromaqnit induksiya cərəyanının istiqamətini müəyyən edən qayda neçənci ildə kim tərəfindən ixtira edilmişdir?",
+  "options": {
+    "A": "835-ci ildə Nyuton tərəfindən",
+    "B": "1833-cü ildə Lens tərəfindən",
+    "C": "1850-ci ildə Yabloçkov tərəfindən",
+    "D": "1845-ci ildə Zodigin tərəfindən"
+  },
+  "correct": "B"
+},
+{
+  "q": "24. Elektrik dövrəsində elektrik cərəyanının istiqaməti necə təyin edilir?",
+  "options": {
+    "A": "Cərəyanın maksimum gücünün olduğu istiqamət",
+    "B": "Müsbət yükün hərəkət etdiyi istiqamət",
+    "C": "Elektronların hərəkət etdiyi istiqamət",
+    "D": "Mənfi yükün hərəkət etdiyi istiqamət"
+  },
+  "correct": "B"
+},
+{
+  "q": "25. Dəyişən cərəyanı almaq üçün nədən istifadə olunur?",
+  "options": {
+    "A": "sinxron generatordan",
+    "B": "mühərrikdən",
+    "C": "drosseldən",
+    "D": "transformatordan"
+  },
+  "correct": "A"
+},
+{
+  "q": "26. Qarşılıqlı maqnit əlaqəsində olan və maqnit selləri əks istiqamətdə olan iki qapalı dövrədə yaranan yekun induksiya e.h.q. nəyə bərabərdir?",
+  "options": {
+    "A": "hər konturda yaranan induksiya e.h.q.-in cəminə",
+    "B": "konturlarda yaranan e.h.q – dən 2 dəfə çox",
+    "C": "hər konturda yaranan induksiya e.h.q.-in fərqinə",
+    "D": "yalnız I konturda yaranan e.h.q – nə"
+  },
+  "correct": "C"
+},
+{
+  "q": "27. Dəyişən cərəyan nəyə deyilir?",
+  "options": {
+    "A": "Vahid zaman müddətində amplitud qiyməti maksimum olan cərəyana",
+    "B": "Vahid zaman müddətində fazaca üst – üstə düşənə",
+    "C": "Vahid zaman müddətində tezliyi sabit qalan cərəyana",
+    "D": "Vahid zaman müddətində bütün kəmiyyətləri təkrarlanan cərəyana"
+  },
+  "correct": "D"
+},
+{
+  "q": "28. Hansı elektrik dövrəsi elementinin ölçü vahidi OM ilə ifadə edilir?",
+  "options": {
+    "A": "lektrik enerjisi",
+    "B": " Elektrik gərginliyi",
+    "C": " Elektrik cərəyanı",
+    "D": "Elektrik müqaviməti"
+  },
+  "correct": "D"
+},
+{
+  "q": "29. Bir dövrədə 12 V gərginlik tətbiq edildikdə və 4 A cərəyan keçdikdə, dövrənin müqaviməti nə qədərdir?",
+  "options": {
+    "A": "48 Ohm",
+    "B": "3 Ohm",
+    "C": "16 Ohm",
+    "D": "3 V"
+  },
+  "correct": "B"
+},
+{
+  "q": "30. Bir dövrədə cərəyanın ölçülməsi üçün istifadə edilən cihaz hansıdır?",
+  "options": {
+    "A": "Barometr",
+    "B": "Voltmetr",
+    "C": "Ampermetr",
+    "D": "Ommetr"
+  },
+  "correct": "C"
+},
+{
+  "q": "31.Aşağıdakılardan hansı elektrik dövrəsində gücün ölçü vahidi olaraq istifadə olunur?",
+  "options": {
+    "A": "Volt",
+    "B": "Amper",
+    "C": "Vatt",
+    "D": "Om"
+  },
+  "correct": "C"
+},
+{
+  "q": "32. Bir elektrik dövrəsində 60 V gərginlik və 20 A cərəyan varsa, dövrənin müqavimətini tapın.",
+  "options": {
+    "A": "4 Ohm",
+    "B": "3 Ohm",
+    "C": "120 Ohm",
+    "D": "12 Ohm"
+  },
+  "correct": "A"
+},
+{
+  "q": "33. Elektrik cərəyanı nə zaman bərabər ölçü vahidində olacaqdır?",
+  "options": {
+    "A": "Cərəyanın maksimum olduğu zaman",
+    "B": "Cərəyanın sıfır olduğu zaman",
+    "C": "Müqavimətin sıfır olduğu zaman",
+    "D": "Müqavimətin sonsuz olduğu zaman"
+  },
+  "correct": "A"
+},
+{
+  "q": "34. İki müqavimət birləşdirildikdə onların ümumi müqaviməti aşağıdakı hallardan hansında ən yüksək olur?",
+  "options": {
+    "A": "Paralel birləşmə",
+    "B": " Seriya birləşmə",
+    "C": "Gücün ölçüsünə bağlıdır",
+    "D": " Cərəyanın intensivliyinə bağlıdır"
+  },
+  "correct": "B"
+},
+{
+  "q": "35. Ayrı-ayrı elementlərin və ya bütövlükdə elektrik dövrəsinin iş rejimini xarakterizə edən nədir?",
+  "options": {
+    "A": "müqavimətin qiyməti",
+    "B": "işlədicilərin tələb etdiyi gücün qiyməti",
+    "C": "cərəyan və gərginliyin qiymətləri",
+    "D": "elementin tutumu"
+  },
+  "correct": "C"
+},
+{
+  "q": "36. Dəyişən cərəyanı hasil etmək üçün nədən istifadə edilir?",
+  "options": {
+    "A": "Müqavimələr maqazasından",
+    "B": "Transformatordan",
+    "C": "Asinxron mühərrikdən",
+    "D": "Sinxron generatordan"
+  },
+  "correct": "D"
+},
+{
+  "q": "37. Sinusoidal dəyişən cərəyanın tezliyi nədən aslıdır?",
+  "options": {
+    "A": "statorun hərəkət sürətindən",
+    "B": "stator dolaqlarının sarğılar sayından",
+    "C": "elektromaqnitin təsirlənmə dolağından",
+    "D": "generatorun dövr etmə sürətindən"
+  },
+  "correct": "D"
+},
+{
+  "q": "38 .Period müddətində cərəyanın istiqaməti necə dəyişər?",
+  "options": {
+    "A": "Periodun hər iki yarısında “ müsbət ” olur",
+    "B": "Periodun birinci yarısında “ müsbət ”, ikinci yarısında isə “ mənfi ” olur",
+    "C": "Period müddətində cərəyanın istiqaməti üç dəfə dəyişir",
+    "D": "Periodun hər iki yarısında “ mənfi ” olur"
+  },
+  "correct": "B"
+},
+{
+  "q": "39. Dəyişən cərəyanın zamanın istənilən anındakı qiyməti necə adlanır?",
+  "options": {
+    "A": "Həqiqi",
+    "B": "Başlanğıc",
+    "C": "Ani",
+    "D": "Xəyali"
+  },
+  "correct": "C"
+},
+{
+  "q": "40. Sinusoidal dəyişən cərəyan dövrələrinin hesablanmasında cərəyan, gərginlik və e.h.q – nin hansı qiymətlərindən istifadə edilir?",
+  "options": {
+    "A": "Ani i,u,e",
+    "B": "Orta Ior,Uor,Eor",
+    "C": "Kompleks I,U,E",
+    "D": "Təsiredici I,U,E"
+  },
+  "correct": "D"
+},
+{
+  "q": "41. Təsiredici qiymətlə amplitud qiymət arasındakı əlaqə necədir?",
+  "options": {
+    "A": "Təsiredici qiymət amplitud qiymətinlə ani qiymətin cəminə bərabərdir",
+    "B": "Təsiredici qiymət amplitud qiymətindən dəfə kiçikdir",
+    "C": "Təsiredici qiymət amplitud qiymətin yarısına bərabərdir",
+    "D": "Təsiredici qiymət amplitud qiymətin üç mislinə bərabərdir"
+  },
+  "correct": "B"
+},
+{
+  "q": "42. Sinusoidal kəmiyyətin orta qiyməti dedikdə nə nəzərdə tutulur?",
+  "options": {
+    "A": "Kəmiyyətin ani qiymətinin yarısı",
+    "B": "Kəmiyyətin maksimum qiymətinin iki misli",
+    "C": "Kəmiyyətlərin orta arifmetik qiyməti",
+    "D": "Kəmiyyətin ani qiyməti ilə amplitud qiymətinin cəbri cəmi"
+  },
+  "correct": "C"
+},
+{
+  "q": "43. Dəyişən cərəyanın təsiredici qiyməti böyükdür yoxsa orta qiyməti?",
+  "options": {
+    "A": "Orta qiyməti",
+    "B": "Təsiredici qiymət orta qiymətə bərabərdir",
+    "C": "Orta qiymət təsiredici qiymətdən iki dəfə böyükdür",
+    "D": "Təsiredici qiyməti"
+  },
+  "correct": "D"
+},
+{
+  "q": "44. Təsiredici qiymətin orta qiymətə nisbətinə nə deyilir?",
+  "options": {
+    "A": "Elektrik dövrəsinin f.i.ə",
+    "B": "Periodik əyrinin forma əmsalı",
+    "C": "İşlədici qurğunun güc əmsalı",
+    "D": "Mühərrikin güc əmsalı"
+  },
+  "correct": "B"
+},
+{
+  "q": "45. Tam period müddətində sinusoidal kəmiyyətin orta qiyməti nəyə bərabərdir?",
+  "options": {
+    "A": "Amplitud qiymətin-nə",
+    "B": "Kəmiyyətin ani qiymətindən 3 dəfə böyükdür",
+    "C": "Sıfıra",
+    "D": "Ani qiymətlə amplitud qiymətin fərqinə"
+  },
+  "correct": "C"
+},
+{
+  "q": "46. Müqavimətlər üçbucağının hipetenuzu hansı müqavimətini göstərir?",
+  "options": {
+    "A": "Omik",
+    "B": "İnduktiv",
+    "C": "Ümumi",
+    "D": "Aktiv"
+  },
+  "correct": "C"
+},
+{
+  "q": "47.Güclər üçbucağında iti bucağa bitişik katet hansı gücü göstərir?",
+  "options": {
+    "A": "Reaktiv",
+    "B": "Aktiv",
+    "C": "Tam",
+    "D": "Maksimum"
+  },
+  "correct": "B"
+},
+{
+  "q": "48. Dəyişən cərəyan dövrəsinin hesablanmasında hansı kəmiyyətdən istifadə edilir?",
+  "options": {
+    "A": "Reaktiv gücdən",
+    "B": "Aktiv gücdən",
+    "C": "Faydalı iş əmsalından",
+    "D": "Tam gücdən"
+  },
+  "correct": "D"
+},
+{
+  "q": "49. Güc müsbət olduqda dəyişən cərəyan dövrəsində hansı energetik proses baş verir?",
+  "options": {
+    "A": "Elektrik enerjisi induktivlikdən mənbəyə verilir",
+    "B": "Heç bir enerji mübadiləsi getmir",
+    "C": "Elektrik enerjisi mənbədən işlədiciyə verilir",
+    "D": "Mənbəyə ötürülən enerji mexaniki enerjiyə çevrilir"
+  },
+  "correct": "C"
+},
+{
+  "q": "50. Elektrik enerji prosesinin kəmiyyət göstəricisini müəyyən edən nədir?",
+  "options": {
+    "A": "Gücün ani qiyməti",
+    "B": "Gücün orta qiyməti",
+    "C": "Gücün effektiv qiyməti",
+    "D": "Gücün maksimum qiyməti"
+  },
+  "correct": "B"
+},
+{
+  "q": "51. İşlədici yalnız aktiv müqavimətdən ibarət olduqda gərginlik və cərəyan arasındakı faza bucağı nəyə bərabərdir?",
+  "options": {
+    "A": "45o – yə",
+    "B": "30o – yə",
+    "C": "60o – yə",
+    "D": "Sıfıra"
+  },
+  "correct": "D"
+},
+{
+  "q": "52. Dövrədə hansı müqavimət olduqda tutum gücü ayrılır?",
+  "options": {
+    "A": "Tutum",
+    "B": "Aktiv",
+    "C": "İnduktiv",
+    "D": "Omik"
+  },
+  "correct": "A"
+},
+{
+  "q": "53. Tutum müqavimətli dövrədə enerji ötürülməsi hansı elementlər arasında gedir?",
+  "options": {
+    "A": "Elektrik mənbəyi ilə dövrədəki aktiv müqavimət",
+    "B": "İnduktiv sarğacla elektrik enerji mənbəyi",
+    "C": "Elektrik enerji mənbəyi ilə dövrədəki kondensator",
+    "D": "Aktiv müqavimətlə tutum"
+  },
+  "correct": "C"
+},
+{
+  "q": "54. Tutumlu dövrədə elektroenergetik proses nə ilə xarakterizə olunur?",
+  "options": {
+    "A": "Aktiv güc ilə",
+    "B": "Reaktiv güc ilə",
+    "C": "Aktiv gücün ani qiyməti ilə",
+    "D": "Aktiv gücün orta qiyməti ilə"
+  },
+  "correct": "B"
+},
+{
+  "q": "55. Gücün dəyişən toplananının amplitudası necə adlanır?",
+  "options": {
+    "A": "Aktiv güc",
+    "B": "Tam güc",
+    "C": "İnduktiv güc",
+    "D": "Ani güc"
+  },
+  "correct": "B"
+},
+{
+  "q": "56. Tam gücün vahidi nədir?",
+  "options": {
+    "A": "Vatt, kilovatt, meqovatt",
+    "B": "Güc əmsalı",
+    "C": "Volt–amper(VA),kilovolt–amper (KVA)",
+    "D": "Volt–amper reaktiv,kilovolt–amper(KVA)"
+  },
+  "correct": "C"
+},
+{
+  "q": "57. Tam güc nəyə bərabərdir?",
+  "options": {
+    "A": "Aktiv və reaktiv gücün fərqinə",
+    "B": "Aktiv gücün kvadrat kökünə",
+    "C": "Aktiv güc ilə reaktiv gücün hasilinə",
+    "D": "Aktiv və reaktiv gücün kvadrat kökünə"
+  },
+  "correct": "D"
+},
+{
+  "q": "58. Aktiv, induktiv və tutum müqavimətləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində gərginlik işlədicilər arasında necə paylanır?",
+  "options": {
+    "A": "Onların hər üçündə gərginlik eyni olur",
+    "B": "İnduktiv müqavimətli qoldakı gərginlik daha böyük olur",
+    "C": "Tutum müqavimətli qoldakı gərginlik çox–çox kiçikdir",
+    "D": "Aktiv müqavimətdəki gərginlik ümumi gərginliyə bərabərdir"
+  },
+  "correct": "A"
+},
+{
+  "q": "59. İşlədiciləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində induktiv keçiricilik nəyə bərabərdir?",
+  "options": {
+    "A": "Aktiv gərginliklə tutum gərginliyinin cəminə",
+    "B": "Aktiv gərginliyin induktiv gərginliyə nisbətinə",
+    "C": "Birin induktiv müqavimətə nisbətinə",
+    "D": "Birin aktiv gərginliyə hasilinə"
+  },
+  "correct": "C"
+},
+{
+  "q": "60. İşlədiciləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində tutum keçiriciliyi nəyə bərabərdir?",
+  "options": {
+    "A": "Birin aktiv gərginliyə nisbətinə",
+    "B": "Birin tutum müqavimətinə nisbətinə",
+    "C": "Birin induktiv gərginliyə nisbətinə",
+    "D": "Aktiv gərginliyin tutum gərginliyə hasilinə"
+  },
+  "correct": "B"
+},
+{
+  "q": "61. Aktiv, induktiv və tutum parametrləri paralel birləşdirilmiş dövrədə vektor dioqramı hansı kəmiyyətlər arasında qurulur?",
+  "options": {
+    "A": "Gərginlik və aktiv budaqdakı cərəyan arasında",
+    "B": "Gərginlik, aktiv budaqdakı cərəyan cərəyan arasında",
+    "C":  "Gərginlik və induktiv budaqdakı cərəyan arasında",
+    "D": "Gərginlik və tutumlu qoldakı cərəyan arasında"
+  },
+  "correct": "B"
+},
+{
+  "q": "62. Parametrləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində gərginliklə aktiv müqavimətli qoldan keçən cərəyan arasındakı faza sürüşməsi nə qədərdir?",
+  "options": {
+    "A": "Gərginliklə aktiv müqavimətli budaqdakı cərəyan fazaca 45o fərqlidir",
+    "B": "Gərginliklə aktiv müqavimətli budaqdakı cərəyan fazaca 50o fərqlidir",
+    "C": "Gərginliklə aktiv müqavimətli budaqdakı cərəyan fazaca 60o fərqlidir",
+    "D": "Gərginliklə aktiv müqavimətli budaqdakı cərəyan üst–üstə düşür"
+  },
+  "correct": "D"
+},
+{
+  "q": "63. Aktiv, induktiv və tutum parametrləri paralel birləşdirilmiş dövrədə gərginliklə induktiv müqavimətli budaqdan axan cərəyan arasındakı faza sürüşməsi nə qədərdir?",
+  "options": {
+    "A": "Aktiv qoldakı cərəyan induktiv müqavimətdəki cərəyana bərabərdir",
+    "B": "Tutumdakı cərəyan aktiv müqavimətdəki cərəyandan kiçikdir",
+    "C": "İnduktiv müqavimətdəki cərəyan gərginliyi 90o qabaqlayır",
+    "D": "İnduktivli qoldakı cərəyan tutumdakı cərəyandan böyükdür"
+  },
+  "correct": "C"
+},
+{
+  "q": "64. Paralel birləşdirilmiş dövrə üçün qurulmuş cərəyan vektor dioqramına əsasən aktiv və reaktiv toplananlar haqqında nə demək olar?",
+  "options": {
+    "A": "Aktiv toplanan gərginlikdən π 3 bucağı qədər fərqlidir",
+    "B": "İnduktiv toplanan gərginliklə eyni fazadadır",
+    "C": "Aktiv toplanan gərginliklə eyni, reaktiv toplanan isə π 2 bucağı qədər fərqlənir",
+    "D": "Tam cərəyan gərginliklə eyni fazadadır"
+  },
+  "correct": "C"
+},
+{
+  "q": "65. Dəyişən cərəyan dövrəsində hansı element olduqda cərəyan gərginlikdən geri qalır?",
+  "options": {
+    "A": "İnduktiv",
+    "B": "Aktiv",
+    "C": "Tutum",
+    "D": "Aktiv və tutum"
+  },
+  "correct": "A"
+},
+{
+  "q": "66. Aktiv, induktiv və tutum parametrləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində hansı rezonans alınır?",
+  "options": {
+    "A": "Güclər",
+    "B": "Müqavimətlər",
+    "C": "Gərginliklər",
+    "D": "Cərəyanlar"
+  },
+  "correct": "D"
+},
+{
+  "q": "67. İşlədiciləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində cərəyanlar üçün alınan üçbucağın katetləri nəyi göstərir?",
+  "options": {
+    "A": "Aktiv gərginliyi",
+    "B": "Aktiv və reaktiv cərəyanı",
+    "C": "Tutum gərginliyi",
+    "D": "Tam gərginliyi"
+  },
+  "correct": "B"
+},
+{
+  "q": "68. İşlədiciləri paralel birləşdirilmiş dəyişən cərəyan dövrəsində cərəyanlar üçün qurulmuş vektor dioqramında üçbucağın hipetenuzu nəyi göstərir?",
+  "options": {
+    "A": "Aktiv cərəyanı",
+    "B": "İnduktiv cərəyanı",
+    "C": "Tam cərəyanı",
+    "D": "Tutum cərəyanı"
+  },
+  "correct": "C"
+},
+{
+  "q": "69. RL və C parametrləri ardıcıl birləşdirilmiş dövrədə i(t) funksiyasını tapmaq üçün nələri bilmək lazımdır?",
+  "options": {
+    "A": "cərəyanın ani qiymətini i",
+    "B": "cərəyanın orta qiymətini Ior",
+    "C": " cərəyanın amplitudasını Im və faza bucağınıφ",
+    "D": "reaktiv gərginliklər arasındakı faza sürüşmə bucağını φ"
+  },
+  "correct": "C"
+},
+{
+  "q": "70. Gərginliklər üçbucağında hipetenuz nəyi göstərir?",
+  "options": {
+    "A": "Aktiv gərginliyi",
+    "B": "İnduktiv gərginliyi",
+    "C": "Aktiv gərginliklə induktiv gərginliyin fərqini",
+    "D": "Ümumi gərginliyi"
+  },
+  "correct": "D"
+},
+{
+  "q": "71. Parametrləri ardıcıl birləşdirilmiş dəyişən cərəyan dövrəsində X L<XC olduqda faza bucağının işarəsi necə olcaq?",
+  "options": {
+    "A": "Faza sürüşməsi olmur",
+    "B": "Müsbət tərəfdə",
+    "C": "Obsis oxundan solda",
+    "D": "Mənfi tərəfdə"
+  },
+  "correct": "D"
+},
+{
+  "q": "72. Üçfazalı sistem nəyə deyilir?",
+  "options": {
+    "A": "Biri-birinə nəzərən faza sürüşməsinə malik olan eyni tezlikli və eyni amplitudalı üç sinusoidal e.h.q sisteminə",
+    "B": "Biri-birinə nəzərən eyni bucaq sürüşməsində olan müxtəlif tezlikli iki e.h.q sisteminə",
+    "C": "Biri-birinə nəzərən müxtəlif bucaq sürüşməsində olan müxtəlif amplitudalı iki e.h.q sisteminə",
+    "D": "Üç müxtəlif güclü e.h.q – li mənbələrin cəminə"
+  },
+  "correct": "A"
+},
+{
+  "q": "73. Fazalarının sayına görə çoxfazalı sistemlər neçə fazalı olur?",
+  "options": {
+    "A": "Üçfazalı və dördfazalı",
+    "B": "İkifazalı və beşfazalı",
+    "C": "Üçfazalı və altıfazalı",
+    "D": "Birfazalı və ikifazalı"
+  },
+  "correct": "C"
+},
+{
+  "q": "74. Praktikada ən çox neçə fazalı sistemdən istifadə edilir?",
+  "options": {
+    "A": "ikifazalı",
+    "B": "üçfazalı",
+    "C": "dördfazalı",
+    "D": "yeddifazalı"
+  },
+  "correct": "B"
+},
+{
+  "q": "75. Üçfazalı cərəyanı nə hasil edir?",
+  "options": {
+    "A": "birfazalı generator",
+    "B": "birfazalı mühərrik",
+    "C": "üçfazalı generator",
+    "D": "transformatorla"
+  },
+  "correct": "C"
+},
+{
+  "q": "76. Üçfazalı sistemdən hansı məqsədlə istifadə edilir?",
+  "options": {
+    "A": "Birfazalı işlədiciləri elektrik enerjisi ilə təmin etmək üçün",
+    "B": "Birfazalı asinxron mühərrikini işə salmaq üçün",
+    "C": "Elektrik enerjisini mexaniki enerjiyə çevirmək üçün",
+    "D": "Elektrik enerjisini uzaq məsafəyə vermək üçün"
+  },
+  "correct": "D"
+},
+{
+  "q": "77. Üçfazalı sistem hansı elektrotexniki avadanlıqların istehsalına imkan verir?",
+  "options": {
+    "A": "Qızdırıcı cihazlar",
+    "B": "Elektrik mühərrikləri",
+    "C": "Peçlər, közərmə lampaları",
+    "D": "Elektrik ölçü cihazları"
+  },
+  "correct": "B"
+},
+{
+  "q": "78. Üçfazalı cərəyan nə ilə hasil edilir?",
+  "options": {
+    "A": "A B C",
+    "B": "A D E",
+    "C": "E K M",
+    "D": "N M J"
+  },
+  "correct": "A"
+},
+{
+  "q": "79. Üçfazalı sistemdə faza dolaqlarının sonları hansı həriflərlə işarə edilir?",
+  "options": {
+    "A": "X G D",
+    "B": "G D E",
+    "C": "X Y Z",
+    "D": "N M P"
+  },
+  "correct": "C"
+},
+{
+  "q": "80. Üçfazalı sistemdə ulduz birləşdirilməsi nəyə deyilir?",
+  "options": {
+    "A": "Üçfazalı generatorun faza dolaqlarından ikisini ardıcıl, qalan üçüncüsünü isə onlara paralel birləşdirdikdə alınan birləşməyə",
+    "B": "Üçfazalı generatorun dolaqlarını öz aralarında paralel birləşdirdikdə alınan birləşməyə",
+    "C": "Üçfazalı generatorun dolaqlarından birini neytral xətlə birləşdirdikdə alınan birləşməyə",
+    "D": "Üçfazalı generatorun faza dolaqlarını birləşdirib qalan ucları isə xətt məftillərinə birləşdirdikdə alınan birləşməyə"
+  },
+  "correct": "D"
+},
+{
+  "q": "81. Üçfazalı generator dolaqlarının sonlarını və işlədicilərin fazalarının sonlarını birləşdirən xəttə nə deyilir?",
+  "options": {
+    "A": "N və n nöqtələrinə başlanğıc, bu nöqtələri birləşdirən xəttə isə faza xətti deyilir",
+    "B": "N və n nöqtələrinə neytral, bu nöqtələri birləşdirən xəttə isə neytral xətt deyilir",
+    "C": "Generator dolaqlarının öz aralarında paralel birləşdirilməsinə xətt naqilləri deyilir",
+    "D": "Mənbə ilə işlədicinin sonunu birləşdirən xətt faza xətti adlanır"
+  },
+  "correct": "B"
+},
+{
+  "q": "82. Xətt naqili nəyə deyilir?",
+  "options": {
+    "A": "Generator dolaqlarının sonlarını birləşdirən naqilə",
+    "B": "Generator və işlədicinin fazalarının başlanğıcarını birləşdirən naqilə",
+    "C": "İşlədicinin fazalarının sonlarını birləşdirən naqilə",
+    "D": "Generator dolaqlarının başlanğıcarını birləşdirən naqilə"
+  },
+  "correct": "B"
+},
+{
+  "q": "83. Üç fazalı sistemdə xətt gərginliyi nəyə deyilir?",
+  "options": {
+    "A": "İki faza məftili arasında qalan gərginliyə",
+    "B": "Bir xətt naqili və bir faza naqili arasında qalan gərginliyə",
+    "C": "İki xətt naqili arasında qalan gərginliyə",
+    "D": "Mənbə ilə faza naqili arasında qalan gərginliyə"
+  },
+  "correct": "C"
+},
+{
+  "q": "84. Xətt gərginlikləri necə işarə edilir?",
+  "options": {
+    "A": "UBA , UCB , UAC",
+    "B": "UAD , UBL , ULA",
+    "C": "ULD , UEL , ULE",
+    "D": "UAB , UBC , UCA"
+  },
+  "correct": "D"
+},
+{
+  "q": "85. Xətt gərginliyi nəyə əsasən təyin olunur?",
+  "options": {
+    "A": "Məlum faza cərəyanına əsasən",
+    "B": "Məlum faza gərginliyinə əsasən",
+    "C": "Fazaya induksiyalanan e.h.q – nə əsasən",
+    "D": "Fazalardakı e.h.q – nin qiymətlərinə əsasən"
+  },
+  "correct": "B"
+},
+{
+  "q": "86. Fazalarda cərəyanın istiqaməti necə olur?",
+  "options": {
+    "A": "cərəyanın istiqaməti ehq-nin müsbət istiqaməti ilə eynidir",
+    "B": "cərəyanın istiqaməti ehq-nin əksinədir",
+    "C": "cərəyanın istiqaməti ehq-dən 90o fərqlənir",
+    "D": "cərəyanın mənfi maksimum qiyməti ehq-nin üçdə biri qədərdir"
+  },
+  "correct": "A"
+},
+{
+  "q": "87. İşlədicinin fazalarındakı gərginlik düşgüsünün müsbət istiqaməti ilə fazadakı cərəyanın istiqaməti necə olur?",
+  "options": {
+    "A": "gərginlik düşgüsünün müsbət istiqaməti, cərəyanın müsbət istiqaməti ilə 30o faza sürüşməsindədir.",
+    "B": "gərginlik düşgüsünün müsbət istiqaməti, cərəyanın müsbət istiqaməti ilə əks fazadadır",
+    "C": "gərginlik düşgüsünün müsbət istiqaməti, cərəyanın müsbət istiqaməti 45o faza sürüşməsi qədərdir",
+    "D": "gərginlik düşgüsünün müsbət istiqaməti, cərəyanın müsbət istiqaməti ilə üst-üstə düşür."
+  },
+  "correct": "D"
+},
+{
+  "q": "88. Xətt gərginliyinin təsiredici qiyməti nəyə bərabərdir?",
+  "options": {
+    "A": "Uyğun faza gərginliklərinin cəminə",
+    "B": "Uyğun faza gərginliyinin fərqinə",
+    "C": "Uyğun faza gərginliklərinin hasilinə",
+    "D": "Uyğun faza gərginliklərinin iki mislinə"
+  },
+  "correct": "B"
+},
+{
+  "q": "89. Üçfazalı sistemin birfazalıdan üstünlükləri nədədir?",
+  "options": {
+    "A": "İqtisadi cəhətdən əlverişli olmasından",
+    "B": "Üçfazalı qurğuların mürəkkəbliyindən",
+    "C": "İki müxtəlif qiymətli gərginlik almasından",
+    "D": "Mənbədən az enerji tələb olmasından"
+  },
+  "correct": "C"
+},
+{
+  "q": "90. Üçfazalı sistemdə fazalar bir – birinə nəzərən neçə period fərqlənir?",
+  "options": {
+    "A": "İkidə bir period",
+    "B": "Bir period",
+    "C": "İki period",
+    "D": "Üçdə bir period"
+  },
+  "correct": "D"
+},
+{
+  "q": "91. Hansı halda üçfazalı sistem ulduz birləşdirildikdə üç məftildən istifadə edilir?",
+  "options": {
+    "A": "Simmetrik yüklənmədə",
+    "B": "Qeyri-simmetrik yüklənmədə",
+    "C": "Stator dolaqları ardıcıl birləşdirildikdə",
+    "D": "Stator dolaqları paralel birləşdirildikdə"
+  },
+  "correct": "A"
+},
+{
+  "q": "92. Simmetrik yüklənmiş üçfazalı sistemin gücü nəyə bərabərdir?",
+  "options": {
+    "A": "Birfazanın gücünün iki mislinə",
+    "B": "Birfazanın gücünün üç mislinə",
+    "C": "Birfazanın gücünün yarısına",
+    "D": "Birfazanın gücünün dörddə birinə"
+  },
+  "correct": "B"
+},
+{
+  "q": "93. Hansı halda bir vattmetrlə üçfazalı sistemin gücünü ölçmək olar?",
+  "options": {
+    "A": "Fazalar nominal yükləndikdə",
+    "B": "Fazalar simmetrik yükləndikdə",
+    "C": "Fazalar nominaldan artıq yükləndikdə ",
+    "D": "Fazalar qeyri-simmetrik yükləndikdə"
+  },
+  "correct": "B"
+},
+{
+  "q": "94. Voltmetr hansı şəkildə dövrəyə qoşulur?",
+  "options": {
+    "A": "Seriya",
+    "B": "Cərəyanın istiqamətində",
+    "C": "Paralel",
+    "D": "Yalnız müsbət gərginlikdə"
+  },
+  "correct": "C"
+},
+{
+  "q": "95. 1 Amper cərəyanını yaratmaq üçün lazımi gərginlik və müqavimət necə olmalıdır?",
+  "options": {
+    "A": "1 V, 0 Ohm",
+    "B": " 0 V, 1 Ohm",
+    "C": "1 A, 1 Ohm",
+    "D": "1 V, 1 Ohm"
+  },
+  "correct": "D"
+},
+{
+  "q": "96. Elektrik dövrəsində güc itkisinin minimum olması üçün hansı şərt təmin edilməlidir?",
+  "options": {
+    "A": "Müqavimətin maksimum olması",
+    "B": "Gərginliyin minimum olması",
+    "C": "Cərəyanın minimum olması",
+    "D": "Müqavimətin minimum olması"
+  },
+  "correct": "C"
+},
+{
+  "q": "97. Elektrik dövrəsində müqavimətin ölçü vahidi necə adlanır?",
+  "options": {
+    "A": "Volt",
+    "B": "Om",
+    "C": "Amper",
+    "D": "Vatt"
+  },
+  "correct": "B"
+},
+{
+  "q": "98. Bir elektrik dövrəsində enerji sərfiyyatını ölçmək üçün hansı cihaz istifadə edilir?",
+  "options": {
+    "A": "Termometr",
+    "B": "Voltmetr",
+    "C": "Vattmetr",
+    "D": "Ampermetr"
+  },
+  "correct": "C"
+},
+{
+  "q": "99. Aşağıdakılardan hansı, bir elektrik dövrəsindəki güc itkisini minimumlaşdırmağa kömək edər?",
+  "options": {
+    "A": " Dövrənin izolyasiyası",
+    "B": "Müqavimətin artırılması",
+    "C": "Cərəyanın artırılması",
+    "D": "Gərginliyin artırılması"
+  },
+  "correct": "A"
+},
+  {
+    "q": "101. Aşağıdakı hallardan hansı elektrik dövrəsində cərəyanın yönünü dəyişdirə bilər?",
+    "options": {
+      "A": "Elektronların istiqamətinin dəyişməsi",
+      "B": "Elektrik dövrə müqavimətinin artması",
+      "C": "Elektrik dövrə gərginliyinin dəyişməsi",
+      "D": "Elektronların sürətinin azalması"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "102. Elektrik cərəyanının qarşısında olan müqavimət artdıqca nə baş verir?",
+    "options": {
+      "A": "Gərginlik artır",
+      "B": "Cərəyan artır",
+      "C": "Cərəyan azalır",
+      "D": "Güc azalır"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "103. Qısa dövrə zamanı hansı hadisə baş verir?",
+    "options": {
+      "A": "Gərginlik artar",
+      "B": "Dövrənin müqaviməti sıfıra enər",
+      "C": "Cərəyanın intensivliyi artar",
+      "D": "Elektrik enerjisi artar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "104. Aşağıdakılardan hansı halda elektrik cərəyanı daha asan keçir?",
+    "options": {
+      "A": "Aşağı gərginlik",
+      "B": "Yüksək müqavimət",
+      "C": "Yüksək gərginlik",
+      "D": "Aşağı müqavimət"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "105. Bir elektrik dövrəsində 50 V gərginlik və 10 A cərəyan varsa, gücü tapın.",
+    "options": {
+      "A": "500 W",
+      "B": "500 V",
+      "C": "500 A",
+      "D": "5 W"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "106. Elektrik enerjisi hansı vahiddə ölçülür?",
+    "options": {
+      "A": "Vatt",
+      "B": "Volt",
+      "C": "Amper",
+      "D": "Coul"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "107. Elektrik dövrəsində cərəyanın istiqamətini necə dəyişdirmək olar?",
+    "options": {
+      "A": "Elektronların istiqamətini dəyişdirmək",
+      "B": "Dövrənin müqavimətini dəyişdirmək",
+      "C": "Gərginliyi dəyişdirmək",
+      "D": "Dövrəyə bir cərəyan mənbəyi əlavə etmək"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "108. Aşağıdakı hallardan hansı elektrik dövrəsində gərginlik düşüşünün artmasına səbəb olur?",
+    "options": {
+      "A": "Müqavimətin azalması",
+      "B": "Müqavimətin artması",
+      "C": "Cərəyanın artması",
+      "D": "Cərəyanın azalması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "109. İki müqavimət paralel birləşdirildikdə, ümumi müqavimət hansı halı alır?",
+    "options": {
+      "A": "Hər zaman daha kiçik olur",
+      "B": "Hər zaman daha böyük olur",
+      "C": "İki müqavimət bərabərdirsə, ümumi müqavimət onların ortalamasına bərabərdir",
+      "D": "Heç vaxt dəyişmir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "110. Om qanunu hansı əlaqəni təsvir edir?",
+    "options": {
+      "A": "Elektrik gərginliyi ilə müqavimətin əlaqəsini",
+      "B": "Elektrik gücü ilə cərəyanın əlaqəsini",
+      "C": "Elektrik gərginliyi ilə cərəyanın əlaqəsini",
+      "D": "Elektrik cərəyanı ilə zamanın əlaqəsini"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "111. Maqnit axınının vahidi nədir?",
+    "options": {
+      "A": "Veber",
+      "B": "Tesla",
+      "C": "Volt",
+      "D": "Amper"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "112. İnduktiv qarşılıqlı təsir zamanı hansı kəmiyyət əsas rol oynayır?",
+    "options": {
+      "A": "Gərginlik",
+      "B": "Maqnit keçirmə əmsalı",
+      "C": "Cərəyanın tezliyi",
+      "D": "Qarşılıqlı induktivlik"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "113. Qarşılıqlı induksiya hadisəsi necə baş verir?",
+    "options": {
+      "A": "Maqnit sahəsi sabit olduqda cərəyan yaranır",
+      "B": "Başqa bir dövrədə induksiya EHQ-sı yaranır",
+      "C": "Dövrənin elektrik müqaviməti dəyişdikdə induksiya yaranır",
+      "D": "Gərginlik sabit olduqda qarşılıqlı təsir yaranır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "114. Qarşılıqlı induktivlik əmsalı hansı vahidlə ölçülür?",
+    "options": {
+      "A": "Tesla",
+      "B": "Veber",
+      "C": "Henry",
+      "D": "Amper"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "115. Üçbucaq birləşmə nəyə deyilir?",
+    "options": {
+      "A": "Generator dolaqlarından ikisinin sonu üçüncünün əvvəlinə biləşdirildikdə alınan üçfazalı sistemə",
+      "B": "Generator dolaqlarından birincinin sonu ikincinin başlanğıcına, birləşdirildikdə alınan üçfazalı sistemə",
+      "C": "Generator dolaqlarından ikinci və üçüncünü ardıcıl biləşdirildikdə alınan üçfazalı sistemə",
+      "D": "İşlədicilərin fazaları ardıcıl biləşdirildikdə alınan üçfazalı sistemə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "116. İşlədicilərin fazalarından axan cərəyanın müsbət istiqaməti necə götürülür?",
+    "options": {
+      "A": "Mənbədən işlədiciyə",
+      "B": "İkinci indeksdən birinciyə doğru",
+      "C": "Biri – birinə əks istiqamətdə",
+      "D": "İşlədicidən mənbəyə doğru"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "117. Üçbucaq birləşmədə faza gərginlikləri ilə faza cərəyanları istiqamətcə necə fərqlənir?",
+    "options": {
+      "A": "Faza gərginliyi, faza cərəyanı ilə 30o faza sürüşməsindədir",
+      "B": "Faza gərginliklərinin və faza cərəyanlarının müsbət istiqamətləri müxtəlifdir",
+      "C": "Faza gərginliklərinin müsbət istiqaməti ilə faza cərəyanlarının müsbət istiqaməti eynidir",
+      "D": "Faza gərginliklərinin müsbət istiqaməti ilə faza cərəyanlarının müsbət istiqaməti müxtəlifdir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "118. Üçbucaq birləşdirilmiş sistemdə işlədiciləri necə birləşdirmək olar?",
+    "options": {
+      "A": "Ulduz – üçbucaq",
+      "B": "Ulduz – ulduz- ulduz",
+      "C": "Ulduz – üçbucaq – ulduz",
+      "D": "Üçbucaq – ulduz – üçbucaq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "119. Nə üçün üçfazalı sistem üçbucaq birləşdirildikdə xətt gərginliyi faza gərginliyinə bərabərdir?",
+    "options": {
+      "A": "Xətt gərginliyi faza gərginliyindən 45o fərqlidir",
+      "B": "Üçbucaq birləşmədə fazanın başlanğıcı ilə sonu arasındakı gərginlik, həmçinin xətlər arasındakı gərginlikdir",
+      "C": "Xətt gərginliyi faza gərginliyindən 90o fərqlidir",
+      "D": "Üçbucaq birləşmədə fazanın başlanğıcı ilə sonu arasındakı cərəyan, həmçinin xətlər arasındakı isə gərginlikdir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "120. Üçfazalı sistem üçbucaq birləşdirildikdə xətt gərginliyi ilə faza gərginliyi arasında əlaqə necədir?",
+    "options": {
+      "A": "Xətt gərginliyi faza gərginliyinin yarısına bərabərdir",
+      "B": "Xətt gərginliyi faza gərginliyindən iki dəfə böyükdür",
+      "C": "Xətt gərginliyi faza gərginliyindən kiçikdir",
+      "D": "Xətt gərginliyi faza gərginliyinə bərabərdir"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "121. Üçfazalı sistemdə üçbucaq birləşmədə yüklənmə qeyri-simmetrik olduqda sistem necə olur?",
+    "options": {
+      "A": "Faza və xətt cərəyanları sistemi qeyri-simmetrik olur",
+      "B": "Faza və xətt cərəyanları sistemi simmetrik olur",
+      "C": "İki faza gərginliklərinin cəmi, üçüncü fazanın gərginliyinə bərabər olur",
+      "D": "İki faza cərəyanlarının nisbəti üçüncü fazanın cərəyanına bərabərdir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "122. Böyük cərəyan tələb olunduqda üçfazalı sistemin hansı birləşməsindən istifadə olunur?",
+    "options": {
+      "A": "Ulduz – üçbucaq – ulduz",
+      "B": "Ulduz",
+      "C": "Üçbucaq",
+      "D": "Üçbucaq – ulduz – üçbucaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "123. Nə üçün üçfazalı işlədicinin gücünü xətt gərginliyi və xətt cərəyanı ilə ifadə etmək daha münasibdir?",
+    "options": {
+      "A": "Dövrədəki cərəyanı ölçmək üçün vattmetrdən istifadə etmək daha rahatdır",
+      "B": "Vattmetrlə ölçmə aparmaq daha çətindir",
+      "C": "Vattmetrin dövrəyə qoşulmna sxemi voltmetrə nəzərən daha asandır",
+      "D": "Həmin kəmiyyətləri ölçmək asandır"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "124. Xətt gərginliyi sabit olduqda ulduz birləşmədən üçbucaq birləşməyə keçdikdə üçfazalı sistemin gücü necə dəyişir?",
+    "options": {
+      "A": "İki dəfə artır",
+      "B": "Üç dəfə artır",
+      "C": "Üç dəfə azalır",
+      "D": "Sabit qalır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "125. Nə üçün üçbucaq birləşmədə faza gərginliyi, ulduz birləşmədəki faza gərginliyinə nəzərən √3 dəfə böyük olar?",
+    "options": {
+      "A": "Üçbucaq birləşmədə xətt gərginliyi faza gərginliyinə bərabərdir",
+      "B": "Üçbucaq birləşmədə xətt gərginliyi faza gərginliyindən kiçikdir",
+      "C": "Üçbucaq birləşmədə xətt gərginliyi faza gərginliyi ilə 45o bucaq sürüşməsindədir",
+      "D": "Faza gərginliyi xətt gərginliyindən 90o geri qalır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "126. Elektrik ölçü cihazları nəyə deyilir?",
+    "options": {
+      "A": "Rəqsin amplitudasını ölçən cihazlara",
+      "B": "İstilik enerjisini ölçən cihazlara",
+      "C": "Temperaturu ölçən cihazları",
+      "D": "Elektrik kəmiyyətlərini, cərəyan, gərginlik, güc, enerji, faza, tezlik və s. ölçmək üçün istifadə edilən cihazlara"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "127. Əgər elektrik cihazı ölçülən kəmiyyəti yalnız göstərirsə ona nə deyilir?",
+    "options": {
+      "A": "öz-özünə yazan",
+      "B": "qeyd edən",
+      "C": "göstərən",
+      "D": "hesablayan"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "128. Hansı ölçmə üsulunun nəticəsi daha dəqiq olur?",
+    "options": {
+      "A": "hesablama yolu ilə ölçmənin",
+      "B": "bilavasitə ölçmənin",
+      "C": "cihazın ölçü həddindən asılıdır",
+      "D": "cihazın bir bölgüsünün qiymətindən asılıdır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "129. Hansı texniki vasitələr elektrik ölçmə vasitələri adlanır?",
+    "options": {
+      "A": "Normallaşdırılmış metreoloji xarakteristikası olanlar",
+      "B": "Normallaşdırılmış qiyməti bilavasitə göstərə bilməyənlər",
+      "C": "Ölçmədən alınan nəticələrə görə qrafik qurmağa imkan verənlər",
+      "D": "Kəmiyyətin qiymətini texniki göstərənlər"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "130. Cihazın mütləq xətası nəyə deyilir?",
+    "options": {
+      "A": "Cihazın göstərişi ilə ölçülən kəmiyyətin həqiqi qiymətinin hasilinə",
+      "B": "Cihazın göstərişi ilə ölçülən kəmiyyətin həqiqi qiymətinin cəminə",
+      "C": "Cihazın göstərişi ilə ölçülən kəmiyyətin həqiqi qiymətinin fərqinə",
+      "D": "Cihazın göstərişi ilə ölçülən kəmiyyətin həqiqi qiymətinin yarısına"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "131. Nisbi xəta nəyə deyilir?",
+    "options": {
+      "A": "Mütləq xəta ilə həqiqi qiymətin fərqinə",
+      "B": "Mütləq xətanın həqiqi qiymətə hasilinə",
+      "C": "Mütləq xəta ilə həqiqi qiymətin cəminə",
+      "D": "Mütləq xətanın həqiqi qiymətə nisbətinə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "132. Cihazlar hansı əlamətə görə siniflərə ayrılır?",
+    "options": {
+      "A": "Ölçü həddinə",
+      "B": "Hesablama qurğusuna",
+      "C": "Bir bölgünün qiymətinə",
+      "D": "Hansı cərəyanla işləməsinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "133. Cihazın şkalasında bölgülər necə olur?",
+    "options": {
+      "A": "Müntəzəm və qeyri – müntəzəm",
+      "B": "Başlanğıcda müntəzəm, sora qeyri – müntəzəm",
+      "C": "Ölçdüyü kəmiyyətdən asılı olaraq",
+      "D": "Cihazın nominal gücündən asılı olaraq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "134. Bunlardan hansı ampermetrin şərti işarəsidir?",
+    "options": {
+      "A": "V , mV , KV",
+      "B": "A , mA , MA",
+      "C": "W , KW",
+      "D": "K W h"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "135. Nə üçün əqrəbli cihazlarda şkalanın aşağısında yastı güzgü qoyulur?",
+    "options": {
+      "A": "Ölçülən kəmiyyətin təxmini qiymətini təyin etmək üçün",
+      "B": "Ölçmə dəqiqliyini artırmaq üçün",
+      "C": "Əqrəbin şkalada hər – hansı bölgü üzərində dayandığını dəqiq təyin etmək üçün",
+      "D": "Cihazın mütləq xətasını hesablamaq üçün"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "136. Maqnitoelektrik sistemli cihazın şkalasında bölgülər necədir?",
+    "options": {
+      "A": "Əvvəl müntəzəm, sonra qeyri – müntəzəm",
+      "B": "Qeyri – müntəzəm",
+      "C": "Əvvəl qeyri – müntəzəm, sonra müntəzəm",
+      "D": "Müntəzəm"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "137. Gərginliyə görə cihazın ölçü həddini genişləndirdikdə voltmetrə nə qoşulur?",
+    "options": {
+      "A": "Rə =(n-1)Rdax",
+      "B": "Rə =(n+1)/Rdax",
+      "C": "Rə =Rdax/R(n+1)",
+      "D": "Rə=RdaxR(n+1)"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "138. Maqnitoelektrik cihazın həssaslığı nəyə bərabərdir?",
+    "options": {
+      "A": "S = BSWS W2 T",
+      "B": "S = BSWWα",
+      "C": "S = BSW / W2",
+      "D": "S = BS WW2 T"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "139. Nə üçün maqnitoelektrik sistemli cihazlardan geniş istifadə olunur?",
+    "options": {
+      "A": "Dəyişən cərəyanı daha dəqiq ölçdüyünə görə",
+      "B": "Dövrəyə qoşulma sxeminin mürəkkəbliyinə görə",
+      "C": "Dəyişən və sabit cərəyan dövrələrində işləməsinə görə",
+      "D": "Yüksək keyfiyyətinə, qurluşunun sadəliyinə, şkalasının müntəzəmliyinə, yüksək həssaslığına, az enerji sərf etdiyinə görə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "140. Nə üçün maqnitoelektrik sistemli cihaza xarici sahə təsir etmir?",
+    "options": {
+      "A": "Böyük induktiv müqavimətə malik olduğundan",
+      "B": "Güclü maqnit sahəsinə malik olduğuna görə",
+      "C": "Tutum müqaviməti kiçik olduğundan",
+      "D": "Mənbəyin e.h.q – nin təsirindən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "141. Elektromaqnit sistemli cihazın iş prinsipi nəyə əsaslanır?",
+    "options": {
+      "A": "Ferromaqnit içliyin hərəkətinə",
+      "B": "Əqrəbin dönmə bucağının səviyyəsinə",
+      "C": "Yarım oxların vəziyyətinə",
+      "D": "Maqnit induksiya sakitləşdiricisinin işinə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "142. Nə üçün elektromaqnit sistemli cihaza xarici maqnit sahəsi tez təsir edir?",
+    "options": {
+      "A": "Cihazın həssaslığından",
+      "B": "Sarğacın induktiv müqaviməti böyük olduğundan",
+      "C": "Ölçü mexanizminin aktiv müqaviməti kiçik olduğundan",
+      "D": "Cihazın özünün maqnit sahəsi kiçik olduğundan"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "143. Elektromaqnit sistemli cihazı xarici maqnit sahəsindən qorumaq üçün nə tədbir görülür?",
+    "options": {
+      "A": "Cihazın gövdəsi xarici maqnit sahəsindən qorunur",
+      "B": "Cihazın ölçü mexanizmi polad ekranda mühafizə olunur",
+      "C": "Cihazın əsas hissələri elastik metaldan hazırlanır",
+      "D": "Yayın sərtliyi kiçik götürülür"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "144. Elektromaqnit sistemli cihazlar gərginlik və cərəyanın hansı qiymətlərini ölçür?",
+    "options": {
+      "A": "Amplitud qiymətini",
+      "B": "Ani qiymətini",
+      "C": "Təsiredici qiymətini",
+      "D": "Orta qiymətini"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "145. Üçfazalı sistemdə sistemin gücünün ölçülməsi hansı faktorlardan asılıdır?",
+    "options": {
+      "A": "Sistemin xarakterindən",
+      "B": "Yükün müqavimətinin xarakterindən",
+      "C": "Üçfazalı sistemə tətbiq edilən gərginlikdən",
+      "D": "Xətt cərəyanlarının qiymətindən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "146. Qeyri-simmetrik yüklənmədə sistemin gücü necə ölçülür?",
+    "options": {
+      "A": "İki Vattmetrlə",
+      "B": "Üç Vattmetrlə",
+      "C": "Bir Vattmetrlə",
+      "D": "İnduksion hesabçı ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "147. Qeyri-simmetrik yüklənmiş üçfazalı sistemdə gücü ölçərkən vattmetr dövrəyə necə qoşulmalıdır?",
+    "options": {
+      "A": "Vattmetr işlədicilərə ardıcıl qoşulsun",
+      "B": "Vattmetrin ardıcıl dolağından xətt cərəyanı keçsin",
+      "C": "Vattmetrin paralel dolaqlarına şəbəkə gərginliyi verilsin",
+      "D": "Vattmetrin paralel dolaqlarına faza gərginliyi verilsin"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "148. Qeyri-simmetrik yüklənmədə üç vattmetrlə sistemin gücünü ölçərkən hər bir vattmetr hansı gücü ölçür?",
+    "options": {
+      "A": "Bütövlükdə sistemin gücünü",
+      "B": "İki faza arasındakı gücü",
+      "C": "Hər bir fazanın gücünü",
+      "D": "Mənbənin gücünü"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "149. Üçfazalı sistem simmetrik yükləndikdə onun gücünü necə ölçmək olar?",
+    "options": {
+      "A": "Vattmetrlə",
+      "B": "Ampermetrlə",
+      "C": "Voltmetrlə",
+      "D": "Hesabçı ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "150. Simmetrik yüklənmədə bir vattmetrlə fazalardan birinin gücünü ölçdükdən sonra sistemin gücünü necə hesablamaq olar?",
+    "options": {
+      "A": "Vattmetrin göstərişini ikiyə bölməklə",
+      "B": "Vattmetrin göstərişini ikiyə vurmaqla",
+      "C": "Vattmetrin göstərişini üçə vurmaqla",
+      "D": "Vattmetrin göstərişini dördə bölməklə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "151. Stasionar simmetrik işlədiciləri üçfazalı sistemə qoşmaq üçün nə yaradılır?",
+    "options": {
+      "A": "Neytral nöqtə",
+      "B": "Süni sıfır nöqtəsi",
+      "C": "Yerlə birləşdirilmə nöqtəsi",
+      "D": "Potensialı 100V olan nöqtə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "152. Əgər işlədici ulduz birləşdirilibsə sıfır nöqtəli vattmetr hansı gücü ölçəcək?",
+    "options": {
+      "A": "Dövrənin aktiv gücünü",
+      "B": "Sistemin gücünü",
+      "C": "Hər üç işlədicilərin gücünü",
+      "D": "Faza gücünü"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "153. Üçməftilli üçfazalı sistemdə simmetrik və ya qeyri-simmetrik yüklənmədə aktiv güc necə ölçülür?",
+    "options": {
+      "A": "İki vaatmetrlə",
+      "B": "Üç vaatmetrlə",
+      "C": "Bir vaatmetrlə",
+      "D": "İnduksion hesabçı ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "154. Üçfazalı sistemə qoşulmuş vattmetrlərin hər birinin ölçdüyü gücün qiyməti nədən asılıdır?",
+    "options": {
+      "A": "Xətt gərginliyinin qiymətindən",
+      "B": "Xətt gərginliyi ilə cərəyan arasındakı faza bucağından",
+      "C": "Faza gərginliyinin qiymətindən",
+      "D": "Xətt cərəyanının qiymətindən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "155. Üçfazalı sistemdə iki vaatmetrlə ölçmə aparmaq üçün vattmetri necə birləşdirmək lazımdır?",
+    "options": {
+      "A": "Vattmetrin başlanğıcı B xəttinə sonu isə A xəttinə birləşdirilməlidir",
+      "B": "Vattmetrin başlanğıcı A xəttinə sonu isə B xəttinə birləşdirilməlidir",
+      "C": "Birinci vattmetrin başlanğıcı A xəttinə sonu isə C xəttinə birləşdirilməlidir",
+      "D": "Vattmetrin başlanğıcı C xəttinə sonu isə A xəttinə birləşdirilməlidir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "156. Birfazalı fazometrdən hansı kəmiyyətləri ölçmək üçün istifadə edilir?",
+    "options": {
+      "A": "Gərginliyi və faza sürüşməsini",
+      "B": "Tezliyi və induktivliyi",
+      "C": "Gücü və gərginliyi",
+      "D": "Sürüşmə bucağı və güc əmsalı"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "157. Hansı sistemli fazometrlərdən daha çox istifadə olunur?",
+    "options": {
+      "A": "Elektrodinamik",
+      "B": "Elektromaqnit",
+      "C": "İnduksion",
+      "D": "İstilik"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "158. Fazometrin ölçü mexnizmi hansı hissələrdən ibarətdir?",
+    "options": {
+      "A": "K1 sarğacına qoşulmuş induktivlikdən",
+      "B": "Hərəkətli K və K1 sarğacından",
+      "C": "Hərəkətli K və K2 sarğacından",
+      "D": "Hərəkətli K1 və K2 sarğaclarından"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "159. Fazometrin K1 və K2 makaraları haradan keçir?",
+    "options": {
+      "A": "K makarasının yaxınlığından",
+      "B": "K makarasının içərisindən",
+      "C": "K makarasına perpendikulyar",
+      "D": "K makarasına paralel"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "160. Hərəkətli makaralar hara bərkidilir?",
+    "options": {
+      "A": "Gövdəyə",
+      "B": "Əqrəbə",
+      "C": "Ümumi oxa",
+      "D": "Yükə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "161. Cihazın hərəkətli sistemini nələr təşkil edir?",
+    "options": {
+      "A": "Hərəkətli makaralar OX və əqrəb",
+      "B": "OX və yay",
+      "C": "Əqrəb və hava sakitləşdirici",
+      "D": "Hərəkətli makaralar və şkala"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "162. I1 və I2 cərəyanları arasında 90o faza sürüşməsi yaratmaq üçün K1 və K2 makaralarına nə qoşulur?",
+    "options": {
+      "A": "K1 və K2 – yə ardıcıl olaraq aktiv R müqaviməti qoşulur",
+      "B": "K1 - ə paralel XL , K2 – yə isə R müqaviməti qoşulur",
+      "C": "K1 - ə R aktiv, K2 – yə isə XL müqavimətləri ardıcıl olaraq birləşdirilir",
+      "D": "K1 və K2 makaralarına paralel olaraq XL induktiv müqavimət qoşulur"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "163. Hərəkətli makaralar yüklə necə birləşdirilir?",
+    "options": {
+      "A": "Qarışıq",
+      "B": "Paralel",
+      "C": "Ardıcıl",
+      "D": "90o bucaq altında"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "164. R aktiv yük K1 makarasına necə birləşdirilir?",
+    "options": {
+      "A": "60o bucaq sürüşməsində",
+      "B": "Paralel",
+      "C": "30o bucaq sürüşməsində",
+      "D": "Ardıcıl"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "165. İkinci dolaqdan axan cərəyan I2 tətbiq edilən gərginliklə necə münasibətdə olacaq?",
+    "options": {
+      "A": "I2 cərəyanı tətbiq edilmiş gərginlikdən fazaca 90o sürüçməsi olacaq",
+      "B": "I2 cərəyanı gərginlikdən fazaca 45o sürüçməsi olacaq",
+      "C": "I2 cərəyanı gərginlikle fazaca üst- üstə düşəcək",
+      "D": "I2 cərəyanı fazaca gərginlikdən geri qalacaq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "166. Fazometrin hərəkətli sisteminin meyl bucağını müəyyən etmək üçün nə etmək lazımdır?",
+    "options": {
+      "A": "I1 cərəyanı ilə φ maqnit selinin hasilini tapmaq lazımdır",
+      "B": "I1 və I2 cərəyanlarını toplamaq lazımdır",
+      "C": "Kəmiyyətlər arasında vektor dioqramını qurmaq lazımdır",
+      "D": "I2 cərəyanının φ maqnit selindən asılılığını müəyyən etmək lazımdır"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "167. α < φ olduqda fazometrin şkalası hansı kəmiyyətə görə dərəcələnir?",
+    "options": {
+      "A": "tgφ - yə görə",
+      "B": "α - ya görə",
+      "C": "tgα - ya görə",
+      "D": "φ - yə görə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "168. Fazometrin şkalası cosφ - yə görə dərəcələndikdə şkala necə olur?",
+    "options": {
+      "A": "Müntəzəm",
+      "B": "Qeyri – müntəzəm",
+      "C": "K1 və K2 – ni hansı bucaq sürüşməsində yerləşdirməkdən asılıdır",
+      "D": "I1 ≠ I2 olmaqla qeyri müntəzəm"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "169. Fazometrin hərəkətli hissəsinin meyl bucağı nə ilə müəyyən olunur?",
+    "options": {
+      "A": "Yük dövrəsindəki faza bucağı",
+      "B": "Yük dövrəsindəki cərəyana görə",
+      "C": "Yük dövrəsindəki gərginliyə görə",
+      "D": "Yüklərin xarakterinə görə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "170. Qeyri – elektrik kəmiyyətini elektrik ölçü cihazı ilə ölçmək üçün nə etmək lazımdır?",
+    "options": {
+      "A": "Ölçülən qeyri – elektrik kəmiyyətini gücləndirmək lazımdır",
+      "B": "Ölçülən qeyri – elektrik kəmiyyətini elektrik kəmiyyətinə çevirmək lazımdır",
+      "C": "Ölçülən qeyri – elektrik kəmiyyətini dəyişmədən elektrik ölçü cihazına vermək lazımdır",
+      "D": "Ölçülən qeyri – elektrik kəmiyyətini süzgəcdən keçirmək lazımdır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "171. Qeyri – elektrik kəmiyyətini elektrik kəmiyyətinə keçirən çevirici əsas neçə hissədən ibarətdir?",
+    "options": {
+      "A": "5",
+      "B": "3",
+      "C": "4",
+      "D": "2"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "172. Kompensasiya ölçmə üsulunda (n) kimi qeyd olunur?",
+    "options": {
+      "A": "Tutumun",
+      "B": "Müqavimətin",
+      "C": "E.h.q-nin",
+      "D": "Maqnit nüfuzluğunun"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "173. Qeyri – elektrik kəmiyyətini elektrik kəmiyyəti ilə əvəz edən qurğu necə adlanır?",
+    "options": {
+      "A": "çevirici",
+      "B": "gücləndirici",
+      "C": "düzləndirici",
+      "D": "süzgəc"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "174. Parametrik çeviricilərdə qeyri – elektrik kəmiyyət əsasən nəyin dəyişməsi kimi qeyd olunur?",
+    "options": {
+      "A": "Cərəyanın",
+      "B": "Elektrik hərəkət qüvvəsinin",
+      "C": "Elektrik və maqnit parametrlərinin",
+      "D": "E.h.q. və cərəyanın"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "176. Sabit cərəyan körpüsündən hansı kəmiyyəti təyin etmək üçün istifadə edilir?",
+    "options": {
+      "A": "gərginliyi",
+      "B": "müqaviməti",
+      "C": "cərəyan şiddətini",
+      "D": "tutumu"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "177. Maqnit rabitəsinin təsir effektivliyini göstərən parametr hansıdır?",
+    "options": {
+      "A": "Elektrik gərginliyi",
+      "B": "Dövrələrin maqnit axını",
+      "C": "Dövrənin müqaviməti",
+      "D": "Rabitə əmsalı"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "178. Qarşılıqlı induktivlik əmsalı hansı amillərdən asılıdır?",
+    "options": {
+      "A": "İki dövrənin induktivliyindən",
+      "B": "Sadəcə dövrələrin elektrik müqavimətindən",
+      "C": "Cərəyanın gücündən və gərginliyindən",
+      "D": "Dövrələrin sahə ölçüsündən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "179. Dəyişən cərəyan körpüsündən hansı kəmiyyətləri təyin etmək üçün istifadə olunur?",
+    "options": {
+      "A": "gərginliyi və müqaviməti",
+      "B": "müqaviməti və tutumu",
+      "C": "cərəyan şiddətini və gərginliyi",
+      "D": "induktivliyi və tutumu"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "181. Tranformatordan nə üçün istifadə olunur?",
+    "options": {
+      "A": "elektromaqnit sahəsi yaratmaq üçün",
+      "B": "elektrik enerjisi hasil etmək üçün",
+      "C": "elektrik enerjisini uzaq məsafəyə ötürmək üçün",
+      "D": "elektrik hərəkət qüvvəsi yaratmaq üçün"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "182. Tranformatorun neçə iş rejimi var?",
+    "options": {
+      "A": "beş",
+      "B": "üç",
+      "C": "dörd",
+      "D": "iki"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "183. Transformatorun yüksüz işləmə rejimi hansıdır?",
+    "options": {
+      "A": "Transformatorun I tərəf dolağı cərəyan mənbəyinə qoşulmuş, II tərəf dolağın ucları açıq olan hal",
+      "B": "Transformatorun I tərəf dolağı cərəyan mənbəyinə, II tərəf dolağına yük qoşmaqla",
+      "C": "Transformatorun I tərəf dolağı cərəyan mənbəyinə, II tərəf dolağı isə qısa qapanan halda",
+      "D": "Transformatorun birinci tərəf dolağı sabit cərəyan mənbəyinə qoşulan hal"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "184. Transformatorun yüksüz işləmə rejimində birinci tərəf gərginliyi nominal olduqda yüksüz işləmə cərəyanı I tərəf cərəyanının təqribən neçə faizini təşkil edir?",
+    "options": {
+      "A": "12 ÷15%",
+      "B": "3 ÷10%",
+      "C": "1 ÷2%",
+      "D": "15÷20%"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "185. Transformatorun qısaqapanma rejimi hansıdır?",
+    "options": {
+      "A": "Yalnız II tərəf dolağına yük qoşulan hal",
+      "B": "Transformatorun I tərəf dolağı cərəyan mənbəyinə qoşulmuş olduqda onun II tərəf dolağına müəyyən yük müqaviməti qoşulduğu hal",
+      "C": "Transformatorun I tərəf dolağı cərəyan mənbəyinə qoşulmuş olduqda onun II tərəf dolağının qısa qapanması",
+      "D": "Yalnız II tərəf dolağının qısa qapandığı hal"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "186. Transformatorlar neçə fazalı olur?",
+    "options": {
+      "A": "altı fazalı",
+      "B": "iki fazalı",
+      "C": "dörd fazalı",
+      "D": "bir və üç fazalı"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "187. Transformatorun yüksüz işləmə rejimində hansı kəmiyyətlər təyin olunur? (I. Nominal güc; II. Transformator nüvəsinin poladında itki; III. Nominal gərginlik; IV. Yüksüz işləmə cərəyanı; V. Transformasiya əmsalı)",
+    "options": {
+      "A": "II, IV, V",
+      "B": "I, II, III",
+      "C": "I, IV, V",
+      "D": "III, IV, V"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "188. Güc transformatorları əsasən nə ilə soyudulur?",
+    "options": {
+      "A": "Öz – özünə soyuyur",
+      "B": "Yağla",
+      "C": "Su ilə",
+      "D": "Soyuducu ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "189. Avtotransformatorlar neçə dolaqdan ibarət olur?",
+    "options": {
+      "A": "4",
+      "B": "2",
+      "C": "3",
+      "D": "1"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "190. Transformatorların normal paralel qoşulmasının əlamətləri hansıdır?",
+    "options": {
+      "A": "I tərəf gərginliklərinin bərabər olması",
+      "B": "Yüksüz işləmə zamanı II tərəf dolaqlarında cərəyanın olmaması",
+      "C": "Hər bir variant doğrudur",
+      "D": "II tərəf gərginliklərinin bərabər olması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "191. Avtotransformatorlar neçə fazalı olurlar?",
+    "options": {
+      "A": "Birfazalı və Üçfazalı (A və B)",
+      "B": "Birfazalı",
+      "C": "Üçfazalı",
+      "D": "İkifazalı"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "192. Üçfazalı transformatorların paralel işlənməsi üçün hansı şərtlər ödənməlidir?",
+    "options": {
+      "A": "Bütün qeyd olunan şərtlər (A, B, C)",
+      "B": "Yüksək işləyən transformatorların II tərəf dolaqlarında cərəyanın olmaması",
+      "C": "Paralel işləyən transformatorlar arasında onların nominal gücünə görə paylanması",
+      "D": "Paralel işləyən transformatorların birləşmə qrupları eyni olmalıdır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "193. Ölçü transformatorları nə üçün istifadə olunur?",
+    "options": {
+      "A": "Həm ölçü həddini artırmaq, həm də dövrələrdən izolə etmək (A və B)",
+      "B": "Ölçü dəqiqliyini artırmaq üçün",
+      "C": "Ölçü cihazlarını yüksək gərginlik dövrələrindən izolə etmək üçün",
+      "D": "Elektrik ölçü cihazının ölçü həddini artırmaq"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "194. Közərmə lampaları ulduz birləşdirilmişdir və onların gücləri eynidirsə (P1=P2=P3), bu cür yüklənmə necə adlanır?",
+    "options": {
+      "A": "asinxron",
+      "B": "sinxron",
+      "C": "simmetrik",
+      "D": "qeyri-simmetrik"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "195. Közərmə lampaları ulduz birləşdirilmişdir və onların gücləri fərqlidirsə (P1≠P2≠P3), bu cür yüklənmə necə adlanır?",
+    "options": {
+      "A": "asinxron",
+      "B": "sinxron",
+      "C": "qeyri-simmetrik",
+      "D": "simmetrik"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "196. Əgər iki tranzistorun dövrəyə qoşulması zamanı tranzistorların bazaları eyni bir nöqtəyə birləşibsə, bu tranzistorların hansı növ birləşməsidir?",
+    "options": {
+      "A": "ümumi baza ilə qoşulma",
+      "B": "ümumi anodla qoşulma",
+      "C": "ümumi kollektorla qoşulma",
+      "D": "ümumi emitterlə qoşulma"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "197. Əgər iki tranzistorun dövrəyə qoşulması zamanı tranzistorların emitterləri eyni bir nöqtəyə birləşibsə, bu tranzistorların hansı növ birləşməsidir?",
+    "options": {
+      "A": "ümumi emitterlə qoşulma",
+      "B": "ümumi baza ilə qoşulma",
+      "C": "ümumi kollektorla qoşulma",
+      "D": "ümumi anodla qoşulma"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "198. Əgər iki tranzistorun dövrəyə qoşulması zamanı tranzistorların kollektorları eyni bir nöqtəyə birləşibsə, bu tranzistorların hansı növ birləşməsidir?",
+    "options": {
+      "A": "ümumi kollektorla qoşulma",
+      "B": "ümumi emitterlə qoşulma",
+      "C": "ümumi baza ilə qoşulma",
+      "D": "ümumi anodla qoşulma"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "199. Tam güc vahidi hansıdır?",
+    "options": {
+      "A": "1Vt",
+      "B": "1 V·A",
+      "C": "1V·Ar",
+      "D": "1kVt"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "200.	Əgər dövrədə müqavimət  X= ωL düsturu ilə müəyyən olunursa dövrə hansı xarakterlidir?",
+    "options": {
+      "A": "Dinamik müqavimət",
+      "B": "Statik müqavimət",
+      "C": "İnduktiv müqavimət",
+      "D": "Aktiv müqavimət"
+    },
+    "correct": "C"
+  },
+  {
+   "q": "Aşağıda göstərilənlərdən hansı xalis aktiv güc tələb edir?(I. Dəyişən cərəyan elektrik mühərriki; II. Közərmə lampası; III. Elektrik qızdırıcısı; IV. Selenoid; V. Kondensator,",
+   "options": {
+     "A": "III",
+     "B": "IV ",
+     "C": "II",
+     "D": "V"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Hansı qurğulara asinxron maşın deyilir? ",
+   "options": {
+     "A": "İstilik enerjisini mexaniki enerjiyə çevirən qurğular ",
+     "B": "Fırlanan maqnit sahəsi yaradan qurğular; ",
+     "C": "Elektrik və mexaniki enerjiləri bir-birinə çevirən qurğular; ",
+     "D": "Mexaniki enerjini elektrik enerjisinə çevirən qurğular; "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Yazılanlardan hansı doğrudur?",
+   "options": {
+     "A": "η=1 olduqda transformator alçaldıcı ",
+     "B": "k>1 olduqda transformator yüksəldici ",
+     "C": "k <1 olduqda transformator yüksəldici ",
+     "D": "k=1 olduqda transformator alçaldıcı "
+   },
+   "correct": "B"
+ },
+ {
+   "q": "204. İki dövrədə maqnit rabitəsinin mövcud olması üçün hansı şərt vacibdir? ",
+   "options": {
+     "A": "Dövrələr arasında elektrik rabitəsinin olması",
+     "B": "Hər iki dövrənin eyni cərəyan şiddətinə malik olması",
+     "C": "Dövrələrdə gərginliyin sabit olması",
+     "D": "Dövrələrin ümumi maqnit sahəsində yerləşməsi"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "İki dövrə arasında rabitə əmsalı olarsa, bu nəyi göstərir?",
+   "options": {
+     "A": "Dövrələr arasında tam rabitə var",
+     "B": "Dövrələrin induktivlikləri bərabərdir",
+     "C": "Dövrələrin maqnit sahələri bir-birinə perpendikulyardır",
+     "D": "Dövrələr arasında heç bir rabitə yoxdur"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Qarşılıqlı induktivlik əmsalını artırmaq üçün hansı üsuldan istifadə edilə bilər?",
+   "options": {
+     "A": "Gərginliyi sabit saxlamaq",
+     "B": "Dövrələrin arasındakı məsafəni artırmaq",
+     "C": "Cərəyan tezliyini azaltmaq ",
+     "D": "Maqnit keçirici material əlavə etmək"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Qarşılıqlı induksiya zamanı yaranan EHQ-nin istiqamətini hansı qanun müəyyən edir? ",
+   "options": {
+     "A": "Om qanunu",
+     "B": "Lenz qanunu",
+     "C": "Amper qanunu",
+     "D": "Faradey qanunu"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə enerjinin ötürülməsi hansı yolla baş verir?",
+   "options": {
+     "A": "Cərəyanın elektrik naqilləri vasitəsilə ötürülməsi",
+     "B": "Elektromaqnit induksiya yolu ilə",
+     "C": "Elektronların birbaşa hərəkəti ilə",
+     "D": "Mexaniki dalğaların təsiri ilə"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə maqnit axını hansı əsas amildən asılıdır? ",
+   "options": {
+     "A": "Dövrələrin müqavimətindən ",
+     "B": "Xarici elektrik sahəsinin gücündən ",
+     "C": "Elektrik gərginliyindən",
+     "D": "Dövrələrin maqnit rabitə əmsalından"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə induksiya EHQ-sinin yaranması üçün hansı şərt lazımdır?",
+   "options": {
+     "A": "Maqnit axınının dəyişməsi ",
+     "B": "Cərəyanın sabit olması",
+     "C": "Dövrələrin eyni tezlikdə işləməsi",
+     "D": "Dövrələrin müqavimətinin bərabər olması"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə enerji itkisinin azaldılması üçün hansı üsul tətbiq olunur?",
+   "options": {
+     "A": "Maqnit keçirici materialın yerləşdirilməsi",
+     "B": "Dövrələrin müqavimətinin artırılması",
+     "C": "Maqnit keçirici materialın yerləşdirilməsi",
+     "D": "Xarici maqnit sahəsinin təsirinin artırılması"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Asinxron maşın hansı halda mühərrik rejimində işləyir?",
+   "options": {
+     "A": "Rotorun fırlanma sürəti sabit olduqda",
+     "B": "Rotorun fırlanma sürəti fırlanan maqnit sahəsinin fırlanma sürətindən kiçik olduqda; ",
+     "C": "Maqnit sahəsinin fırlanma sürəti sabit olduqda",
+     "D": "Rotorun fırlanma sürətinin fırlanan maqnit sahəsinin fırlanma sürətinə bərabər olduqda;"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Asinxron maşın hansı halda generator rejimində işləyir?",
+   "options": {
+     "A": "Rotorun fırlanma sürəti ilə fırlanan maqnit sahəsinin fırlanma sürəti bir- birinə bərabər olduqda",
+     "B": "Fırlanan maqnit sahəsinin fırlanma sürəti rotorun fırlanma sürətindən ən azı üç dəfə çox olduqda",
+     "C": "Rotorun fırlanma sürəti fırlanan maqnit sahəsinin fırlanma sürətindən böyük olduqda ",
+     "D": "Rotorun fırlanma sürəti fırlanan maqnit sahəsinin fırlanma sürətindən kiçik olduqda "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Asinxron maşının stator dolağı neçə dolaqdan ibarət olur?",
+   "options": {
+     "A": "1",
+     "B": "2",
+     "C": "3",
+     "D": "6"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Asinxron maşın əsas neçə hissədən ibarətdir?",
+   "options": {
+     "A": "5",
+     "B": "2",
+     "C": "3",
+     "D": "6"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Asinxron maşının fırlanan maqnit sahəsinin fırlanma sürətinin fırlanma istiqaməti necədir?",
+   "options": {
+     "A": "Şəbəkənin faza ardıcıllığı",
+     "B": "Yalnız B fazasının istiqaməti",
+     "C": "Sol əl qaydası ilə",
+     "D": "Yalnız C fazasının istiqaməti"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Asinxron maşınlarda n0=60·f ifadəsi ilə nəyin fırlanma sürəti müəyyən edir?",
+   "options": {
+     "A": "Rotorun ",
+     "B": "A və B birlikdə ",
+     "C": "Statorun ",
+     "D": "Fırlanan maqnit sahəsinin"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Dolağın bir dövrü nəyə uyğun gəlir?",
+   "options": {
+     "A": "ωt – yə ",
+     "B": "T-yə",
+     "C": "α- ya ",
+     "D": "bucaq tezliyinə"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Quruluşlarına görə generatorlar neçə qrupa bölünür?",
+   "options": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "6"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Dəyişən cərəyan generatorları hansı hissələrdən ibarətdir?",
+   "options": {
+     "A": "Zövbər dolağından ",
+     "B": "Nazik elektrotexniki alminiyum lövhələrdən ",
+     "C": "Üçfazalı sistemdən ",
+     "D": "Hərəkətsiz stator və hərəkətli rotordan "
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Stator dolaqları harada yerləşdirilir?",
+   "options": {
+     "A": "Stator dövrəsində ",
+     "B": "Stator lövhələrinin başlanğıcında ",
+     "C": " Statorun daxilində açılan yuvalarda ",
+     "D": "Stator lövhələrin sonunda "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Elektromaqnitlər harada yerləşir?",
+   "options": {
+     "A": "Rotorda",
+     "B": "Stator dövrəsində ",
+     "C": "Təsirlənmə dolağı dövrəsində ",
+     "D": "Statorda "
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Nə üçün keçiricilərin e.h.q - si toplanır?",
+   "options": {
+     "A": "Dolaq yarımkeçirici olduğundan ",
+     "B": "Dolağı əmələ gətirən iki keçirici öz aralarında ardıcıl birləşdirildiyindən",
+     "C": "Dolaqdakı keçiricilər biri - biri ilə əks fazada olduğundan",
+     "D": "Keçiricilər öz aralarında paralel birləşdirildiyindən"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Fırlanmanın bucaq tezliyinin vahidi nədir?",
+   "options": {
+     "A": "San/metr ",
+     "B": "Metr/saat ",
+     "C": "Santımetr/san ",
+     "D": "Dövr/dəqiqə "
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Generatorda maqnit qütblərinin maqnit selini artırmaq üçün nə qoşulur?",
+   "options": {
+     "A": "Rotorda təsirlənmə dolağı yerləşdirilir ",
+     "B": "Rotor dövrəsinə kondensator qoşulur ",
+     "C": "Rotor dövrəsinə reaktiv müqavimətli yük qoşulur ",
+     "D": "Rotor dövrəsinə aktiv müqavimətli rezistor qoşulur "
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Rotora qoşulmuş həyəcanlandırma dolağı hansı cərəyanla qidalandırılır?",
+   "options": {
+     "A": "Üçfazalı dəyişən ",
+     "B": "Dəyişən",
+     "C": "Sabit",
+     "D": "Birfazalı sabit "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Əsas maqnit selini nə yaradır?",
+   "options": {
+     "A": "Statorun B fazasının gərginliyi",
+     "B": "Statorun C fazasının e.h.q – si",
+     "C": "Statorun A fazasının cərəyanı",
+     "D": "Həyəcanlandırma dolağının cərəyanı"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Maqnit seli hansı sürətlə fırlanır?",
+   "options": {
+     "A": "p sürəti ilə",
+     "B": "T sürəti ilə",
+     "C": "n sürəti ilə",
+     "D": "E sürəti ilə"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Generatorun rotoru necə fırladılır?",
+   "options": {
+     "A": "Nasos vasitəsi ilə",
+     "B": "Sabit cərəyan maşınları ilə",
+     "C": "Avtotransformator vasitəsi ilə",
+     "D": "Buxar su trubinləri, dizel mühərrikləri vasitəsi ilə"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Üçfazalı generatorun neçə dolağı var?",
+   "options": {
+     "A": "5",
+     "B": "6",
+     "C": "2",
+     "D": "3"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Dəqiqədə 3000 dəfə fırlanan rotoru olan generatorun tezliyi nə qədər olar?",
+   "options": {
+     "A": "100 Hs",
+     "B": "200 Hs ",
+     "C": "75 Hs ",
+     "D": "50 Hs"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Rotorun nüvəsi hansı xassəyə malik olmalıdır?",
+   "options": {
+     "A": "maqnitsizləşdirici",
+     "B": "işıqvermə ",
+     "C": "maqnitlənmə",
+     "D": "istilikvermə "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Asinxron maşının işədüşmə cərəyanı (J i.d ) nominal cərəyandan (Jn) nə qədər çox olur?",
+   "options": {
+     "A": "2-2.5 dəfə",
+     "B": "1.5-2 dəfə",
+     "C": "2-3 dəfə",
+     "D": "4-8 dəfə"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Aşağıda göstərilənlərdən neçəsi xalis aktiv güc tələb etmir? (I. Dəyişən cərəyan elektrik mühərriki; II. Közərmə lampası; III. Elektrik qızdırıcısı; IV. Rezistor; V. Kondensator.)",
+   "options": {
+     "A": "II",
+     "B": "IV",
+     "C": "V",
+     "D": "I"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Hansı hal asinxron maşının yüksüz işləmə rejimidir?",
+   "options": {
+     "A": "B və C şərtləri birlikdə",
+     "B": "Stator dolağının ucları açıq, rotor dolağı qapalı",
+     "C": "rotor dolağının ucları açıq olan hal",
+     "D": "Stator və rotor dolaqlarının ucları açıq"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Asinxron maşının yüksüz işləmə cərəyanı statorun nominal cərəyanının neçə faizini təşkil edir?",
+   "options": {
+     "A": "3-5 %",
+     "B": "10-15 %",
+     "C": "5-10 %",
+     "D": "20-40 %"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Rotorun maqnit selini artırmaq üçün nə edirlər?",
+   "options": {
+     "A": "rotorun üzərinə sabit cərəyanla qidalanan dolaq sarınır",
+     "B": "statorun sarğılar sayı artırılır",
+     "C": "rotorun həcmi böyüdülür",
+     "D": "rotorun həcmi azaldılır"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Asinxron maşının yüksüz işləmə cərəyanının böyük olmasının səbəbi nədir?",
+   "options": {
+     "A": "İşçi cərəyanın böyük olması",
+     "B": "Dövrədə hava aralığının olması",
+     "C": "İşçi gərginliyin böyük olması",
+     "D": "Böyük işədüşmə momentinin tələb olunması"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə enerji ötürülməsi hansı qanunla izah olunur?",
+   "options": {
+     "A": "Lenz qanunu",
+     "B": "Faradey qanunu",
+     "C": "Coulomb qanunu",
+     "D": "Om qanunu"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Asinxron maşınların reversivlənməsi nədir?",
+   "options": {
+     "A": "Asinxron maşınların gücünün azaldılması",
+     "B": "Asinxron maşınların sürətinin azalması",
+     "C": "Sinxron mühərrikin istiqamətinin dəyişməsi",
+     "D": "Asinxron maşınların sürətinin artırılması"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Dəyişən cərəyan maşınında rotorun vəzifəsi nədir?",
+   "options": {
+     "A": "elektromaqnit induksiya e.h.q. induksiyalamaq",
+     "B": "maqnit sahəsi yaratmaq",
+     "C": "faza sürüşməsini təyin etmək",
+     "D": "fırlanma momenti yaratmaq"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Sinxron maşın əsas hansı hissələrdən ibarətdir?",
+   "options": {
+     "A": "Rotor və stator",
+     "B": "Stator və onun dolaqları",
+     "C": "Maşının əsas maqnit selini yaradan təsirlənmə sistemi",
+     "D": "A və B birlikdə"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Sinxron maşınlarda istifadə olunan elektromaqnitin dolağı necə adlanır?",
+   "options": {
+     "A": "Sürüşmə yaratmaq üçün istifadə olunan dolaq",
+     "B": "Rotor dolağı",
+     "C": "Tormozlayıcı moment yaratmaq üçün istifadə olunan dolaq",
+     "D": "Təsirlənmə dolağı"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Sinxron maşınların lövbər dolağında e.h.q. almaq üçün lövbərlə rotor arasında hava aralığında maqnit xətləri necə olmalıdır?",
+   "options": {
+     "A": "Sinusoidal",
+     "B": "Sabit",
+     "C": "Dəyişən",
+     "D": "Eksponensial artan"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Sinxron maşının Lövbər dolağında e.h.q. almaq üçün hansı üsullardan istifadə olunur?",
+   "options": {
+     "A": "Qısa qapanmış rotoru hazırlamaq",
+     "B": "Rotorun dolağını lazımi formada yığmaq",
+     "C": "B və D birlikdə",
+     "D": "Lazımi formalı elektromaqnitdən istifadə olunmaq"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Sinxron generatorun yüksüz işləmə rejimi hansıdır?",
+   "options": {
+     "A": "Zəiflətmə",
+     "B": "Stator dolağı",
+     "C": "Təsirlənmə",
+     "D": "Maqnitlənmə"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Sinxron maşınlarda elektromaqnit nə üçün istifadə olunur?",
+   "options": {
+     "A": "Əsas maqnit selini yaratmaq üçün",
+     "B": "Rotorun fırlanma sürətini tənzimləmək üçün",
+     "C": "Stator dolaqlarında e.h.q. yaratmaq üçün",
+     "D": "C və D birlikdə"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Sinxron generatorun elektrik şəbəkəsinə paralel qoşulmasının şərtləri hansılardır?",
+   "options": {
+     "A": "Generatorun (Ug) və şəbəkənin (U) gərginlikləri eyni fazada olmalıdır",
+     "B": "Generatorun tezliyi şəbəkənin tezliyinə bərabər olmalıdır",
+     "C": "Generatorun və şəbəkənin faza ardıcıllıqları eyni olmalıdır; ",
+     "D": "A, B, C,birlikdə"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Dəyişən cərəyan generatoru hansı əsas hissələrdən ibarətdir?",
+   "options": {
+     "A": "stator və rotordan",
+     "B": "stator, rotor və kollektordan",
+     "C": "kollektor və rotordan",
+     "D": "kollektordan"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Dəyişən cərəyan mənbəyi necə adlanır?",
+   "options": {
+     "A": "akkumulyator",
+     "B": "rezistor",
+     "C": "generator",
+     "D": "transformator"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Hansı dəyişən cərəyan maşınına sinxron maşın deyilir?",
+   "options": {
+     "A": "rotoru müxtəlif tezliklə fırlanan maşına",
+     "B": "rotoru sabit sürətlə fırlanan maşına",
+     "C": "rotoru əsas maqnit seli ilə müxtəlif sürətlə fırlanan maşına",
+     "D": "rotoru əsas maqnit seli ilə eyni sürətlə fırlanan maşına"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Sabit cərəyan maşını əsas hansı hissələrdən ibarətdir?",
+   "options": {
+     "A": "Kollektor",
+     "B": "Stator",
+     "C": "Lövbər",
+     "D": "A, B və C birlikdə"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Təsirlənmə dolağını qidalandırma üsuluna görə sabit cərəyan generatorları neçə qrupa bölünür?",
+   "options": {
+     "A": "2",
+     "B": "3",
+     "C": "4",
+     "D": "5"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Sabit cərəyan generatorlarında özütəsirlənməni təmin etmək üçün əsas hansı şərtlər zəruridir?",
+   "options": {
+     "A": "Maqnit selləri bir-birini gücləndirməlidir",
+     "B": "A və C birlikdə",
+     "C": "Maşında qalıq maqnit selinin olması",
+     "D": "Təsirlənmə dolağının Lövbər sıxaclarına düzgün birləşdirilməsi"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Sabit cərəyan maşınlarında təsirlənmə cərəyanı maşının normal cərəyanının təqribən neçə faizini təşkil edir?",
+   "options": {
+     "A": "1-5%",
+     "B": "10-15%",
+     "C": "6-7%",
+     "D": "10-12%"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Sabit cərəyan maşını hansı hissələrdən ibarətdir?",
+   "options": {
+     "A": "stator",
+     "B": "stator, rotor, kollektor",
+     "C": "rotor, kollektor",
+     "D": "kollektor"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Lövbər reaksiyası nəyə deyilir?",
+   "options": {
+     "A": "təsirlənmə maqnit selinin qütblərə təsirinə",
+     "B": "qütbün maqnit selinin fırçaların vəziyyətinə təsiri",
+     "C": "lövbər maqnit selinin təsirlənmə cərəyanına təsirinə",
+     "D": "lövbər maqnit selinin təsirlənmə dolağının maqnit selinə təsirinə"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Əsas maqnit seli sabit cərəyan maşınının hansı hissəsində yaradılır? ",
+   "options": {
+     "A": "Kollektorda ",
+     "B": "Statorda",
+     "C": "Lövbərdə ",
+     "D": "B və C birlikdə"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Təsirlənmə dolağını qidalandırma üsuluna görə sabit cərəyan generatorlarının qrupları hansılardır?",
+   "options": {
+     "A": "Müstəqil təsirlənən generatorlar",
+     "B": "Transformator əlaqəli gücləndiricilər",
+     "C": "A və B birlikdə",
+     "D": "Özü təsirlənən generatorlar"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Yarımkeçirici diodda neçə p-n keçid vardır?",
+   "options": {
+     "A": "4",
+     "B": "6",
+     "C": "3",
+     "D": "1"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Yarımkeçirici tranzistorun elektrodları hansılardır?",
+   "options": {
+     "A": "baza",
+     "B": "kollektor",
+     "C": "emitter",
+     "D": "A, B və C birlikdə"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Yarımkeçirici materialların aşqarlanması üçün istifadə olunan aşqarların neçə növü vardır?",
+   "options": {
+     "A": "2",
+     "B": "4",
+     "C": "1",
+     "D": "3"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Yarımkeçirici diodun elektrodları hansılardır?",
+   "options": {
+     "A": "emitter",
+     "B": "anod",
+     "C": "kollektor",
+     "D": "katod"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Tranzistorların hansı növü var?",
+   "options": {
+     "A": "sahə, bipolyar",
+     "B": "taktlı, kaskadlı",
+     "C": "drosser, kaskadlı",
+     "D": "alçaldıcı, yüksəldici"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Yarımkeçirici tranzistorda neçə p-n keçid vardır?",
+   "options": {
+     "A": "5",
+     "B": "2",
+     "C": "1",
+     "D": "3"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Giriş və çıxış siqnalları üçün baza siqnalı eyni olan halda, tranzistorun qoşulması necə adlanır?",
+   "options": {
+     "A": "ümumi baza ilə qoşulma",
+     "B": "ümumi emitterlə qoşulma",
+     "C": "ümumi anodla qoşulma",
+     "D": "ümumi katodla qoşulma"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Giriş və çıxış siqnalları üçün kollektor siqnalı eyni olan halda, tranzistorun qoşulması necə adlandırılır?",
+   "options": {
+     "A": "ümumi kollektorla qoşulma",
+     "B": "ümumi anodla qoşulma",
+     "C": "ümumi katodla qoşulma",
+     "D": "ümumi emitterlə qoşulma"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Giriş və çıxış siqnalları üçün emitter siqnalı eyni olan halda, tranzistorun qoşulması necə adlandırılır?",
+   "options": {
+     "A": "ümumi emitterlə qoşulma",
+     "B": "ümumi baza ilə qoşulma",
+     "C": "ümumi kollektorla qoşulma",
+     "D": "ümumi katodla qoşulma"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Aşağıdakı mülahizələrdən hansı doğrudur?(I.Gücləndirmə əmsalı (k) gücləndiricinin vacib xarakteristikasıdır;  II. k=F(ω) asılılığı gücləndiricinin tezlik xarakteristikasıdır (burada ω – gücləndirilən siqnalın tezliyidir); III. Sxemlərdə induktivlik və tutum elementlərinin olması gücləndiricilərdə faza təhriflərinə səbəb olur;  IV. İnduktivlik və tutum elementlərinin gücləndirici sxemlərdə varlığı tezlik təhriflərinə səbəb olur;  V. Gücləndiricinin işçi tezlik diapazonu k əmsalının (1-6)dB arasında dəyişməsinə uyğundur.)",
+   "options": {
+     "A": "I",
+     "B": "II",
+     "C": "IV",
+     "D": "V"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Əks rabitə nədir?",
+   "options": {
+     "A": "güc əmsalının yüksəldilməsi",
+     "B": "giriş parametrlərindən çıxış parametrinin çıxılması və ya əlavə olunması",
+     "C": "giriş parametrlərinin çıxış parametrinə bölünməsi",
+     "D": "güc əmsalının vahidə yaxınlaşdırılması"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Güc gücləndiricilərinin hansı növündən istifadə olunur?",
+   "options": {
+     "A": "iki və üç kaskadl",
+     "B": "bir və üç kaskadlı",
+     "C": "dörd kaskadlı",
+     "D": "bir və iki kaskadlı"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Kaskadlararası rabitəyə görə gücləndiricilərin hansı növləri vardır?",
+   "options": {
+     "A": "hamısı",
+     "B": "transformator rabitəli",
+     "C": "rezonans rabitəli",
+     "D": "rezonans və transformator rabitəli"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Güc gücləndiricilərini xarakterizə edən əsas kəmiyyətlər hansılardır?",
+   "options": {
+     "A": "Gücləndiricinin mənbədən tələb etdiyi güc",
+     "B": "Qeyri-xətti təhrif əmsalı",
+     "C": "Gücləndiricinin f.i.ə",
+     "D": "Hamısı"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Düzləndiricilərdə istifadə olunan ventilin (diodun) əsas parametrləri hansılardır?",
+   "options": {
+     "A": "cərəyanın orta qiyməti",
+     "B": "hamısı",
+     "C": "əks gərginliyin amplitud qiyməti",
+     "D": "cərəyanın amplitud qiyməti"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Bir yarımperiodlu düzləndiricilərdə gərginliyin periodunun hansı hissəsində cərəyan keçir?",
+   "options": {
+     "A": "tam periodda",
+     "B": "periodun dörddə bir hissəsində",
+     "C": "yarımperiodda",
+     "D": "periodun üçdə bir hissəsində"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Üçfazalı düzləndiricilərdə neçə ventildən istifadə olunur?",
+   "options": {
+     "A": "1",
+     "B": "2",
+     "C": "3",
+     "D": "4"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Körpü sxemli birfazalı düzləndiricilərdə neçə ventildən istifadə olunur?",
+   "options": {
+     "A": "3",
+     "B": "2",
+     "C": "4",
+     "D": "1"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Üçfazalı düzləndiricilərdə istifadə olunan hər bir ventil periodun hansı hissəsində işləyir (açıq olur)?",
+   "options": {
+     "A": "1/4",
+     "B": "1/3",
+     "C": "1/2",
+     "D": "2/3"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Üçfazalı düzləndiricilərdə ventillərin anodu neçə nöqtədə birləşir?",
+   "options": {
+     "A": "1",
+     "B": "5",
+     "C": "6",
+     "D": "3"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Körpü sxemli düzləndiricilərdə əks gərginlik hansı düsturla təyin olunur?",
+   "options": {
+     "A": "Uəks=1.3 U0",
+     "B": "Uəks=1.7 U0",
+     "C": "Uəks=1.57 U0 ",
+     "D": "Uəks=1.2 U0 "
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Üçfazalı düzləndiricilərdə əks gərginlik hansı halda doğrudur?",
+   "options": {
+     "A": " Uəks=2.1 U0",
+     "B": "Uəks=1.5 U0",
+     "C": "Uəks=1.4 U ",
+     "D": "Uəks=1.3 U0 "
+   },
+   "correct": "A"
+ },
+ {
+   "q": "289.  Elektrik birləşməsi olmayan maqnit rabitəli iki dövrənin effektiv enerji ötürülməsi üçün hansı şərt vacibdir?",
+   "options": {
+     "A": "Dövrələrin maqnit rabitə əmsalının yüksək olması",
+     "B": "Dövrələrdə gərginliyin sabit qalması",
+     "C": "Dövrələrdəki cərəyan şiddətinin eyni olması",
+     "D": "Xarici maqnit sahəsinin olmaması"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "290. Elektrik birləşməsi olmayan dövrələrdə qarşılıqlı induksiya zamanı yaranan maqnit axını hansı asılılığı göstərir?",
+   "options": {
+     "A": "Axın, cərəyanın kvadratı ilə tərs mütənasibdir",
+     "B": "Axın, cərəyanın kvadratı ilə tərs mütənasibdir",
+     "C": "Axın yalnız maqnit keçiriciliyindən asılıdır",
+     "D": "Axın, maqnit rabitə əmsalı ilə düz mütənasibdir"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə cərəyanın tezliyinin artırılması hansı nəticəyə səbəb ola bilər?",
+   "options": {
+     "A": "Yaranan induksiya EHQ-sinin artması",
+     "B": "Dövrədə enerji itkisinə səbəb olması",
+     "C": "Maqnit axınının azalması",
+     "D": "Maqnit rabitə əmsalının azalması"
+   },
+   "correct": "A"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə naqilsiz enerji ötürülməsi sistemləri hansı texnologiyada geniş istifadə olunur?",
+   "options": {
+     "A": "İstilik enerjisinin ötürülməsində",
+     "B": "Sabit maqnit sahəsi ilə enerji ötürülməsində",
+     "C": "Maqnit rezonanslı naqilsiz enerji ötürülməsində",
+     "D": "Yüksək gərginlikli enerji ötürmə xətlərində"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə rabitə əmsalı  necə dəyişir?",
+   "options": {
+     "A": "Dövrələr arasında naqil rabitəsi qurulduqca artır",
+     "B": "Dövrələr arasındakı məsafə azaldıqca artır",
+     "C": "Xarici maqnit sahəsi artdıqca azalır",
+     "D": "Dövrələrin müqaviməti artdıqca artır"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Maqnit rabitəli naqilsiz enerji ötürmə sistemində maksimum enerji ötürülməsi üçün dövrələr arasında hansı uyğunluq tələb olunur?",
+   "options": {
+     "A": "Dövrələrin elektrik müqavimətinin eyni olması",
+     "B": "Gərginliklərin eyni olması",
+     "C": "Maqnit sahəsinin perpendikulyar olması",
+     "D": "Cərəyanların tezliklərinin uyğunluğu"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə yaranan maqnit sahəsi hansı amildən asılıdır?",
+   "options": {
+     "A": "Dövrələrin arasındakı məsafədən və naqil materialından",
+     "B": "Gərginlikdən və tezlikdən",
+     "C": "Cərəyan şiddətindən və maqnit rabitə əmsalından",
+     "D": "Dövrələrin müqavimətindən və tezliyindən"
+   },
+   "correct": "C"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrin tətbiq sahəsinə aid olan texnologiyalardan biri hansıdır?",
+   "options": {
+     "A": "Yanacaq hüceyrələri",
+     "B": "Transformatorlar",
+     "C": "İstilik turbinləri",
+     "D": "Ultrasonik dalğalar"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan dövrələrdə enerjinin ötürülmə effektivliyini artırmaq üçün hansı üsuldan istifadə edilir?",
+   "options": {
+     "A": "Dövrələr arasındakı məsafəni artırmaq",
+     "B": "Yüksək tezlikli cərəyan tətbiq etmək",
+     "C": "Xarici maqnit sahəsini zəiflətmək",
+     "D": "Cərəyanı sabit saxlamaq"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "İki dövrə arasında maqnit rabitə əmsalının olması hansı mənanı daşıyır?",
+   "options": {
+     "A": "Dövrələr arasında tam maqnit rabitəli əlaqə var",
+     "B": "Maqnit axını maksimumdur",
+     "C": "Enerji tamamilə ötürülür",
+     "D": "Dövrələr arasında heç bir maqnit rabitəsi yoxdur"
+   },
+   "correct": "D"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə naqilsiz enerji ötürülməsi hansı sahədə daha çox istifadə olunur?",
+   "options": {
+     "A": "Elektrik mühərriklərinin idarə edilməsi",
+     "B": "Simsiz şarj sistemləri",
+     "C": "Yüksək gərginlikli elektrik xətləri",
+     "D": "Transformatorların istehsalı"
+   },
+   "correct": "B"
+ },
+ {
+   "q": "Elektrik birləşməsi olmayan maqnit rabitəli dövrələrdə naqilsiz enerji ötürülməsi hansı sahədə daha çox istifadə olunur?",
+   "options": {
+     "A": "Elektrik mühərrikləri",
+     "B": "Tibbi implantlar və elektronika",
+     "C": "Transformator qurğuları",
+     "D": "Yüksək gərginlik xətləri"
+   },
+   "correct": "B"
+ },
+];
+
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function loadQuestions() {
+    const quizDiv = document.getElementById("quiz");
+    quizDiv.innerHTML = "Suallar yüklənir...";
+
+    try {
+        console.log("Sual sayı:", allQuestions.length);
+
+        const validQuestions = allQuestions.filter(q => q.q && q.options && q.correct);
+        if (validQuestions.length === 0) throw new Error("Heç bir düzgün sual tapılmadı");
+
+        currentQuestions = shuffle([...validQuestions]).slice(0, 25); // 25 random sual
+
+        quizDiv.innerHTML = "";
+        currentQuestions.forEach((q, i) => {
+            let optionsHtml = "";
+            Object.keys(q.options).forEach(key => {
+                optionsHtml += `
+                    <label class="option">
+                        <input type="radio" name="q${i}" value="${key}"> ${key}) ${q.options[key]}
+                    </label>`;
+            });
+
+            optionsHtml += `
+                <label class="option" style="background: #f1f2f6; border-style: dashed;">
+                    <input type="radio" name="q${i}" value="BOS"> <b>Boş burax (bal silinmir)</b>
+                </label>`;
+
+            quizDiv.innerHTML += `
+                <div id="block${i}" class="question-block">
+                    <p><b>${i + 1}. ${q.q}</b></p>
+                    ${optionsHtml}
+                    <div id="feedback${i}" style="margin-top:10px;"></div>
+                </div>`;
+        });
+
+        document.getElementById("finishBtn").style.display = "block";
+        startTimer();
+    } catch (err) {
+        console.error("Xəta:", err.message);
+        quizDiv.innerHTML = `
+            <div style="color:red; text-align:center; padding:20px;">
+                <h3>Xəta baş verdi!</h3>
+                <p>${err.message}</p>
+                <button onclick="location.reload()">Yenidən cəhd et</button>
+            </div>`;
+    }
+}
+
+function start() {
+    const val = prompt("İmtahana giriş balın neçədir? (0–50, boş buraxa bilərsən)", "0");
+    startScore = parseInt(val) || 0;
+    if (startScore < 0 || startScore > 50) startScore = 0;
+
+    loadQuestions(); // Sualları yüklə
+}
+
+function startTimer() {
+    interval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+    if (TIME <= 0) { finish(); return; }
+    TIME--;
+    const m = Math.floor(TIME / 60);
+    const s = TIME % 60;
+    document.getElementById("timer").innerText = `Qalan vaxt: ${m}:${s < 10 ? '0' + s : s}`;
+}
+
+function finish() {
+    clearInterval(interval);
+    window.scrollTo(0, 0);
+    document.getElementById("finishBtn").style.display = "none";
+
+    let correctCount = 0;
+    let wrongCount = 0;
+
+    currentQuestions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        const block = document.getElementById(`block${i}`);
+        const feedback = document.getElementById(`feedback${i}`);
+
+        if (selected) {
+            if (selected.value === q.correct) {
+                correctCount++;
+                block.classList.add("correct-ans");
+                feedback.innerHTML = "<b>✅ Doğru (+2 bal)</b>";
+            } else if (selected.value === "BOS") {
+                block.classList.add("skipped-ans");
+                feedback.innerHTML = `<b>⚪ Boş buraxıldı.</b> Düzgün: ${q.correct}`;
+            } else {
+                wrongCount++;
+                block.classList.add("wrong-ans");
+                feedback.innerHTML = `<b>❌ Səhv! (-1 bal)</b> Düzgün: ${q.correct}`;
+            }
+        } else {
+            block.classList.add("skipped-ans");
+            feedback.innerHTML = `<b>⚪ Cavabsız.</b> Düzgün: ${q.correct}`;
+        }
+    });
+
+    const examScore = (correctCount * 2) - (wrongCount * 1);
+    const total = startScore + examScore;
+
+    document.getElementById("result").innerHTML = `
+        <div style="background:#2c3e50; color:white; padding:20px; border-radius:10px; text-align:center;">
+            <h2>Nəticə</h2>
+            <p>Doğru: ${correctCount} | Səhv: ${wrongCount}</p>
+            <p><strong>Sınaq Balı: ${examScore} (doğru ${correctCount}×2 - səhv ${wrongCount}×1 = ${examScore})</strong></p>
+            <hr>
+            <h3>Yekun Bal: ${total}</h3>
+        </div>`;
+}
+
+// Səhifə yüklənəndə dərhal başla
+window.onload = start;
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
