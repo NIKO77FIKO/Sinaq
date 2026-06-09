@@ -1,0 +1,4293 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Sınaq Sistemi By Nurali and Nihat</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; margin-top: 5px; }
+    h2 { text-align: center; color: #333; margin-top: 5px; }
+    #meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin: 10px 0 20px; }
+    #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; flex: 0 0 220px; }
+    #progress { flex: 1; min-width: 220px; background:#f0f0f0; border-radius: 5px; padding: 10px; }
+    .bar { height: 10px; background: #ddd; border-radius: 999px; overflow:hidden; }
+    .bar > div { height: 100%; width: 0%; background: #2ecc71; }
+    #progress small { display:block; color:#555; margin-top:6px; }
+    .question-block { margin-bottom: 16px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.2s; }
+    .question-block:hover { border-color:#cfcfcf; }
+    .q-title { font-weight: 700; margin-bottom: 10px; }
+    .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 6px; border: 1px solid #eee; user-select:none; }
+    .option:hover { background: #f9f9f9; }
+    .option input { margin-right: 8px; }
+    button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; }
+    button:hover { background: #27ae60; }
+    #result { margin-top: 20px; }
+    .correct-ans { background-color: #d4edda !important; border-color:#c3e6cb !important; }
+    .wrong-ans { background-color: #f8d7da !important; border-color:#f5c6cb !important; }
+    .skipped-ans { background-color: #fff3cd !important; border-color:#ffeeba !important; }
+    .badge { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .b-ok { background:#d4edda; }
+    .b-no { background:#f8d7da; }
+    .b-skip { background:#fff3cd; }
+    .muted { color:#666; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .row > div { flex:1; min-width: 200px; }
+    .top-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+    .secondary { background:#3498db; }
+    .secondary:hover { background:#2d86c1; }
+    .danger { background:#e74c3c; }
+    .danger:hover { background:#d63c2f; }
+    .danger { margin-bottom: 25px; }
+  
+/* ===== DARK MODE ===== */
+body.dark { background-color: #121212 !important; color: #e0e0e0 !important; }
+body.dark .container { background: #1e1e1e !important; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
+body.dark h1, body.dark h2 { color: #ffffff !important; }
+body.dark #timer { background:#c0392b !important; }
+body.dark #progress { background:#2a2a2a !important; }
+body.dark .bar { background:#444 !important; }
+body.dark .question-block { background:#1a1a1a !important; border-color:#333 !important; }
+body.dark .option { border-color:#333 !important; }
+body.dark .option:hover { background:#2a2a2a !important; }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <h2>By Nurali and Nihat</h2>
+    
+    <div id="meta">
+      <div id="timer">Qalan vaxt: 30:00</div>
+      <div id="progress">
+        <div class="bar"><div id="barFill"></div></div>
+        <small id="progressText">Cavablanan: 0 / 25</small>
+        <small class="muted">Düz: <b id="okCount">0</b> · Səhv: <b id="noCount">0</b> · Boş: <b id="skipCount">25</b></small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" onclick="toggleTheme()" class="secondary">🌙 Dark / Light</button>
+      <button class="secondary" id="regenBtn" type="button">25 sualı yenidən seç (random)</button>
+      <button class="danger" id="clearBtn" type="button">Cavabları sıfırla</button>
+    </div>
+
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" type="button" style="display:none;">İmtahanı Bitir</button>
+    <div id="result"></div>
+  </div>
+
+<script>
+/** ====== MƏLUMAT ====== */
+const ALL_QUESTIONS = [
+  {
+    "q": "1. Complete the sentence. Do you know the size of a boxing …….. ?",
+    "options": {
+      "A": "court",
+      "B": "ring",
+      "C": "track",
+      "D": "field"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "2. Complete the sentence. My sister enjoys rock ……… .",
+    "options": {
+      "A": "running",
+      "B": "diving",
+      "C": "climbing",
+      "D": "jumping"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "3. Complete the sentence. I used to play ice ……… .",
+    "options": {
+      "A": "golf",
+      "B": "hockey",
+      "C": "rugby",
+      "D": "tennis"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "4. Complete the sentence. We watch a lot of motor ……… .",
+    "options": {
+      "A": "swimming",
+      "B": "boxing",
+      "C": "racing",
+      "D": "walking"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "5. Complete the sentence. You cannot go camping unless you have a …….. .",
+    "options": {
+      "A": "helmet",
+      "B": "tent",
+      "C": "whistle",
+      "D": "racket"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "6. Complete the sentence. It was a fantastic ……… for the team.",
+    "options": {
+      "A": "mistake",
+      "B": "problem",
+      "C": "victory",
+      "D": "defeat"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "7. Complete the sentence. Argentina are playing ……… Brazil next week.",
+    "options": {
+      "A": "through",
+      "B": "against",
+      "C": "under",
+      "D": "beside"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "8. Complete the sentence. A composer is someone who writes ……… .",
+    "options": {
+      "A": "reports",
+      "B": "letters",
+      "C": "novels",
+      "D": "music"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "9. Complete the sentence. ………… is someone who stands in front of an orchestra.",
+    "options": {
+      "A": "a driver",
+      "B": "a conductor",
+      "C": "a dancer",
+      "D": "a painter"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "10. Complete the sentence. My father …….. classical music.",
+    "options": {
+      "A": "borrows",
+      "B": "carries",
+      "C": "prefers",
+      "D": "destroys"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "11. Complete the sentence. I am interested in live …….. .",
+    "options": {
+      "A": "journeys",
+      "B": "performances",
+      "C": "matches",
+      "D": "exercises"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "13. Complete the sentence. All age groups …… in the event.",
+    "options": {
+      "A": "are hidden",
+      "B": "are closed",
+      "C": "are involved",
+      "D": "are lost"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "14. Complete the sentence. I love sunbathing, so I can get a nice …….. .",
+    "options": {
+      "A": "passport",
+      "B": "jacket",
+      "C": "suntan",
+      "D": "haircut"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "15. Complete the sentence. It may be safer just to sit ……… .",
+    "options": {
+      "A": "on the roof",
+      "B": "under water",
+      "C": "in the shade",
+      "D": "on the road"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "16. Complete the sentence. I prefer to sit ……… .",
+    "options": {
+      "A": "in the river",
+      "B": "in the shade",
+      "C": "in the rain",
+      "D": "on the wall"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "17. Complete the sentence. How quickly do you ……. the emails you receive?",
+    "options": {
+      "A": "give away",
+      "B": "reply to",
+      "C": "look after",
+      "D": "turn off"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "18. Complete the sentence. The boy was badly injured and later ………. .",
+    "options": {
+      "A": "smiled",
+      "B": "arrived",
+      "C": "died",
+      "D": "laughed"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "19. Complete the sentence. The course …… ten weeks.",
+    "options": {
+      "A": "asks for",
+      "B": "lasts for",
+      "C": "waits for",
+      "D": "speaks for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "20. Complete the sentence. I haven’t seen him ……… last Thursday.",
+    "options": {
+      "A": "until",
+      "B": "from",
+      "C": "during",
+      "D": "since"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "21. Complete the sentence. I’ll see you ……. time I come to London.",
+    "options": {
+      "A": "last",
+      "B": "the next",
+      "C": "every",
+      "D": "many"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "22. Complete the sentence. I used to go skiing, but that was ………..",
+    "options": {
+      "A": "a long time ago",
+      "B": "next week",
+      "C": "every day",
+      "D": "at noon"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "23. Complete the sentence. I’ve known Lucia ……..",
+    "options": {
+      "A": "for ages",
+      "B": "tomorrow",
+      "C": "sometimes",
+      "D": "next year"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "24. Complete the sentence. I need ………. paper.",
+    "options": {
+      "A": "a bottle of",
+      "B": "a sheet of",
+      "C": "a cup of",
+      "D": "a bag of"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "25. Complete the sentence. I gave her a big ……….. from my garden.",
+    "options": {
+      "A": "box of books",
+      "B": "bag of apples",
+      "C": "bunch of flowers",
+      "D": "glass of water"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "26. Complete the sentence. Do you delete emails ………. ?",
+    "options": {
+      "A": "regularly",
+      "B": "outside",
+      "C": "yesterday",
+      "D": "upstairs"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "27. Complete the sentence. Rooms are often …….. during the week.",
+    "options": {
+      "A": "closed",
+      "B": "available",
+      "C": "broken",
+      "D": "missing"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "28. Complete the sentence. I need ……… inside these shoes.",
+    "options": {
+      "A": "two pairs of socks",
+      "B": "three hats",
+      "C": "a notebook",
+      "D": "many bags"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "29. Complete the sentence. I cut about …….. and put them on a plate.",
+    "options": {
+      "A": "two bottles of milk",
+      "B": "three bags of rice",
+      "C": "six slices of bread",
+      "D": "one glass of tea"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "30. Complete the sentence. Could you get ………",
+    "options": {
+      "A": "a carton of milk",
+      "B": "two shoes",
+      "C": "a football",
+      "D": "many books"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "31. Complete the sentence. Would you like ……..",
+    "options": {
+      "A": "a bottle of water",
+      "B": "many apples",
+      "C": "a slice of cake",
+      "D": "some chairs"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "32. Complete the sentence. I bought ……..",
+    "options": {
+      "A": "one hat",
+      "B": "two pairs of socks",
+      "C": "three pens",
+      "D": "many tables"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "33. Complete the sentence. I must ……….. last night.",
+    "options": {
+      "A": "watch television",
+      "B": "cook dinner",
+      "C": "apologise for the noise",
+      "D": "go shopping"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "34. Complete the sentence. My train was cancelled and I ……. half an hour.",
+    "options": {
+      "A": "had to wait",
+      "B": "had to swim",
+      "C": "had to run",
+      "D": "had to sing"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "35. Complete the sentence. I ……. you this morning.",
+    "options": {
+      "A": "wrote to",
+      "B": "tried to ring",
+      "C": "walked with",
+      "D": "looked at"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "36. Complete the sentence. I ……… the Internet.",
+    "options": {
+      "A": "was able to use",
+      "B": "was afraid of",
+      "C": "was tired of",
+      "D": "was close to"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "37. Complete the sentence. Did you ………..?",
+    "options": {
+      "A": "play football",
+      "B": "book it in advance",
+      "C": "visit school",
+      "D": "drink coffee"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "38. Complete the sentence. ……… at the cinema?",
+    "options": {
+      "A": "Who’s there",
+      "B": "What’s on",
+      "C": "Where’s home",
+      "D": "When’s lunch"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "39. Complete the sentence. A harbour is a place …….. .",
+    "options": {
+      "A": "where birds fly",
+      "B": "where ships are kept",
+      "C": "where cars stop",
+      "D": "where trees grow"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "40. Complete the sentence. Did you …… the software yourself?",
+    "options": {
+      "A": "destroy",
+      "B": "borrow",
+      "C": "install",
+      "D": "forget"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "41. Complete the sentence. Could I ……. your dictionary?",
+    "options": {
+      "A": "break",
+      "B": "borrow",
+      "C": "hide",
+      "D": "throw"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "42. Complete the sentence. There were …….. there.",
+    "options": {
+      "A": "different types of people",
+      "B": "only one chair",
+      "C": "many roads",
+      "D": "few windows"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "43. Complete the sentence. I bought all the food I ……… .",
+    "options": {
+      "A": "wanted to throw",
+      "B": "needed for the dish",
+      "C": "forgot yesterday",
+      "D": "found outside"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "44. Complete the sentence. I think their new ……. is a great song.",
+    "options": {
+      "A": "single",
+      "B": "teacher",
+      "C": "holiday",
+      "D": "garden"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "45. Complete the sentence. The new album ……. in a studio near my home.",
+    "options": {
+      "A": "was destroyed",
+      "B": "was painted",
+      "C": "was recorded",
+      "D": "was hidden"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "46. Complete the sentence. When I listen ……… in the tune.",
+    "options": {
+      "A": "to school every day",
+      "B": "to music I am mostly interested",
+      "C": "with my family often",
+      "D": "for dinner at night"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "47. Complete the sentence. My brother …… the lyrics.",
+    "options": {
+      "A": "is afraid of",
+      "B": "is more interested in",
+      "C": "is angry about",
+      "D": "is ready for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "48. Complete the sentence. There was …….. their last concert.",
+    "options": {
+      "A": "a very big audience for",
+      "B": "a little rain near",
+      "C": "a long road behind",
+      "D": "a broken chair beside"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "49. Complete the sentence. You then ……. belt.",
+    "options": {
+      "A": "must wash your",
+      "B": "have to fasten your seat",
+      "C": "can throw your",
+      "D": "need to hide your"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "50. Complete the sentence. You don’t …….. .",
+    "options": {
+      "A": "pay extra for service",
+      "B": "close the window",
+      "C": "drive too fast",
+      "D": "buy new shoes"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "51. Complete the sentence. The hotel …….. .",
+    "options": {
+      "A": "was immediately closed",
+      "B": "was fully booked",
+      "C": "was very small",
+      "D": "was completely destroyed"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "52. Complete the sentence. Have the police …….. ?",
+    "options": {
+      "A": "found the keys",
+      "B": "blocked the road",
+      "C": "caught the man",
+      "D": "called your family"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "53. Complete the sentence. The ……… the prime minister.",
+    "options": {
+      "A": "leader of the party in power is",
+      "B": "youngest person in the room is",
+      "C": "man standing outside is",
+      "D": "official driver of the king is"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "54. Complete the sentence. The ……. early this morning.",
+    "options": {
+      "A": "train left",
+      "B": "weather changed",
+      "C": "attack happened",
+      "D": "shop opened"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "55. Complete the sentence. ………. on TV last night, the plane crashed in the sea.",
+    "options": {
+      "A": "According to the news",
+      "B": "Before the main movie",
+      "C": "During the sports match",
+      "D": "After the comedy show"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "56. Complete the sentence. I never watch ……. operas.",
+    "options": {
+      "A": "drama",
+      "B": "soap",
+      "C": "music",
+      "D": "radio"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "57. Complete the sentence. ………. does the film last?",
+    "options": {
+      "A": "How many",
+      "B": "How long",
+      "C": "How much",
+      "D": "How often"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "58. Complete the sentence. I went to Egypt with my parents but ………. .",
+    "options": {
+      "A": "we didn’t like it",
+      "B": "the weather was cold",
+      "C": "that was a long time ago",
+      "D": "I lost my passport"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "59. Complete the sentence. I haven’t been to the cinema ……. .",
+    "options": {
+      "A": "since next month",
+      "B": "for the last three weeks",
+      "C": "before two years ago",
+      "D": "during the summer holiday"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "60. Complete the sentence. Marcel and I got to the station ……. .",
+    "options": {
+      "A": "at the same time",
+      "B": "in a very big hurry",
+      "C": "without our heavy bags",
+      "D": "by taking a fast taxi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "61. Complete the sentence. Michael Jackson …… 2009.",
+    "options": {
+      "A": "sang in",
+      "B": "was born in",
+      "C": "died in",
+      "D": "visited London in"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "62. Complete the sentence. Pavel told me a joke but ………… .",
+    "options": {
+      "A": "it wasn't funny",
+      "B": "I can’t remember it",
+      "C": "everyone laughed loudly",
+      "D": "he forgot the ending"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "63. Complete the sentence. I got some money …….. .",
+    "options": {
+      "A": "from my older brother",
+      "B": "inside the small shop",
+      "C": "from the cashpoint",
+      "D": "on the kitchen table"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "64. Complete the sentence. He’s tired ……… .",
+    "options": {
+      "A": "of working at weekends",
+      "B": "after playing football",
+      "C": "because of the long flight",
+      "D": "to walk to school"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "65. Complete the sentence. She was not aware ……… .",
+    "options": {
+      "A": "about the new rules",
+      "B": "of her mistakes",
+      "C": "with the main problem",
+      "D": "for the upcoming exam"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "66. Complete the sentence. He threw the pen to ………. .",
+    "options": {
+      "A": "the desk near the door",
+      "B": "his younger sister",
+      "C": "me but I dropped it",
+      "D": "the floor in anger"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "67. Complete the sentence. He threw the book at …….. .",
+    "options": {
+      "A": "me but it missed",
+      "B": "the open window",
+      "C": "the wooden table",
+      "D": "his best friend"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "68. Complete the sentence. I don’t agree ……… .",
+    "options": {
+      "A": "about this book",
+      "B": "with them",
+      "C": "for your plan",
+      "D": "on the decision"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "69. Choose the correct preposition. I was held …….. traffic.",
+    "options": {
+      "A": "down, inside",
+      "B": "off, through",
+      "C": "up, in",
+      "D": "back, with"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "70. Choose the correct preposition. I must apologise ……. the noise last night.",
+    "options": {
+      "A": "about",
+      "B": "for",
+      "C": "with",
+      "D": "to"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "71. Choose the correct preposition. That is very kind ….. you.",
+    "options": {
+      "A": "for",
+      "B": "from",
+      "C": "of",
+      "D": "with"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "72. Choose the correct preposition. What can you say …. them?",
+    "options": {
+      "A": "to",
+      "B": "for",
+      "C": "about",
+      "D": "with"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "73. Choose the correct preposition. We’ve seen a slight increase ….. profit.",
+    "options": {
+      "A": "on",
+      "B": "at",
+      "C": "in",
+      "D": "for"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "74. Choose the correct preposition. There has been a sharp fall ….. sales.",
+    "options": {
+      "A": "down",
+      "B": "in",
+      "C": "of",
+      "D": "from"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "75. Choose the correct preposition. There has been a gradual rise ……. sales.",
+    "options": {
+      "A": "up",
+      "B": "on",
+      "C": "in",
+      "D": "of"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "76. Choose the correct preposition. What is the current value …… the euro?",
+    "options": {
+      "A": "for",
+      "B": "of",
+      "C": "in",
+      "D": "by"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "77. Choose the correct preposition. We made a profit …… six million euros.",
+    "options": {
+      "A": "in",
+      "B": "at",
+      "C": "on",
+      "D": "of in at on for"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "78. Choose the correct preposition. Do you know the size …… a boxing ring?",
+    "options": {
+      "A": "for",
+      "B": "of",
+      "C": "in",
+      "D": "about"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "79. Choose the correct preposition. It was a fantastic victory …… the team.",
+    "options": {
+      "A": "for",
+      "B": "to",
+      "C": "of",
+      "D": "by"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "80. Choose the correct preposition. What’s ……. the cinema?",
+    "options": {
+      "A": "in, at",
+      "B": "on, at",
+      "C": "at, in",
+      "D": "by, near"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "81. Choose the correct preposition. People’s taste …….. music is different.",
+    "options": {
+      "A": "for",
+      "B": "about",
+      "C": "in",
+      "D": "of"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "82. Choose the correct preposition. I’ve just arrived ……. Rome.",
+    "options": {
+      "A": "at",
+      "B": "in",
+      "C": "to",
+      "D": "on"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "83. Choose the correct preposition. Rooms are often available …….. the week.",
+    "options": {
+      "A": "during at on in to",
+      "B": "at",
+      "C": "on",
+      "D": "to"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "84. Choose the correct preposition. When you arrive, you check ……. reception.",
+    "options": {
+      "A": "out, from",
+      "B": "in, at",
+      "C": "up, on",
+      "D": "to, near"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "85. Choose the correct preposition. So you may need to book a room ……. advance.",
+    "options": {
+      "A": "before",
+      "B": "for",
+      "C": "in",
+      "D": "by"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "86. Choose the correct preposition. You don’t pay extra …….. service.",
+    "options": {
+      "A": "to",
+      "B": "for",
+      "C": "with",
+      "D": "on"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "87. Choose the correct preposition. They are ……. risk …….. getting skin cancer.",
+    "options": {
+      "A": "in, for",
+      "B": "under, to",
+      "C": "at, of",
+      "D": "with, about"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "88. Choose the correct preposition. How often do you back …… your files?",
+    "options": {
+      "A": "down",
+      "B": "off",
+      "C": "up",
+      "D": "in"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "89. Choose the correct preposition. Will she go ……. prison?",
+    "options": {
+      "A": "to",
+      "B": "in",
+      "C": "inside",
+      "D": "at"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "90. Choose the correct preposition. The leader ……. the party ……. power is the prime minister.",
+    "options": {
+      "A": "for, with",
+      "B": "of, in",
+      "C": "by, under",
+      "D": "with, at"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "91. Choose the correct preposition. People usually vote …….. a political party.",
+    "options": {
+      "A": "to",
+      "B": "with",
+      "C": "for",
+      "D": "about"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "92. Choose the correct preposition. They believe ……. the party’s ideas.",
+    "options": {
+      "A": "on",
+      "B": "in",
+      "C": "for",
+      "D": "with"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "93. Choose the correct preposition. Our policy is to look ……. old people.",
+    "options": {
+      "A": "after",
+      "B": "for",
+      "C": "at",
+      "D": "forward"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "94. Choose the correct preposition. It is a fair system ……. everyone.",
+    "options": {
+      "A": "to",
+      "B": "for",
+      "C": "with",
+      "D": "of"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "95. Choose the correct preposition. It may be safer just to sit ……. the shade.",
+    "options": {
+      "A": "under",
+      "B": "below",
+      "C": "in",
+      "D": "on"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "96. Choose the correct preposition. People who lie ….. the sun …… any protection can get sunburn.",
+    "options": {
+      "A": "under, with",
+      "B": "on, behind",
+      "C": "in, without",
+      "D": "at, inside"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "97. Choose the correct preposition. Don’t throw …….. paper, glass.",
+    "options": {
+      "A": "away",
+      "B": "out of",
+      "C": "off",
+      "D": "down"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "98. Choose the correct preposition. We got …… the meeting …….. time.",
+    "options": {
+      "A": "in, on",
+      "B": "to, in",
+      "C": "for, at",
+      "D": "at, by"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "99. Choose the correct preposition. Do you have time ……. a cup of tea?",
+    "options": {
+      "A": "to",
+      "B": "for",
+      "C": "with",
+      "D": "about"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "100. Choose the correct preposition. I’m sure I’ll go …… America one day.",
+    "options": {
+      "A": "in",
+      "B": "at",
+      "C": "to",
+      "D": "for"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "101. Choose the correct preposition. The battery …….. my camera didn’t last long.",
+    "options": {
+      "A": "at",
+      "B": "in",
+      "=C": "on",
+      "D": "for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "102. Choose the correct preposition. I am very good ……. arithmetic.",
+    "options": {
+      "A": "in",
+      "B": "on",
+      "C": "at",
+      "D": "with"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "103. Choose the correct preposition. Eight multiplied …….. seven is fifty–six.",
+    "options": {
+      "A": "by",
+      "B": "with",
+      "C": "for",
+      "D": "in"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "104. Choose the correct preposition. We arrived …….. the seventh ……. June.",
+    "options": {
+      "A": "at, in",
+      "B": "on, of",
+      "C": "in, at",
+      "D": "by, for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "105. Choose the correct preposition. It is a very narrow road ….. bus.",
+    "options": {
+      "A": "to",
+      "B": "with",
+      "C": "for",
+      "D": "at"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "106. Choose the correct preposition. Could you get a carton …… milk?",
+    "options": {
+      "A": "from",
+      "B": "with",
+      "C": "of",
+      "D": "in"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "107. Choose the correct preposition. The newspaper says the fire was started ……… purpose.",
+    "options": {
+      "A": "by",
+      "B": "on",
+      "C": "with",
+      "D": "for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "108. Choose the correct preposition. I partly agree ……… her.",
+    "options": {
+      "A": "to",
+      "B": "for",
+      "C": "with",
+      "D": "about"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "109. Choose the correct preposition. It depends …….. my parents.",
+    "options": {
+      "A": "from",
+      "B": "on",
+      "C": "to",
+      "D": "with"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "110. Choose the correct preposition. She’s well aware …….. the problem.",
+    "options": {
+      "A": "about",
+      "B": "for",
+      "C": "of",
+      "D": "with"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "111. Choose the correct preposition. You ‘ll have to make ……. your mind soon.",
+    "options": {
+      "A": "up",
+      "B": "out",
+      "C": "off",
+      "D": "over"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "112. Choose the correct preposition. Don’t worry …….. your exam.",
+    "options": {
+      "A": "for",
+      "B": "about",
+      "C": "with",
+      "D": "on"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "113. Choose the correct preposition. Many people spend a lot ……. money ……. clothes.",
+    "options": {
+      "A": "for, on",
+      "B": "of, in",
+      "C": "of, on",
+      "D": "with, for"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "114. Choose the correct preposition. I may go but it depends …….. the weather.",
+    "options": {
+      "A": "from",
+      "B": "on",
+      "C": "by",
+      "D": "to"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "115. Choose the correct preposition. I translated the letter ……. French.",
+    "options": {
+      "A": "to",
+      "B": "in",
+      "C": "into",
+      "D": "for"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "116. Choose the correct preposition. She’s afraid ……. flying.",
+    "options": {
+      "A": "from",
+      "B": "of",
+      "C": "with",
+      "D": "at"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "117. Choose the correct preposition. The neighbours are fond …….. the children.",
+    "options": {
+      "A": "for",
+      "B": "with",
+      "C": "of",
+      "D": "about"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "118. Choose the correct preposition. There is something wrong ……… this TV.",
+    "options": {
+      "A": "on",
+      "B": "with",
+      "C": "in",
+      "D": "at"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "119. Choose the correct preposition. I’ve never been very good ……. maths.",
+    "options": {
+      "A": "in",
+      "B": "on",
+      "C": "at",
+      "D": "with"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "120. Choose the correct preposition. This land belongs ……… the company.",
+    "options": {
+      "A": "for",
+      "B": "to",
+      "C": "with",
+      "D": "on"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "121. Choose the correct preposition. What subjects is she good …… ?",
+    "options": {
+      "A": "in",
+      "B": "at",
+      "C": "on",
+      "D": "for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "122. Choose the correct preposition. What are you afraid ……. ?",
+    "options": {
+      "A": "from",
+      "B": "of",
+      "C": "with",
+      "D": "about"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "123. Choose the correct preposition. Who does this belong …….. ?",
+    "options": {
+      "A": "for",
+      "B": "with",
+      "C": "to",
+      "D": "by"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "124. Choose the correct preposition. My boss is ……. the phone …… the moment.",
+    "options": {
+      "A": "at, on",
+      "B": "on, at",
+      "C": "in, by",
+      "D": "with, at"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "125. Choose the correct preposition. I explained everything ……. detail.",
+    "options": {
+      "A": "with",
+      "B": "in",
+      "C": "on",
+      "D": "for"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "126. Choose the correct preposition. They’re both …… Germany …….. business.",
+    "options": {
+      "A": "at, on",
+      "B": "in, for",
+      "C": "in, on",
+      "D": "to, on"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "127. Choose the correct preposition. I’ll try to find …….. the quickest way to get there.",
+    "options": {
+      "A": "out",
+      "B": "up",
+      "C": "off",
+      "D": "in"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "128. Choose the correct preposition. My wife has decided to give ……. smoking.",
+    "options": {
+      "A": "in",
+      "B": "off",
+      "C": "up",
+      "D": "away"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "129. Choose the correct preposition. I put …… my best suit.",
+    "options": {
+      "A": "on",
+      "B": "in",
+      "C": "up",
+      "D": "off"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "130. Choose the correct preposition. I was busy , so I told him to go ……. .",
+    "options": {
+      "A": "out",
+      "B": "off",
+      "C": "away",
+      "D": "down"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "131. Choose the correct preposition. I’m not stopping, so I won’t take …… my coat.",
+    "options": {
+      "A": "up",
+      "B": "out",
+      "C": "off",
+      "D": "in"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "132. Choose the correct preposition. How did the two men break ……. the shop?",
+    "options": {
+      "A": "into",
+      "B": "down",
+      "C": "up",
+      "D": "away"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "133. Choose the correct preposition. They put the game …….. Friday.",
+    "options": {
+      "A": "on, at",
+      "B": "off, till",
+      "C": "away, for",
+      "D": "out, up to"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "134. Choose the correct preposition. I took the key …….. my pocket.",
+    "options": {
+      "A": "away from",
+      "B": "off from",
+      "C": "inside of",
+      "D": "out of"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "135. Choose the correct preposition. What time did you get …….. this morning.",
+    "options": {
+      "A": "over",
+      "B": "up",
+      "C": "on",
+      "D": "through"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "136. Choose the correct preposition. They sat …… the floor.",
+    "options": {
+      "A": "at",
+      "B": "in",
+      "C": "on",
+      "D": "above"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "137. Choose the correct preposition. I sat ……. the bed and wrote the letter.",
+    "options": {
+      "A": "on",
+      "B": "over",
+      "C": "at",
+      "D": "into"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "138. Choose the definition. Escaped",
+    "options": {
+      "A": "arrived at the final destination",
+      "B": "stayed hidden inside a building",
+      "C": "left the place without being caught",
+      "D": "captured by the local guards"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "139. Choose the definition. Took place",
+    "options": {
+      "A": "cancelled",
+      "B": "happened",
+      "C": "changed location",
+      "D": "borrowed"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "140. Choose the definition. Searching",
+    "options": {
+      "A": "trying to find someone or something",
+      "B": "keeping an object secure",
+      "C": "losing track of items",
+      "D": "creating a brand new thing"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "141. Choose the definition. Destroyed",
+    "options": {
+      "A": "repaired them quickly so they can be used",
+      "B": "moved them to a safer environment",
+      "C": "painted them in a bright new color",
+      "D": "damaged them so badly that they don’t exist now"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "142. Choose the definition. Protect",
+    "options": {
+      "A": "put them in danger",
+      "B": "keep them safe",
+      "C": "throw them away",
+      "D": "break them down"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "143. Choose the definition. Battles",
+    "options": {
+      "A": "agreements between nations",
+      "B": "fights between two armies",
+      "C": "sports games in a stadium",
+      "D": "friendly public debates"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "144. Choose the definition. Exist",
+    "options": {
+      "A": "disappear suddenly",
+      "B": "are hard to imagine",
+      "C": "are real or present",
+      "D": "become very expensive"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "145. Choose the definition. Support",
+    "options": {
+      "A": "help to continue",
+      "B": "refuse to cooperate",
+      "C": "cause to stop or fail",
+      "D": "look down on someone"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "146. Choose the definition. Environment",
+    "options": {
+      "A": "a high-tech computer laboratory",
+      "B": "the air, land and water around us",
+      "C": "the financial status of a modern company",
+      "D": "a crowded public transportation network"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "147. Choose the definition. Sunburn",
+    "options": {
+      "A": "a sudden rise in temperature",
+      "B": "protection from solar radiation",
+      "C": "when the skin becomes red",
+      "D": "a visual illusion caused by light"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "148. Choose the definition. Shade",
+    "options": {
+      "A": "an area where there is no light from the sun",
+      "B": "a place with extreme direct sunlight",
+      "C": "the highest point of a mountain peak",
+      "D": "an artificially heated glass room"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "149. Choose the definition. Recommend",
+    "options": {
+      "A": "forbid someone to take action",
+      "B": "say what someone should do",
+      "C": "complain about poor services",
+      "D": "forget an important arrangement"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "150. Choose the definition. Fully booked",
+    "options": {
+      "A": "the library has many books",
+      "B": "no tickets have been sold yet",
+      "C": "the hotel is closed for winter",
+      "D": "all the rooms are taken"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "151. Choose the definition. Book a room",
+    "options": {
+      "A": "plan to have a room",
+      "B": "clean up an apartment",
+      "C": "sell a building to an agency",
+      "D": "paint the walls of a bedroom"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "152. Choose the definition. Check out",
+    "options": {
+      "A": "arrive at the hotel and register",
+      "B": "pay your bill and leave the hotel",
+      "C": "order room service to your door",
+      "D": "cancel your holiday reservation"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "153. Choose the definition. destinations",
+    "options": {
+      "A": "where the aircraft are repaired",
+      "B": "the places where passengers wait",
+      "C": "where the flights are going to",
+      "D": "the official weight limits for luggage"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "154. Choose the definition. Runway",
+    "options": {
+      "A": "the main path leading to the terminal check-in",
+      "B": "the large road that planes use for take offs and landings",
+      "C": "a conveyor belt used for moving heavy bags",
+      "D": "the high-altitude route taken by helicopters"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "155. Choose the definition. Board the plane",
+    "options": {
+      "A": "get on the plane",
+      "B": "jump off the plane",
+      "C": "clean the plane's cabin",
+      "D": "delay the plane's departure"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "156. Choose the definition. Thrillers",
+    "options": {
+      "A": "historical documents",
+      "B": "exciting stories",
+      "C": "romantic poems",
+      "D": "scientific textbooks"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "157. Choose the definition. Author",
+    "options": {
+      "A": "someone who paints portraits",
+      "B": "someone who manages a bookstore",
+      "C": "someone who writes books",
+      "D": "someone who reads aloud in public"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "158. Choose the definition. Gave up",
+    "options": {
+      "A": "stopped playing",
+      "B": "won the final round",
+      "C": "started training hard",
+      "D": "cheated in the game"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "159. Choose the definition. Winner",
+    "options": {
+      "A": "the referee of a match",
+      "B": "the person who wins",
+      "C": "the person who loses",
+      "D": "a regular sports fan"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "160. Choose the definition. Loans",
+    "options": {
+      "A": "taxes that you pay daily",
+      "B": "cash rewards for achievements",
+      "C": "money that you borrow",
+      "D": "donations given to charities"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "161. Choose the definition. Economy",
+    "options": {
+      "A": "the system by which a country’s trade , industry and money are organised",
+      "B": "the study of biological organisms and their interactions",
+      "C": "a political agreement signed between neighboring countries",
+      "D": "the legal framework regulating global aviation safety"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "162. Choose the definition. Figures",
+    "options": {
+      "A": "letters written in ancient alphabets",
+      "B": "an amount shown in numbers",
+      "C": "secret geometric codes",
+      "D": "abstract landscape paintings"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "163. Choose the definition. Harbour",
+    "options": {
+      "A": "an open runway for commercial jets",
+      "B": "a central railway station platform",
+      "C": "area of water where ships are kept",
+      "D": "a deep valley between tall mountains"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "164. Choose the definition. Branches",
+    "options": {
+      "A": "offices that are part of the company",
+      "B": "individual products sold online",
+      "C": "dynamic marketing campaigns",
+      "D": "rival companies in the market"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "165. Choose the definition. Accountants",
+    "options": {
+      "A": "professionals who design computer cases",
+      "B": "people who control a person or company’s money",
+      "C": "legal experts working in Supreme Courts",
+      "D": "engineers building high-speed network routes"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "166. Choose the definition. Headquarters",
+    "options": {
+      "A": "a local storage facility for spare parts",
+      "B": "a small branch located overseas",
+      "C": "the apartment of a junior employee",
+      "D": "the place where the main office is in"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "167. Choose the definition. Ambition",
+    "options": {
+      "A": "Something someone wants to achieve",
+      "B": "a past event that caused a failure",
+      "C": "a boring daily routine task",
+      "D": "a feeling of total relaxation"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "168. Choose the definition. Annual",
+    "options": {
+      "A": "occurring every single hour",
+      "B": "happening once a year",
+      "C": "lasting for only a century",
+      "D": "taking place once a decade"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "169. Choose the definition. Terminal building",
+    "options": {
+      "A": "the airport building",
+      "B": "a train engine unit",
+      "C": "a warehouse for cargo ships",
+      "D": "a security control tower"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "170. Choose the definition. Gather",
+    "options": {
+      "A": "scatter away",
+      "B": "come together",
+      "C": "run fast",
+      "D": "fall down"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "171. Choose the definition. Take place",
+    "options": {
+      "A": "close down",
+      "B": "postpone",
+      "C": "happen",
+      "D": "disappear"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "172. Choose the definition. Last",
+    "options": {
+      "A": "continue",
+      "B": "interrupt",
+      "C": "transform",
+      "D": "finish"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "173. Find the correct answer. The opposite of win",
+    "options": {
+      "A": "fail",
+      "B": "lose",
+      "C": "quit",
+      "D": "draw"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "174. Find the correct answer. A group of people who play together",
+    "options": {
+      "A": "crowd",
+      "B": "staff",
+      "C": "audience",
+      "D": "team"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "175. Find the correct answer. A synonym for outstanding",
+    "options": {
+      "A": "superb",
+      "B": "ordinary",
+      "C": "terrible",
+      "D": "standard"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "176. Find the correct answer. Stop doing a regular activity",
+    "options": {
+      "A": "get over",
+      "B": "take up",
+      "C": "give up",
+      "D": "keep on"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "177. Find the correct answer. The leader of the team",
+    "options": {
+      "A": "captain",
+      "B": "referee",
+      "C": "coach",
+      "D": "opponent"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "178. Find the correct answer. Someone who wins something",
+    "options": {
+      "A": "loser",
+      "B": "winner",
+      "C": "candidate",
+      "D": "sponsor"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "179. Find the correct answer. The opposite of winner",
+    "options": {
+      "A": "champion",
+      "B": "master",
+      "C": "loser",
+      "D": "fan"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "180. Find the correct answer. Another word for old",
+    "options": {
+      "A": "elderly",
+      "B": "youthful",
+      "C": "newborn",
+      "D": "modern"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "181. Find the correct answer. A synonym for reduce",
+    "options": {
+      "A": "grow",
+      "B": "boost",
+      "C": "add",
+      "D": "cut"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "182. Find the correct answer. Money people must pay to the government",
+    "options": {
+      "A": "tax",
+      "B": "loan",
+      "C": "tip",
+      "D": "fine"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "183. Find the correct answer. A famous person",
+    "options": {
+      "A": "stranger",
+      "B": "celebrity",
+      "C": "relative",
+      "D": "citizen"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "184. Find the correct answer. Happening every day",
+    "options": {
+      "A": "monthly",
+      "B": "weekly",
+      "C": "hourly",
+      "D": "daily"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "185. Find the correct answer. A piece of writing about an important subject",
+    "options": {
+      "A": "article",
+      "B": "textbook",
+      "C": "notebook",
+      "D": "contract"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "186. Find the correct answer. Who are the people that travel on a plane",
+    "options": {
+      "A": "flight attendants",
+      "B": "passengers",
+      "C": "pilots",
+      "D": "mechanics"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "187. Find the correct answer. What do airline staff weigh at the check in desk",
+    "options": {
+      "A": "passports",
+      "B": "tickets",
+      "C": "hand baggage",
+      "D": "luggage"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "188. Find the correct answer. What do we call the place you’re travelling to",
+    "options": {
+      "A": "destination",
+      "B": "terminal",
+      "C": "location",
+      "D": "runway"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "189. Find the correct answer. What do airport staff do at passport control",
+    "options": {
+      "A": "weigh your luggage",
+      "B": "print your boarding pass",
+      "C": "check your passport",
+      "D": "search your small bags"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "190. Find the correct answer. What do you call the bags that you can take on the plane with you",
+    "options": {
+      "A": "hand luggage",
+      "B": "heavy suitcase",
+      "C": "cargo box",
+      "D": "checked baggage"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "191. Find the correct answer. What’s the part of the airport where the plane takes off and lands",
+    "options": {
+      "A": "lounge",
+      "B": "runway",
+      "C": "gate",
+      "D": "lobby"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "192. Find the correct answer. It is usually made of wood or metal, and you climb up it.",
+    "options": {
+      "A": "an elevator",
+      "B": "an escalator",
+      "C": "a rope",
+      "D": "a ladder"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "193. What does “CU” stand for?",
+    "options": {
+      "A": "Central Utility",
+      "B": "Control Unit",
+      "C": "Core User",
+      "D": "Computing Upgrade"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "194. What does “LAN” stand for?",
+    "options": {
+      "A": "Local Area Network",
+      "B": "Long Access Node",
+      "C": "Light Area Network",
+      "D": "Logical Array Number"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "195. What does “AI” stand for?",
+    "options": {
+      "A": "Automated Interface",
+      "B": "Advanced Integration",
+      "C": "Artificial Intelligence",
+      "D": "Array Indexing"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "196. What does “ASCII” stand for?",
+    "options": {
+      "A": "Automated System Code for Internet Integration",
+      "B": "Advanced Security Cipher for Information Interconnect",
+      "C": "Allied Standard Control for Internal Input",
+      "D": "American Standards Code for Information Interchange"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "197. What does “AT” stand for?",
+    "options": {
+      "A": "Advanced Technology",
+      "B": "Access Terminal",
+      "C": "Array Table",
+      "D": "Alternate Transfer"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "198. What does \"IT\" stand for?",
+    "options": {
+      "A": "Internet Telephony",
+      "B": "Information Technology",
+      "C": "Integrated Terminal",
+      "D": "Internal Tracker"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "199. What does “IBM” stand for?",
+    "options": {
+      "A": "Intel Based Mainframe",
+      "B": "International Business Machines",
+      "C": "Internal Byte Management",
+      "D": "Integrated Business Matrix"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "200. What does “ALU” stand for?",
+    "options": {
+      "A": "Arithmetic Logic Unit",
+      "B": "Advanced Link Unit",
+      "C": "Array Logic Utility",
+      "D": "Application Layer Unit"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "201. What does “BIOS” stand for?",
+    "options": {
+      "A": "Binary Integrated Operating System",
+      "B": "Built-in Input Output Software",
+      "C": "Basic Input Output System",
+      "D": "Bus Interface Optical System"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "202. Choose the correct answer: Bps",
+    "options": {
+      "A": "Bytes per sector",
+      "B": "Binary processing system",
+      "C": "Bus processing speed",
+      "D": "Bits per second"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "203. What does “CAD” stand for?",
+    "options": {
+      "A": "Computer aided Design",
+      "B": "Central Array Driver",
+      "C": "Cyber Attack Defense",
+      "D": "Core Application Developer"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "204. What does “CGA” stand for?",
+    "options": {
+      "A": "Core Graphics Array",
+      "B": "Colour Graphics Adapter",
+      "C": "Computer Graphic Architecture",
+      "D": "Central Gaming Adapter"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "205. What does “DNS” stand for?",
+    "options": {
+      "A": "Domain Name Server",
+      "B": "Data Network System",
+      "C": "Digital Name Standard",
+      "D": "Dynamic Node Service"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "206. What does “FAT” stand for?",
+    "options": {
+      "A": "Fast Access Technology",
+      "B": "Format Array Tool",
+      "C": "file allocation table",
+      "D": "Fixed Allocation Track"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "207. What does “FAQ” stand for?",
+    "options": {
+      "A": "frequently asked questions",
+      "B": "Fast Access Query",
+      "C": "File Auxiliary Queue",
+      "D": "Final Automated Question"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "208. What does “FTP” stand for?",
+    "options": {
+      "A": "Fast Transfer Pathway",
+      "B": "file transfer protocol",
+      "C": "File Transit Process",
+      "D": "Format Transfer Packet"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "209. What does “GIF” stand for?",
+    "options": {
+      "A": "Global Image File",
+      "B": "Graphic Interface Function",
+      "C": "graphics interchange format",
+      "D": "General Information Folder"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "210. What does “IP” stand for?",
+    "options": {
+      "A": "Internet protocol",
+      "B": "Internal Pathway",
+      "C": "Intel Processing",
+      "D": "Interface Packet"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "211. What does “MPC” stand for?",
+    "options": {
+      "A": "Main Processing Core",
+      "B": "Memory Protocol Controller",
+      "C": "Micro Processing Chip",
+      "D": "Multimedia personal computer"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "212. What is “pixel”?",
+    "options": {
+      "A": "The smallest element on the screen",
+      "B": "A storage unit on a hard drive",
+      "C": "A cable used for network connection",
+      "D": "A chip that controls the keyboard"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "213. What does “HDD” stand for?",
+    "options": {
+      "A": "High Density Data",
+      "B": "Hard Disc Drive",
+      "C": "Hybrid Digital Drive",
+      "D": "Hosted Data Directory"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "214. What does “UPS” stand for?",
+    "options": {
+      "A": "Universal Processing System",
+      "B": "User Profile Service",
+      "C": "Uninterruptable Power Supply",
+      "D": "Unified Protocol Server"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "215. Choose the correct translation: Kəsilməz Qida Bloku",
+    "options": {
+      "A": "Uninterruptable Power Supply",
+      "B": "Hard Disk Drive",
+      "C": "Central Processing Unit",
+      "D": "Universal Serial Bus"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "216. What does “SVGA” stand for?",
+    "options": {
+      "A": "System Virtual Graphics Array",
+      "B": "Super Video Graphics Adapter",
+      "C": "Static Video Graphics Architecture",
+      "D": "Serial Visual Graphics Adapter"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "217. Choose the correct variant: keyboard",
+    "options": {
+      "A": "An electronic device that shows pictures",
+      "B": "A panel keys that operate a computer",
+      "C": "A pointing device used to move the cursor",
+      "D": "A plastic box that contains the motherboard"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "218. Find the correct variant: computer",
+    "options": {
+      "A": "A mechanical tool designed only for typing text",
+      "B": "A peripheral device used to print large documents",
+      "C": "an electronic device for storing and processing data",
+      "D": "A power supply unit providing emergency energy"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "219. Find the correct answer: keyboard:",
+    "options": {
+      "A": "a panel of keys that operate a computer",
+      "B": "A screen that displays graphical interface",
+      "C": "A cable connecting a PC to the local network",
+      "D": "A software program managing file systems"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "220. What is the correct answer for “PC”?",
+    "options": {
+      "A": "Processing Core",
+      "B": "Personal computer",
+      "C": "Private Connection",
+      "D": "Protocol Controller"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "221. What is the correct answer for “CPU”",
+    "options": {
+      "A": "Computer Power Utility",
+      "B": "Core Programming Unit",
+      "C": "Central processing unit",
+      "D": "Control Panel User"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "222. What is the correct answer for “e-mail”?",
+    "options": {
+      "A": "Extended Memory",
+      "B": "External Message",
+      "C": "Emergency Mainframe",
+      "D": "Electronic mail"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "223. Find the synonym: motherboard",
+    "options": {
+      "A": "Mainboard",
+      "B": "Hard drive",
+      "C": "Keyboard",
+      "D": "Sound card"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "224. Choose the appropriate variant: USB",
+    "options": {
+      "A": "Unified System Backup",
+      "B": "Universal Serial Bus",
+      "C": "User Service Bus",
+      "D": "Utility Serial Buffer"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "225. Complete: Using a keyboard to enter lots of data is called ....",
+    "options": {
+      "A": "Typing",
+      "B": "Scanning",
+      "C": "Pasting",
+      "D": "Compiling"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "226. Fill in the gap: ....... is an electronic device that shows pictures for computers",
+    "options": {
+      "A": "A computer mouse",
+      "B": "A computer monitor",
+      "C": "A computer processor",
+      "D": "A computer keyboard"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "227. Fill in the gap: .... is technology that allows a person to connect on electronic device to a computer.",
+    "options": {
+      "A": "USB",
+      "B": "CPU",
+      "C": "DNS",
+      "D": "RAM"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "228. Fill in the gap: .... is a document sent with an email message",
+    "options": {
+      "A": "An attachment",
+      "B": "A hyperlink",
+      "C": "A browser",
+      "D": "A password"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "229. Fill in the gap: ...... is the smallest unit of measurement in computing",
+    "options": {
+      "A": "A byte",
+      "B": "A bit",
+      "C": "A pixel",
+      "D": "A sector"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "230. Choose the correct answer: CAT",
+    "options": {
+      "A": "Central Array Terminal",
+      "B": "Cyber Attack Tracker",
+      "C": "Computer Assisted Translation",
+      "D": "Core Access Technology"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "231. What is the synonym of “CAT”?",
+    "options": {
+      "A": "Machinery translation",
+      "B": "Manual typing",
+      "C": "File downloading",
+      "D": "Code debugging"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "232. What is the correct answer for “ISP”?",
+    "options": {
+      "A": "Internal System Protocol",
+      "B": "Internet Service Provider",
+      "C": "Integrated Software Package",
+      "D": "Information Security Pathway"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "233. What is the correct answer for “LAN”",
+    "options": {
+      "A": "Logical Array Number",
+      "B": "Light Access Node",
+      "C": "Live Auxiliary Network",
+      "D": "Local Area Network"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "234. Complete the sentence. Does the price …… service?",
+    "options": {
+      "A": "control",
+      "B": "include",
+      "C": "connect",
+      "D": "standard"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "235. Choose the correct preposition. However, there are now worries …… the dangerous ….. sunbathing.",
+    "options": {
+      "A": "about, of",
+      "B": "for, at",
+      "C": "with, in",
+      "D": "to, from"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "236. Complete the sentence. She complained ……..",
+    "options": {
+      "A": "for the desk",
+      "B": "at the hotel room",
+      "C": "to the manager",
+      "D": "from the service"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "237. Choose the correct preposition. I don’t agree …… all.",
+    "options": {
+      "A": "at",
+      "B": "with",
+      "C": "for",
+      "D": "on"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "238. Choose the correct answer: ATM",
+    "options": {
+      "A": "Advanced Technology Matrix",
+      "B": "Automated Transfer Money",
+      "C": "Automated Teller Machine",
+      "D": "Array Terminal Modulator"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "239. Choose the correct translation: rəqəmsal yaş",
+    "options": {
+      "A": "digital age",
+      "B": "digital generation",
+      "C": "digital screen",
+      "D": "digital network"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "240. Choose the correct translation: rəqəmsal nəsil",
+    "options": {
+      "A": "digital age",
+      "B": "digital generation",
+      "C": "digital era",
+      "D": "digital device"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "241. Choose the correct translation: riyazi əməliyyatlar",
+    "options": {
+      "A": "mathematical operations",
+      "B": "arithmetic units",
+      "C": "computer calculations",
+      "D": "basic processing"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "242. Translate: internetə daxil olmaq",
+    "options": {
+      "A": "to download from the Internet",
+      "B": "to access the Internet",
+      "C": "to load the network",
+      "D": "to search the system"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "243. Translate: tədqiqat, araşdırma",
+    "options": {
+      "A": "attachment",
+      "B": "definition",
+      "C": "database",
+      "D": "research"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "244. Translate: məlumat saxlamaq",
+    "options": {
+      "A": "store information",
+      "B": "process data",
+      "C": "retrieve files",
+      "D": "download content"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "245. Find the correct answer: PIN",
+    "options": {
+      "A": "Private Internet Node",
+      "B": "Protocol Interface Network",
+      "C": "Personal Identification Number",
+      "D": "Password Integration Number"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "246. Choose the synonym of the given word: keep",
+    "options": {
+      "A": "clear",
+      "B": "store",
+      "C": "remove",
+      "D": "display"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "247. Choose the appropriate answer: connected to the Internet",
+    "options": {
+      "A": "online",
+      "B": "offline",
+      "C": "download",
+      "D": "attached"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "248. Choose the synonym: monitor",
+    "options": {
+      "A": "hardware",
+      "B": "keyboard",
+      "C": "processor",
+      "D": "screen"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "249. Fill in the gap: …. means to copy files from a server to your PC or mobile",
+    "options": {
+      "A": "upload",
+      "B": "retrieve",
+      "C": "download",
+      "D": "delete"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "250. Translate: bərpa etmək",
+    "options": {
+      "A": "retrieve",
+      "B": "process",
+      "C": "store",
+      "D": "destroy"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "251. Translate: onlayn qeydiyyatdan keçin",
+    "options": {
+      "A": "download online",
+      "B": "connect online",
+      "C": "update online",
+      "D": "enroll online"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "252. Translate: məlumatları emal edin",
+    "options": {
+      "A": "process the data",
+      "B": "store the information",
+      "C": "retrieve the file",
+      "D": "scan the document"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "253. Fill in the gap: ….. is any electronic or mechanical part you can see or touch.",
+    "options": {
+      "A": "software",
+      "B": "hardware",
+      "C": "browser",
+      "D": "protocol"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "254. Fill in the gap: …. are the physical units attached to the computer",
+    "options": {
+      "A": "applications",
+      "B": "networks",
+      "C": "peripherals",
+      "D": "mainframes"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "255. Find the appropriate answer: physical parts that make up a computer system",
+    "options": {
+      "A": "hardware",
+      "B": "software",
+      "C": "firmware",
+      "D": "malware"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "256. Fill in the gap: …. performs mathematical calculations",
+    "options": {
+      "A": "UPS",
+      "B": "BIOS",
+      "C": "RAM",
+      "D": "ALU"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "257. Find the appropriate answer: arithmetic logic unit",
+    "options": {
+      "A": "ALU",
+      "B": "CPU",
+      "C": "CU",
+      "D": "PC"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "258. Choose the appropriate translation: şəbəkə imkanları",
+    "options": {
+      "A": "network systems",
+      "B": "network capabilities",
+      "C": "internet connections",
+      "D": "digital operations"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "259. Fill in the gap: That`s the computer …. I`d like to buy",
+    "options": {
+      "A": "which",
+      "B": "who",
+      "C": "where",
+      "D": "whose"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "260. Fill in the gap: A webmaster is a person …. designs and develops a website",
+    "options": {
+      "A": "which",
+      "B": "when",
+      "C": "where",
+      "D": "who"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "261. Fill in the gap: Here`s DVD …. you lent me",
+    "options": {
+      "A": "whose",
+      "B": "which",
+      "C": "where",
+      "D": "who"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "262. Fill in the gap: Last night I met someone …. works as a software engineer",
+    "options": {
+      "A": "which",
+      "B": "where",
+      "C": "whose",
+      "D": "who"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "263. Fill in the gap: A blogger is a person …. keeps a web blog",
+    "options": {
+      "A": "who",
+      "B": "which",
+      "C": "when",
+      "D": "whose"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "264. Translate: rəqəmsal kompüter",
+    "options": {
+      "A": "mechanical computer",
+      "B": "analogue computer",
+      "C": "desktop computer",
+      "D": "digital computer"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "265. Choose the appropriate answer: sürət",
+    "options": {
+      "A": "speed",
+      "B": "storage",
+      "C": "space",
+      "D": "size"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "266. Choose the appropriate answer: simsiz",
+    "options": {
+      "A": "wired",
+      "B": "connection",
+      "C": "wireless",
+      "D": "signal"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "267. Translate: yaddaş tutumu",
+    "options": {
+      "A": "screen size",
+      "B": "storage capacity",
+      "C": "speed connection",
+      "D": "system capability"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "268. Translate: texniki xüsusiyyətlər",
+    "options": {
+      "A": "technical specs",
+      "B": "technical tools",
+      "C": "mechanical parts",
+      "D": "hardware items"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "269. Translate: uyğunluq",
+    "options": {
+      "A": "connectivity",
+      "B": "expansion",
+      "C": "compliancy",
+      "D": "installation"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "270. Translate: genişləndirilə bilən yaddaş",
+    "options": {
+      "A": "expandable memory",
+      "B": "internal memory",
+      "C": "cache memory",
+      "D": "visual memory"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "271. Fill in the gap: A mouse allows you to …. the cursor",
+    "options": {
+      "A": "type",
+      "B": "control",
+      "C": "scan",
+      "D": "print"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "272. Fill in the gap: Always buy the …. scanner you can afford",
+    "options": {
+      "A": "faster",
+      "B": "safely",
+      "C": "fast",
+      "D": "fastest"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "273. Fill in the gap: It is the …. photo editing software for your digital camera",
+    "options": {
+      "A": "easiest",
+      "B": "easily",
+      "C": "more easier",
+      "D": "easy"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "274. Fill in the gap: This scanner gives you the …. scans",
+    "options": {
+      "A": "good",
+      "B": "better",
+      "C": "best",
+      "D": "well"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "275. Fill in the gap: the …. computer game you`ve ever played",
+    "options": {
+      "A": "most difficult",
+      "B": "difficult",
+      "C": "difficulty",
+      "D": "more difficult"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "276. Fill in the gap: the …. film you`ve ever seen",
+    "options": {
+      "A": "exciting",
+      "B": "most exciting",
+      "C": "more exciting",
+      "D": "excitement"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "277. Fill in the gap: the …. programme on TV",
+    "options": {
+      "A": "funny",
+      "B": "funnier",
+      "C": "more funny",
+      "D": "funnies"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "278. Fill in the gap: the …. computer virus",
+    "options": {
+      "A": "dangerously",
+      "B": "danger",
+      "C": "most dangerous",
+      "D": "more dangerous"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "279. Fill in the gap: the …. blogger or Webmaster on the Web",
+    "options": {
+      "A": "best",
+      "B": "good",
+      "C": "well",
+      "D": "better"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "280. Fill in the gap: the …. web browser",
+    "options": {
+      "A": "most popular",
+      "B": "more popular",
+      "C": "popular",
+      "D": "popularity"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "281. Complete: …. are often called monitors or screens",
+    "options": {
+      "A": "cables",
+      "B": "displays",
+      "C": "keyboards",
+      "D": "printers"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "282. What does LCD stand for?",
+    "options": {
+      "A": "Light Control Device",
+      "B": "Local Data Center",
+      "C": "Low Current Display",
+      "D": "Liquid Crystal Display"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "283. What does VGA stand for?",
+    "options": {
+      "A": "Visual Generation Array",
+      "B": "Virtual Graphics Access",
+      "C": "Video Graphics Adapter",
+      "D": "Voice Guide Audio"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "284. Translate: ekran ölçüsü",
+    "options": {
+      "A": "screen size",
+      "B": "screen magnifier",
+      "C": "screen shot",
+      "D": "screen saver"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "285. Translate: köməkçi texnologiya",
+    "options": {
+      "A": "artificial technology",
+      "B": "advanced technology",
+      "C": "ancient technology",
+      "D": "assistive technology"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "286. Translate: ekran böyüdücü",
+    "options": {
+      "A": "screen adapter",
+      "B": "screen magnifier",
+      "C": "screen quality",
+      "D": "screen display"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "287. Complete: …. is a file that has been included as part of an email message",
+    "options": {
+      "A": "attachment",
+      "B": "connection",
+      "C": "development",
+      "D": "replacement"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "288. Complete …. is a specialized scanner used to read price labels in shops",
+    "options": {
+      "A": "Digital camera",
+      "B": "Optical character scanner",
+      "C": "Flatbed scanner",
+      "D": "Bar code reader"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "289. Translate: ikili kod",
+    "options": {
+      "A": "basic code",
+      "B": "built-in code",
+      "C": "background code",
+      "D": "binary code"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "290. Complete: A code made of just two numbers is ….",
+    "options": {
+      "A": "basic code",
+      "B": "bypass code",
+      "C": "binary code",
+      "D": "barcode"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "291. Complete: A user-generated website where people express their opinions is ...",
+    "options": {
+      "A": "blog",
+      "B": "browser",
+      "C": "banner",
+      "D": "backup"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "292. Fill in the gap: …. is a person who writes on a blog",
+    "options": {
+      "A": "builder",
+      "B": "backer",
+      "C": "browser",
+      "D": "blogger"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "293. Complete: Writing web logs means ….",
+    "options": {
+      "A": "backing up",
+      "B": "blogging",
+      "C": "booking",
+      "D": "browsing"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "294. Complete: Constructed as part of a larger unit means ….",
+    "options": {
+      "A": "built-up",
+      "B": "built-out",
+      "C": "built-in",
+      "D": "built-on"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "295. Complete: A real-time interactive conversation on the Internet is ….",
+    "options": {
+      "A": "chat",
+      "B": "click",
+      "C": "code",
+      "D": "connection"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "296. Complete: To press and release the left button on a mouse means ….",
+    "options": {
+      "A": "clone",
+      "B": "clear",
+      "C": "chat",
+      "D": "click"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "297. What is the meaning of CD?",
+    "options": {
+      "A": "computer display",
+      "B": "compact disc",
+      "C": "control device",
+      "D": "cable driver"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "298. What does CU stand for?",
+    "options": {
+      "A": "Central Utility",
+      "B": "Connection User",
+      "C": "Control Unit",
+      "D": "Core Unit"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "299. What is the synonym of the word «Cable»?",
+    "options": {
+      "A": "connector",
+      "B": "socket",
+      "C": "terminal",
+      "D": "monitor"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "300. What is the synonym of the word «plug into»?",
+    "options": {
+      "A": "turn away",
+      "B": "put into",
+      "C": "give up",
+      "D": "take off"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "301. What is the synonym of the word «electricity socket»?",
+    "options": {
+      "A": "light bulb",
+      "B": "main switch",
+      "C": "power socket",
+      "D": "energy bill"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "302. What is the synonym of the word «Disconnect»?",
+    "options": {
+      "A": "back up",
+      "B": "install",
+      "C": "restart",
+      "D": "unplug"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "303. What is the synonym of the word «Start again»?",
+    "options": {
+      "A": "restart",
+      "B": "shut down",
+      "C": "log off",
+      "D": "pause"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "304. What is the synonym of the word «Copy data to another place»?",
+    "options": {
+      "A": "delete",
+      "B": "format",
+      "C": "install",
+      "D": "back up"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "305. What is the synonym of the word «Connector»?",
+    "options": {
+      "A": "Screen",
+      "B": "Driver",
+      "C": "Cable",
+      "D": "Power"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "306. What is the synonym of the word « Put into»?",
+    "options": {
+      "A": "take out",
+      "B": "look after",
+      "C": "turn off",
+      "D": "plug into"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "307. What is the synonym of the word « Power socket »?",
+    "options": {
+      "A": "electricity socket",
+      "B": "data cable",
+      "C": "system unit",
+      "D": "network card"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "308. What is the synonym of the word «Unplug»?",
+    "options": {
+      "A": "attach",
+      "B": "display",
+      "C": "disconnect",
+      "D": "connect"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "309. What is the synonym of the word «Restart»?",
+    "options": {
+      "A": "close down",
+      "B": "turn off",
+      "C": "hold up",
+      "D": "start again"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "310. What is the synonym of the word «Back up»?",
+    "options": {
+      "A": "remove files completely",
+      "B": "copy data to another place",
+      "C": "install a new software",
+      "D": "change the screen resolution"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "311. What is the smallest unit of measurement in computing?",
+    "options": {
+      "A": "Mega",
+      "B": "Giga",
+      "C": "Bit",
+      "D": "Tera"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "312. What is a document sent with an email message?",
+    "options": {
+      "A": "attachment",
+      "B": "subject",
+      "C": "signature",
+      "D": "browser"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "313. What is a way of sending messages over the internet?",
+    "options": {
+      "A": "Scanner",
+      "B": "Printer",
+      "C": "Hardware",
+      "D": "Email"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "314. Answer the question: What is «Asymmetric digital subscriber line»?",
+    "options": {
+      "A": "ALU",
+      "B": "AMD",
+      "C": "ADSL",
+      "D": "ATA"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "315. Answer the question: What is «Arithmetic logic unit»?",
+    "options": {
+      "A": "ALU",
+      "B": "ADSL",
+      "C": "ASCII",
+      "D": "AT"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "316. Answer the question: What is «Advanced micro devices»?",
+    "options": {
+      "A": "ATA",
+      "B": "AMD",
+      "C": "ALU",
+      "D": "AVI"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "317. Answer the question: What is «Analogue Telephone adaptor»?",
+    "options": {
+      "A": "ATM",
+      "B": "AMD",
+      "C": "ATA",
+      "D": "ADSL"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "318. Answer the question: What is «Automated teller machine»?",
+    "options": {
+      "A": "ATA",
+      "B": "ALU",
+      "C": "ADSL",
+      "D": "ATM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "319..Answer the question: What is «Audio video interface»?",
+    "options": {
+      "A": "AVI",
+      "B": "ASCII",
+      "C": "ATM",
+      "D": "AMD"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "320. Answer the question: What is «Bulletin board system»?",
+    "options": {
+      "A": "Bps",
+      "B": "BIOS",
+      "C": "BBS",
+      "D": "Bit"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "321. Answer the question: What is «Basic Input/output system»?",
+    "options": {
+      "A": "Bit",
+      "B": "BBS",
+      "C": "Bps",
+      "D": "BIOS"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "322. Answer the question: What is «binary digit»?",
+    "options": {
+      "A": "BIOS",
+      "B": "Bps",
+      "C": "Bit",
+      "D": "BBS"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "323. Answer the question: What is «Computer-aided design»?",
+    "options": {
+      "A": "CGA",
+      "B": "CAD",
+      "C": "CAT",
+      "D": "CPU"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "324. Answer the question: What is «Compact disc»?",
+    "options": {
+      "A": "CD",
+      "B": "CPU",
+      "C": "CU",
+      "D": "CRT"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "325. Answer the question: What is «Compact disc-recordable»?",
+    "options": {
+      "A": "CD-RW",
+      "B": "CD-R",
+      "C": "CD-ROM",
+      "D": "CRT"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "326. Answer the question: What is «Compact disc- read only memory»?",
+    "options": {
+      "A": "CD-R",
+      "B": "CD-RW",
+      "C": "CD-ROM",
+      "D": "CRT"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "327. Answer the question: What is «Compact disc-rewritable»?",
+    "options": {
+      "A": "CD-ROM",
+      "B": "CD-R",
+      "C": "CRT",
+      "D": "CD-RW"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "328. Answer the question: What is «Central processing unit»?",
+    "options": {
+      "A": "CPU",
+      "B": "CU",
+      "C": "CD",
+      "D": "CRT"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "329. Answer the question: What is «Cathode ray tube»?",
+    "options": {
+      "A": "CPU",
+      "B": "CRT",
+      "C": "CU",
+      "D": "CD"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "330. Answer the question: What is «Control unit»?",
+    "options": {
+      "A": "CPU",
+      "B": "CD",
+      "C": "CRT",
+      "D": "CU"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "331. Answer the question: What is «Digital audio broadcasting»?",
+    "options": {
+      "A": "DAW  ",
+      "B": "DLP",
+      "C": "DAB",
+      "D": "DDR"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "332. Answer the question: What is «Digital audio workstation »?",
+    "options": {
+      "A": "DAW",
+      "B": "DAB",
+      "C": "DDR",
+      "D": "DMB"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "333. What is «Double data rate»?",
+    "options": {
+      "A": "DAB",
+      "B": "DDR",
+      "C": "DLP",
+      "D": "DAW"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "334.. Answer the question: What is «Digital-light processing»?",
+    "options": {
+      "A": "DMB",
+      "B": "DNS",
+      "C": "DVD",
+      "D": "DLP"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "335. Answer the question: What is «Digital multimedia broadcasting»?",
+    "options": {
+      "A": "DLP",
+      "B": "DNS",
+      "C": "DMB",
+      "D": "DVI"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "336. Answer the question: What is «Domain name system»?",
+    "options": {
+      "A": "DNS",
+      "B": "DMB",
+      "C": "DLP",
+      "D": "DVD"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "337.. Answer the question: What is «Digital versatile disc»?",
+    "options": {
+      "A": "DVD-R",
+      "B": "DVD",
+      "C": "DVD-ROM",
+      "D": "DVI"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "338. Answer the question: What is «Digital versatile disc- recordable»?",
+    "options": {
+      "A": "DVD-ROM",
+      "B": "DVD",
+      "C": "DVD-R",
+      "D": "DVI"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "339. Answer the question: What is «Digital versatile disc- read only memory»?",
+    "options": {
+      "A": "DVD-R",
+      "B": "DVD",
+      "C": "DVI",
+      "D": "DVD-ROM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "340.. Answer the question: What is «Digital video interface»?",
+    "options": {
+      "A": "DVI",
+      "B": "DVD",
+      "C": "DNS",
+      "D": "DMB"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "341. Answer the question: What is «Gigabyte»?",
+    "options": {
+      "A": "GB",
+      "B": "GPS",
+      "C": "GUI",
+      "D": "Giga"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "342. Answer the question: What is «Global positioning system»?",
+    "options": {
+      "A": "GB",
+      "B": "GPS",
+      "C": "GUI",
+      "D": "GPRS"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "343. Answer the question: What is «Graphical user interface»?",
+    "options": {
+      "A": "GPS",
+      "B": "GB",
+      "C": "GUI",
+      "D": "GIF"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "344. Answer the question: What is «Hard disk drive»?",
+    "options": {
+      "A": "HTTP",
+      "B": "HD",
+      "C": "HDMI",
+      "D": "HDD"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "345. Answer the question: What is «Hypertext transfer protocol»?",
+    "options": {
+      "A": "HTTP",
+      "B": "HDD",
+      "C": "HTML",
+      "D": "HTTPS"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "346. Answer the question: What is «International business machines»?",
+    "options": {
+      "A": "ICT",
+      "B": "IBM",
+      "C": "IM",
+      "D": "IP"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "347. Answer the question: What is «Information and communications technologies»?",
+    "options": {
+      "A": "IBM",
+      "B": "IM",
+      "C": "ICT",
+      "D": "IT"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "348. Answer the question: What is «Instant messaging»?",
+    "options": {
+      "A": "IBM",
+      "B": "ICT",
+      "C": "IP",
+      "D": "IM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "349.. Answer the question: What is «Internet protocol»?",
+    "options": {
+      "A": "IP",
+      "B": "IM",
+      "C": "IR",
+      "D": "ISP"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "350. Answer the question: What is «Instruction register»?",
+    "options": {
+      "A": "IP",
+      "B": "IR",
+      "C": "ISP",
+      "D": "IBM"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "351. Answer the question: What is «Internet service provider»?",
+    "options": {
+      "A": "IP",
+      "B": "IR",
+      "C": "ISP",
+      "D": "ISDN"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "352. Answer the question: What is «Local area network»?",
+    "options": {
+      "A": "LCD",
+      "B": "MAN",
+      "C": "WAN",
+      "D": "LAN"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "353. Answer the question: What is «Liquid-crystal display»?",
+    "options": {
+      "A": "LCD",
+      "B": "LAN",
+      "C": "LED",
+      "D": "LPT"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "354. Answer the question: What is «Metropolitan area network»?",
+    "options": {
+      "A": "WAN",
+      "B": "Modem",
+      "C": "MAN",
+      "D": "LAN"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "355.Answer the question: What is «Modulator/Demodulator»?",
+    "options": {
+      "A": "MAN",
+      "B": "NIC",
+      "C": "Media",
+      "D": "Modem"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "356.Answer the question: What is «Network Interface Card»?",
+    "options": {
+      "A": "NIC",
+      "B": "Modem",
+      "C": "NAS",
+      "D": "NAT"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "357. Answer the question: What is «Optical character recognition»?",
+    "options": {
+      "A": "OOP",
+      "B": "OS",
+      "C": "OCR",
+      "D": "OMR"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "358.Answer the question: What is «Object oriented programming»?",
+    "options": {
+      "A": "OCR",
+      "B": "OOP",
+      "C": "OS",
+      "D": "OLE"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "359..Answer the question: What is «Operating System»?",
+    "options": {
+      "A": "OOP",
+      "B": "OCR",
+      "C": "OLE",
+      "D": "OS"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "360.Answer the question: What is «Portable document format»?",
+    "options": {
+      "A": "PDF",
+      "B": "PAN",
+      "C": "PCL",
+      "D": "PDA"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "361.Answer the question: What is «Personal Area network»?",
+    "options": {
+      "A": "PDF",
+      "B": "PAN",
+      "C": "PCL",
+      "D": "PPM"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "362.Answer the question: What is «Printer control language»?",
+    "options": {
+      "A": "PDL",
+      "B": "PAN",
+      "C": "PCL",
+      "D": "PPP"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "364.Answer the question: What is «Page Description language»?",
+    "options": {
+      "A": "PCL",
+      "B": "PDA",
+      "C": "PNG",
+      "D": "PDL"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "365.Answer the question: What is «Pretty good privacy»?",
+    "options": {
+      "A": "PGP",
+      "B": "PPM",
+      "C": "PPP",
+      "D": "PIN"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "366.Answer the question: What is «Personal Identification number»?",
+    "options": {
+      "A": "Pixel",
+      "B": "PIN",
+      "C": "PNG",
+      "D": "PPM"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "367.Answer the question: What is «picture element»?",
+    "options": {
+      "A": "Pixel",
+      "B": "PIN",
+      "C": "PNG",
+      "D": "PPM"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "368.Answer the question: What is «Portable network graphic»?",
+    "options": {
+      "A": "PPP",
+      "B": "Pixel",
+      "C": "PNG",
+      "D": "PPM"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "369.Answer the question: What is «Pages per minute»?",
+    "options": {
+      "A": "PPP",
+      "B": "PNG",
+      "C": "RAM",
+      "D": "PPM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "370.Answer the question: What is «Point to point protocol»?",
+    "options": {
+      "A": "PPP",
+      "B": "RAM",
+      "C": "ROM",
+      "D": "PPM"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "371.Answer the question: What is «Random access memory»?",
+    "options": {
+      "A": "ROM",
+      "B": "RAM",
+      "C": "RISC",
+      "D": "RIM"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "372.Answer the question: What is «Reduced instruction set computer»?",
+    "options": {
+      "A": "RIM",
+      "B": "RAM",
+      "C": "RISC",
+      "D": "ROM"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "373.Answer the question: What is «Research in motion»?",
+    "options": {
+      "A": "RISC",
+      "B": "ROM",
+      "C": "RAM",
+      "D": "RIM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "374.Answer the question: What is «Read only memory»?",
+    "options": {
+      "A": "ROM",
+      "B": "RAM",
+      "C": "RIM",
+      "D": "RISC"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "375.Answer the question: What is «Subscriber Identity module»?",
+    "options": {
+      "A": "SMS",
+      "B": "SMTP",
+      "C": "SQL",
+      "D": "SIM"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "376.Answer the question: What is «Short message service»?",
+    "options": {
+      "A": "SIM",
+      "B": "SMTP",
+      "C": "SMS",
+      "D": "SSL"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "377.Answer the question: What is «Simple mail transfer protocol»?",
+    "options": {
+      "A": "SMTP",
+      "B": "SMS",
+      "C": "SQL",
+      "D": "SSL"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "378.Answer the question: What is «Structured query language»?",
+    "options": {
+      "A": "SMTP",
+      "B": "SQL",
+      "C": "SSL",
+      "D": "TFT"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "379.Answer the question: What is «Secure sockets layer»?",
+    "options": {
+      "A": "SQL",
+      "B": "TFT",
+      "C": "SSL",
+      "D": "TIFF"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "380.Answer the question: What is «Thin film transistor»?",
+    "options": {
+      "A": "TIFF",
+      "B": "VAT",
+      "C": "VCR",
+      "D": "TFT"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "381.Answer the question: What is «Tagged image file format»?",
+    "options": {
+      "A": "TIFF",
+      "B": "TFT",
+      "C": "VAT",
+      "D": "VDU"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "382.Answer the question: What is «Value added tax»?",
+    "options": {
+      "A": "VCR",
+      "B": "VAT",
+      "C": "VDU",
+      "D": "WAI"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "383.Answer the question: What is «Videocassette recorder»?",
+    "options": {
+      "A": "VAT",
+      "B": "VDU",
+      "C": "WAN",
+      "D": "VCR"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "384.Answer the question: What is «Visual display unit»?",
+    "options": {
+      "A": "VDU",
+      "B": "VCR",
+      "C": "WAI",
+      "D": "WAN"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "385.Answer the question: What is «Web accessibility initiative»?",
+    "options": {
+      "A": "WAN",
+      "B": "WAI",
+      "C": "WI-FI",
+      "D": "WWW"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "386.Answer the question: What is «Wide area network»?",
+    "options": {
+      "A": "WAI",
+      "B": "WI-FI",
+      "C": "WAN",
+      "D": "XGA"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "387.Answer the question: What is «Wireless Fidelity»?",
+    "options": {
+      "A": "WAN",
+      "B": "LAN",
+      "C": "WWW",
+      "D": "WI-FI"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "388.Answer the question: What is «World Wide Web»?",
+    "options": {
+      "A": "WWW",
+      "B": "WI-FI",
+      "C": "XGA",
+      "D": "XML"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "389.Answer the question: What is «Extended Graphics Array»?",
+    "options": {
+      "A": "XML",
+      "B": "XGA",
+      "C": "WWW",
+      "D": "WI-FI"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "390.Answer the question: What is «Extensible markup language»?",
+    "options": {
+      "A": "WI-FI",
+      "B": "WWW",
+      "C": "XML",
+      "D": "XGA"
+    },
+    "correct": "C"
+  }
+];
+
+/** ====== PARAMETRLƏR ====== */
+const QUESTION_COUNT = 25;
+const TIME_LIMIT = 30 * 60; // saniyə
+const SCORE_CORRECT = 2;
+const SCORE_WRONG = -1;
+
+/** ====== STATE ====== */
+let TIME = TIME_LIMIT;
+let interval = null;
+let started = false;
+
+let baseScore = 0;             // giriş balı
+let quizQuestions = [];        // seçilmiş 25 sual (şaffl edilmiş)
+let answers = new Map();       // idx -> seçilən variant (A/B/C/D)
+
+/** ====== UTIL ====== */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function formatTime(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function decodeHTML(str) {
+  // &lt; &gt; &quot; kimi entity-ləri real simvola çevirir
+  const t = document.createElement("textarea");
+  t.innerHTML = str;
+  return t.value;
+}
+
+function safeSetText(el, str) {
+  el.textContent = decodeHTML(str);
+}
+
+/** ====== QUIZ HAZIRLA ====== */
+function pickNewQuiz() {
+  const pool = ALL_QUESTIONS.slice();
+  shuffle(pool);
+  const picked = pool.slice(0, Math.min(QUESTION_COUNT, pool.length));
+
+  // hər sualda variantları qarışdır və correct hərfini yenilə
+  quizQuestions = picked.map((q) => {
+    const entries = Object.entries(q.options); // [ ["A","..."], ... ]
+    shuffle(entries);
+
+    const newOptions = {};
+    const letters = ["A","B","C","D"];
+    let newCorrect = null;
+
+    entries.forEach(([oldKey, val], idx) => {
+      const newKey = letters[idx];
+      newOptions[newKey] = val;
+      if (oldKey === q.correct) newCorrect = newKey;
+    });
+
+    return {
+      q: q.q,
+      options: newOptions,
+      correct: newCorrect
+    };
+  });
+
+  answers = new Map();
+  renderQuiz();
+  updateProgress();
+  document.getElementById("result").innerHTML = "";
+}
+
+function renderQuiz() {
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.dataset.index = String(idx);
+
+    const title = document.createElement("div");
+    title.className = "q-title";
+    safeSetText(title, q.q);
+
+    block.appendChild(title);
+
+    const letters = Object.keys(q.options);
+    letters.forEach((key) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = key;
+
+      input.addEventListener("change", () => {
+        answers.set(idx, key);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      // variantlar artıq &lt;...&gt; kimidir, ona görə innerHTML ilə göstəririk
+      span.innerHTML = `<b>${key})</b> `;
+      span.appendChild(document.createTextNode(decodeHTML(q.options[key])));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    });
+
+    // "Boş" (cavab verməmək) variantı
+    // Seçiləndə cavabı silirik ki, sistem bunu "boş" kimi saysın.
+    {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = "__SKIP__";
+
+      input.addEventListener("change", () => {
+        answers.delete(idx);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      span.innerHTML = `<b>E)</b> `;
+      span.appendChild(document.createTextNode("Boş (cavab yoxdur)"));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    }
+
+    quiz.appendChild(block);
+  });
+
+  document.getElementById("finishBtn").style.display = "block";
+}
+
+/** ====== TIMER ====== */
+function startTimer() {
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    TIME--;
+    document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(Math.max(TIME, 0));
+    if (TIME <= 0) {
+      clearInterval(interval);
+      finish(true);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  TIME = TIME_LIMIT;
+  document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(TIME);
+}
+
+/** ====== PROGRESS ====== */
+function calculateStats() {
+  let correct = 0, wrong = 0, skipped = 0;
+
+  quizQuestions.forEach((q, idx) => {
+    const sel = answers.get(idx);
+    if (!sel) {
+      skipped++;
+    } else if (sel === q.correct) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  return { correct, wrong, skipped };
+}
+
+function updateProgress() {
+  const { correct, wrong, skipped } = calculateStats();
+  const answered = correct + wrong;
+
+  document.getElementById("progressText").textContent = `Cavablanan: ${answered} / ${quizQuestions.length}`;
+  document.getElementById("okCount").textContent = String(correct);
+  document.getElementById("noCount").textContent = String(wrong);
+  document.getElementById("skipCount").textContent = String(skipped);
+
+  const pct = quizQuestions.length ? (answered / quizQuestions.length) * 100 : 0;
+  document.getElementById("barFill").style.width = pct.toFixed(1) + "%";
+}
+
+/** ====== FINISH ====== */
+function finish(auto=false) {
+  // bir dəfə bitirsin
+  document.getElementById("finishBtn").disabled = true;
+  if (interval) clearInterval(interval);
+
+  const { correct, wrong, skipped } = calculateStats();
+  const examScore = correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+  const score = baseScore + correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+
+  // blokları rənglə
+  const blocks = document.querySelectorAll(".question-block");
+  blocks.forEach((block) => {
+    const idx = Number(block.dataset.index);
+    const q = quizQuestions[idx];
+    const sel = answers.get(idx);
+
+    block.classList.remove("correct-ans", "wrong-ans", "skipped-ans");
+
+    if (!sel) block.classList.add("skipped-ans");
+    else if (sel === q.correct) block.classList.add("correct-ans");
+    else block.classList.add("wrong-ans");
+
+    // doğru cavabı yaz
+    const info = document.createElement("div");
+    info.style.marginTop = "10px";
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + (!sel ? "b-skip" : (sel === q.correct ? "b-ok" : "b-no"));
+    badge.textContent = !sel ? "BOŞ" : (sel === q.correct ? "DÜZ" : "SƏHV");
+
+    const text = document.createElement("span");
+    text.className = "muted";
+    text.style.marginLeft = "8px";
+    const selTxt = sel ? sel : "-";
+    text.innerHTML = `Sənin cavabın: <b>${selTxt}</b> · Düzgün cavab: <b>${q.correct}</b>`;
+
+    info.appendChild(badge);
+    info.appendChild(text);
+
+    // eyni sualda təkrar finish etməsin deyə əvvəlki info-ları sil
+    const old = block.querySelector(".muted")?.parentElement;
+    if (old && old.parentElement === block && old !== info) {
+      // nothing
+    }
+    // remove previous info blocks if exists
+    [...block.querySelectorAll("div")].forEach(d => {
+      if (d !== block.firstChild && d.className === "" && d.querySelector(".badge")) d.remove();
+    });
+    block.appendChild(info);
+  });
+
+  const result = document.getElementById("result");
+  result.innerHTML = `
+    <hr />
+    <h3>Nəticə</h3>
+    <div class="row">
+      <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
+      <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
+      <div><b>Boş:</b> ${skipped}</div>
+    </div>
+    <p><b>Sınaq balı:</b> ${examScore}</p>
+    <p><b>Giriş balı:</b> ${baseScore}</p>
+    <p style="font-size: 18px;"><b>Yekun bal:</b> ${score}</p>
+    <button type="button" onclick="location.reload()">Yenidən başla</button>
+  `;
+
+  if (auto) {
+    const warn = document.createElement("p");
+    warn.style.color = "#c0392b";
+    warn.innerHTML = "<b>Vaxt bitdi!</b> İmtahan avtomatik tamamlandı.";
+    result.prepend(warn);
+  }
+}
+
+/** ====== START ====== */
+function askBaseScore() {
+  const raw = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+  const val = Number(raw);
+  if (Number.isFinite(val) && val >= 0 && val <= 50) return Math.floor(val);
+  return 0;
+}
+
+function start() {
+  if (started) return;
+  started = true;
+
+  baseScore = askBaseScore();
+  resetTimer();
+  pickNewQuiz();
+  startTimer();
+
+  document.getElementById("finishBtn").addEventListener("click", () => finish(false));
+  document.getElementById("regenBtn").addEventListener("click", () => {
+    if (confirm("Yeni 25 sual seçilsin? (mövcud cavablar silinəcək)")) {
+      document.getElementById("finishBtn").disabled = false;
+      resetTimer();
+      startTimer();
+      pickNewQuiz();
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (confirm("Bütün cavablar silinsin?")) {
+      answers = new Map();
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      document.getElementById("result").innerHTML = "";
+      document.getElementById("finishBtn").disabled = false;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", start);
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  if(document.body.classList.contains("dark")){
+    localStorage.setItem("theme","dark");
+  } else {
+    localStorage.setItem("theme","light");
+  }
+}
+
+window.addEventListener("load", function(){
+  if(localStorage.getItem("theme")==="dark"){
+    document.body.classList.add("dark");
+  }
+});
+
+</script>
+</body>
+</html>
