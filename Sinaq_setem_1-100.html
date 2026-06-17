@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Sınaq Sistemi By Nurali and Nihat</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; margin-top: 5px; }
+    h2 { text-align: center; color: #333; margin-top: 5px; }
+    #meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin: 10px 0 20px; }
+    #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; flex: 0 0 220px; }
+    #progress { flex: 1; min-width: 220px; background:#f0f0f0; border-radius: 5px; padding: 10px; }
+    .bar { height: 10px; background: #ddd; border-radius: 999px; overflow:hidden; }
+    .bar > div { height: 100%; width: 0%; background: #2ecc71; }
+    #progress small { display:block; color:#555; margin-top:6px; }
+    .question-block { margin-bottom: 16px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.2s; }
+    .question-block:hover { border-color:#cfcfcf; }
+    .q-title { font-weight: 700; margin-bottom: 10px; }
+    .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 6px; border: 1px solid #eee; user-select:none; }
+    .option:hover { background: #f9f9f9; }
+    .option input { margin-right: 8px; }
+    button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; }
+    button:hover { background: #27ae60; }
+    #result { margin-top: 20px; }
+    .correct-ans { background-color: #d4edda !important; border-color:#c3e6cb !important; }
+    .wrong-ans { background-color: #f8d7da !important; border-color:#f5c6cb !important; }
+    .skipped-ans { background-color: #fff3cd !important; border-color:#ffeeba !important; }
+    .badge { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .b-ok { background:#d4edda; }
+    .b-no { background:#f8d7da; }
+    .b-skip { background:#fff3cd; }
+    .muted { color:#666; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .row > div { flex:1; min-width: 200px; }
+    .top-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+    .secondary { background:#3498db; }
+    .secondary:hover { background:#2d86c1; }
+    .danger { background:#e74c3c; }
+    .danger:hover { background:#d63c2f; }
+    .danger { margin-bottom: 25px; }
+  
+/* ===== DARK MODE ===== */
+body.dark { background-color: #121212 !important; color: #e0e0e0 !important; }
+body.dark .container { background: #1e1e1e !important; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
+body.dark h1, body.dark h2 { color: #ffffff !important; }
+body.dark #timer { background:#c0392b !important; }
+body.dark #progress { background:#2a2a2a !important; }
+body.dark .bar { background:#444 !important; }
+body.dark .question-block { background:#1a1a1a !important; border-color:#333 !important; }
+body.dark .option { border-color:#333 !important; }
+body.dark .option:hover { background:#2a2a2a !important; }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <h2>By Nurali and Nihat</h2>
+    
+    <div id="meta">
+      <div id="timer">Qalan vaxt: 30:00</div>
+      <div id="progress">
+        <div class="bar"><div id="barFill"></div></div>
+        <small id="progressText">Cavablanan: 0 / 25</small>
+        <small class="muted">Düz: <b id="okCount">0</b> · Səhv: <b id="noCount">0</b> · Boş: <b id="skipCount">25</b></small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" onclick="toggleTheme()" class="secondary">🌙 Dark / Light</button>
+      <button class="secondary" id="regenBtn" type="button">25 sualı yenidən seç (random)</button>
+      <button class="danger" id="clearBtn" type="button">Cavabları sıfırla</button>
+    </div>
+
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" type="button" style="display:none;">İmtahanı Bitir</button>
+    <div id="result"></div>
+  </div>
+
+<script>
+/** ====== MƏLUMAT ====== */
+const ALL_QUESTIONS = [
+  {
+    "q": "1. SƏTƏM nə deməkdir?",
+    "options": {
+      "A": "Sənaye əməkdaşlığı, təhlükəsizlik və ekoloji idarəetmə",
+      "B": "Sağlamlıq, əməyin təhlükəsizliyi və ətraf mühitin mühafizəsi",
+      "C": "Sağlamlıq, istehsalat təhlükəsizliyi və mülkiyyətin qorunması",
+      "D": "Sənaye ərazilərində təhlükəsizlik və mühit mühəndisliyi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "2. Sağlamlıq nədir?",
+    "options": {
+      "A": "İnsanın iş qabiliyyətini itirmədən uzun müddət çalışa bilməsi vəziyyəti",
+      "B": "Orqanizmdə yalnız xroniki xəstəliklərin və fiziki qüsurların olmaması halı",
+      "C": "Orqanizmin bədən üzvlərinin hamısının öz funksiyasını tam yerinə yetirdiyi hal, ağrı və xəstəliyin olmaması",
+      "D": "Fiziki gücün və dözümlülüyün maksimum səviyyədə olması"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "3. SƏTƏM-in iş prinsiplərinə nələr daxildir?",
+    "options": {
+      "A": "İstehsalat planını doldurmaq, sənaye tullantılarını azaltmaq və xərcləri minimuma endirmək",
+      "B": "İşçilərin iş stajını artırmaq, texnoloji avadanlıqları yeniləmək və gigiyenanı qorumaq",
+      "C": "Müəssisənin maliyyə dayanıqlığını təmin etmək və iş qrafikini optimallaşdırmaq",
+      "D": "İnsanlara ziyan verməmək, mülkiyyətə, ətraf mühitə ziyan vurmamaq və bədbəxt hadisələrin qarşısını almaq"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "4. Sağlamlığı öyrənən elmlərə hansılar aiddir?",
+    "options": {
+      "A": "Psixologiya, psixiatriya, tibbi sosiologiya, gigiyena",
+      "B": "Anatomiya, fiziologiya, biologiya, ekologiya",
+      "C": "Terapiya, cərrahiyyə, mühəndis psixologiyası, erqonomika",
+      "D": "Farmakologiya, toksikologiya, genetika, biokimya"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "5. Əməyin təhlükəsizliyi nədir?",
+    "options": {
+      "A": "İş yerində zərərli amillərin tamamilə ləğv edilməsidir",
+      "B": "Şəxsin ciddi xəsarət alma riskinin olmamasıdır",
+      "C": "İstehsalat sahəsində travma ehtimalının qismən azaldılmasıdır",
+      "D": "Avadanlıqların qəzasız işləməsinin təmin olunmasıdır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "6. Əmək mühafizəsinin məqsədi nədir?",
+    "options": {
+      "A": "İş prosesində avadanlıqların sıradan çıxmasının qarşısını almaq və səmərəliliyi artırmaq",
+      "B": "Müəssisədə daxili nizam-intizam qaydalarına riayət olunmasını təmin etmək",
+      "C": "İstehsalatda işləyənlərə sağlam və təhlükəsiz əmək şəraitinin yaradılması və istehsalatda zərərçəkmə və peşə zədələnmələrinin və xəstəliklərinin qarşısını almaq",
+      "D": "İşçilərin sosial sığorta haqlarının düzgün hesablanmasına nəzarət etmək"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "7. Əmək mühafizəsi qarşısında duran məsələlər hansı qaydalar əsasında tənzim edilir?",
+    "options": {
+      "A": "Azərbaycan dövlətinin qüvvədə olan konstitusiyasına uyğun, qanunvericilik aktları, əmək məcəlləsi, xüsusi qaydalar və normalar",
+      "B": "Beynəlxalq Səhiyyə Təşkilatının təlimatları və sahəvi müəssisə rəhbərliyinin daxili əmrləri",
+      "C": "Yalnız müəssisə daxili əmək intizamı qaydaları və kollektiv müqavilələr",
+      "D": "Həmkarlar ittifaqının daxili nizamnaməsi və təhlükəsizlik bəyannamələri"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "8. Əmək mühafizəsi hansı fənlərlə sıx əlaqədədir?",
+    "options": {
+      "A": "Mexanika, elektrotexnika, sənaye ekologiyası, ümumi psixologiya",
+      "B": "Sosial sığorta, əmək hüququ, mülki müdafiə, biotexnologiya",
+      "C": "İstehsalat sanitariyası və gigiyena, əmək psixologiyası, istehsalat estetikası, erqonomika",
+      "D": "Logistika, menecment, sosiologiya, əmək iqtisadiyyatı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "9. “Texnika ilə onu idarə edən insan arasındakı uyğunsuzluq nəticəsində təkcə 1900-1950-ci illər arasında, yəni cəmi 50 il ərzində 250 milyon adam həlak olması” haqqında hansı alim yazmışdır?",
+    "options": {
+      "A": "V.A.Leqasov",
+      "B": "M.V.Lomonosov",
+      "C": "İ.P.Pavlov",
+      "D": "Q.Y.Panov"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "10. Dünya miqyasında hər bir gün ərzində neçə min insan avtomobil qəzaları ilə bağlı həlak olur?",
+    "options": {
+      "A": "250000",
+      "B": "2500",
+      "C": "25000",
+      "D": "250"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "11. Ümumdünya Əməyin Mühafizəsi günü nə zamandır?",
+    "options": {
+      "A": "1 may",
+      "B": "5 iyun",
+      "C": "28 aprel",
+      "D": "12 noyabr"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "12. Ümumdünya Əməyin Mühafizəsi günü Azərbaycanda neçənci ildən qeyd olunur?",
+    "options": {
+      "A": "2004",
+      "B": "2001",
+      "C": "2008",
+      "D": "1999"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "13. Əmək mühafizəsinə dair ilk elmi-tədqiqat işləri hansı alim tərəfindən aparılmışdır?",
+    "options": {
+      "A": "Mendeleyev",
+      "B": "Lomonosov",
+      "C": "Pavlov",
+      "D": "Seçenov"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "14. Əmək mühafizəsinin hansı əhəmiyyətli tərəfləri vardır?",
+    "options": {
+      "A": "Texniki, texnoloji və idarəetmə",
+      "B": "Siyasi, mədəni və ekoloji",
+      "C": "İqtisadi, sosial və hüquqi",
+      "D": "İnzibati, təşkilati və kadr"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "15. Əmək mühafizəsi neçə müstəqil bölməni əhatə edir?",
+    "options": {
+      "A": "3",
+      "B": "4",
+      "C": "5",
+      "D": "6"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "16. Əmək mühafizəsi hansı müstəqil bölmələri əhatə edir?",
+    "options": {
+      "A": "Erqonomika, mühəndis psixologiyası, sənaye sanitariyası, istehsalat estetikası",
+      "B": "Əmək mühafizəsinin hüquqi və təşkilati əsasları, istehsalat sanitariyasının əsasları, təhlükəsizlik texnikasının əsasları, yanğın təhlükəsizliyinin əsasları",
+      "C": "Texniki təhlükəsizlik, ətraf mühitin qorunması, sığorta işi, sosial müdafiə",
+      "D": "İlk yardım qaydaları, təxliyə planlaşdırılması, risklərin qiymətləndirilməsi, audit"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "17. Hansı alim tikinti obyektlərinin ildırımdan mühafizə məsələsini həll etmişdir?",
+    "options": {
+      "A": "Stekolnikov",
+      "B": "Panov",
+      "C": "Kapitsa",
+      "D": "Zelinski"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "18. İş prosesində ətraf mühitin mühafizəsi nə deməkdir?",
+    "options": {
+      "A": "İstehsalat tullantılarının yalnız şəhər kənarına daşınmasını təmin etmək",
+      "B": "İş yerində yaşıl zonaların və ağaclıqların sayını artırmaq",
+      "C": "Əmək fəaliyyəti zamanı ətraf mühitin çirklənməsinə yol verməmək və çirklənmənin qarşısını almaq",
+      "D": "Müəssisədə ekoloji təmiz xammaldan istifadə olunmasını məhdudlaşdırmaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "19. Atmosferin çirklənməsi hansı yolla və hansı halda baş verə bilər?",
+    "options": {
+      "A": "Yalnız sənaye müəssisələrindən havaya buraxılan dəm qazının miqdarının normadan artıq olması ilə",
+      "B": "Təbii proseslər və insan fəaliyyətinin nəticəsində atmosferə yeni maddələrin qatılması və ya onun təbii durumunun dəyişilməsi",
+      "C": "Yalnız vulkan püskürmələri və meşə yanğınları kimi qlobal təbii fəlakətlər nəticəsində",
+      "D": "Atmosferədə oksigen qatının süni şəkildə artırılması zamanı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "20. Ətraf mühitin çirklənməsinin əsas mənbəyi nədir?",
+    "options": {
+      "A": "Avtomobillərin sayının artması və meşələrin qırılması",
+      "B": "Təbii aşınma prosesləri və dəniz sularının buxarlanması",
+      "C": "İstehsalat və cəmiyyətin həyat fəaliyyəti prosesində əmələ gələn külli miqdarda tullantıların atılması",
+      "D": "Alternativ enerji mənbələrindən istifadənin genişlənməsi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "21. Son illərdə istehsalat proseslərinin yüksək texniki inkişafı işçilərin fəaliyyətinə nə kimi müsbət təsir göstərmişdir?",
+    "options": {
+      "A": "İş saatlarının qısalmasına səbəb olmuşdur",
+      "B": "Peşə xəstəliklərini tamamilə sıfıra endirmişdir",
+      "C": "İşçilərin fiziki yüklənməsini azaltmışdır",
+      "D": "İşçilərin əməkhaqqının avtomatik artmasını təmin etmişdir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "22. İstehsalat proseslərinin yüksək texniki inkişafı işçilərin sağlamlığına nə kimi mənfi təsir göstərmişdir?",
+    "options": {
+      "A": "Onların hissiyat orqanlarının (görmə, eşitmə, yüksək diqqətliliyin) psixoloji yüklənməsinin artmasına, gərginləşməsinə səbəb olur",
+      "B": "Fiziki hərəkətliliyin artması nəticəsində ürək-damar xəstəliklərinin çoxalmasına gətirib çıxarır",
+      "C": "Peşə zədələnmələrinin və travmaların sayının kəskin şəkildə yüksəlməsinə səbəb olur",
+      "D": "İnsanın ümumi immun sisteminin tamamilə çökməsinu yol açır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "23. İnsanların psixoloji yükünün artmasına nə səbəb olur?",
+    "options": {
+      "A": "İş yoldaşları arasındakı rəqabət",
+      "B": "Maşın konstruksiyasının mürəkkəbləşməsi",
+      "C": "Fiziki əməyin payının artması",
+      "D": "İstehsalat sahəsinin genişlənməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "24. İnsan vand maşın qarşılıqlı əlaqələrinin öyrənilməsindən hansı elm sahələri meydana çıxmışdır?",
+    "options": {
+      "A": "Texniki estetika, mühəndis qrafikası, əmək sosiologiyası",
+      "B": "İstehsalat sanitariyası, kibernetika, maşınşünaslıq",
+      "C": "Əmək gigiyenası, mühəndis psixologiyası, erqonomika",
+      "D": "Sənaye təhlükəsizliyi, antropologiya, biotexnika"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "25. Erqonomika sözü nə deməkdir?",
+    "options": {
+      "A": "Latın sözü olub: erqo - insan, nomos - mühit",
+      "B": "Yunan sözü olub: erqon - iş, nomon - işə qanun",
+      "C": "Alman sözü olub: erqo - texnika, nomos - nizam",
+      "D": "İngilis sözü olub: erqo - fəaliyyət, nomon - idarəetmə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "26. Hansı elm sahəsi “İnsan-maşın-mühit\" sistemində istehsalat mühitini insan orqanizminin imkanlarına uyğunlaşdırmaq üçün tədbirlər işləyib hazırlayır?",
+    "options": {
+      "A": "Erqonomika",
+      "B": "Texniki estetika",
+      "C": "Əmək gigiyenası",
+      "D": "Mühəndis psixologiyası"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "27. Hansı elm sahəsi İMM sistemini öyrənərək müxtəlif cihaz və idarəetmə orqanlarının optimal parametrlərini işləyib hazırlayır?",
+    "options": {
+      "A": "Əmək fiziologiyası",
+      "B": "İstehsalat sanitariyası",
+      "C": "Texniki estetika",
+      "D": "Mühəndis psixologiyası"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "28. İMM sistemini öyrənərək müxtəlif cihaz və idarəetmə orqanlarının optimal parametrlərinin işlənib hazırlanmasının müsbət nəticələri hansılardır?",
+    "options": {
+      "A": "Avadanlıqların xidmət müddətinin uzanması və təmir xərclərinin azalması",
+      "B": "İşçilərin tez yorulmasının qarşısını almaq və əmək məhsuldarlığının yüksəlməsi",
+      "C": "Fiziki travma risklərinin tamamilə aradan qaldırılması",
+      "D": "Müəssisənin xammal sərfinin iki dəfə azalması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "29. Erqonomika nə haqqında elmdir?",
+    "options": {
+      "A": "Maşınların mexaniki hərəkətləri haqqında",
+      "B": "Əmək qanunları haqqında",
+      "C": "İstehsalat gigiyenası haqqında",
+      "D": "Ətraf mühitin mühafizəsi haqqında"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "30. Erqonomika hansı elm sahələrinin öyrəndiyi məsələləri özündə birləşdirir?",
+    "options": {
+      "A": "Riyaziyyat, kibernetika, sosiologiya, ekologiya",
+      "B": "Texniki, psixologiyanın, fiziologiyanın, əməyin gigiyenasının",
+      "C": "Anatomiya, mühəndislik, hüquq, estetika",
+      "D": "İqtisadiyyat, statistika, menecment, hüquqşünaslıq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "31. Erqonomikanın əsas məqsədi nədir?",
+    "options": {
+      "A": "İMM sistemində idarəetməni tamamilə avtomatlaşdırmaq və insan amilini sıradan çıxarmaq",
+      "B": "İş şəraitini yalnız vizual baxımdan gözəlləşdirmək və rəng ahəngini təmin etmək",
+      "C": "İMM sistemində əmək məhsuldarlığı ən yüksək, işçinin təhlükəsizliyi minimuma enməklə onun özünü hiss etməsi ən optimal olsun",
+      "D": "İstehsalat xərclərini azaldaraq müəssisənin mənfəətin maksimuma çatdırmaq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "32. Erqonomika hansı məsələləri həll edir?",
+    "options": {
+      "A": "Əlverişli iş şəraitinin təmini, ən rahat işçi mühiti, işçi üzərinə düşən psixoloji yükün azalması, işçiyə düşən fiziki yükün azalması",
+      "B": "İşçilərin əməkhaqqı sisteminin tənzimlənməsi və məzuniyyət müddətlərinin müəyyən edilməsi",
+      "C": "Texnoloji avadanlıqların gücünün artırılması və enerji sərfinin azaldılması",
+      "D": "İş qrafiklərinin tərtib olunması və növbəli iş sisteminin qurulması"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "33. Texniki estetikanın məqsədi nədir?",
+    "options": {
+      "A": "Gözəl, eyni zamanda səmərəli forma və ölçülərdə avadanlıq yaratmaqdır",
+      "B": "İstehsalat sahələrində işıqlandırma sistemini maksimum dərəcədə gücləndirməkdir",
+      "C": "Maşınların daxili hissələrinin korroziyadan qorunmasını təmin etməkdir",
+      "D": "İşçilərin geyim formalarının yalnız davamlılığını artırmaqdır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "34. Avadanlıqların rənginin düzgün seçilməsi işçilərə nə kimi təsir göstərir?",
+    "options": {
+      "A": "Onların görmə qabiliyyətini zəiflədir, lakin diqqəti bir yerə toplamağa kömək edir",
+      "B": "Fiziki yorğunluğu artırır, lakin psixoloji gərginliyi azaldır",
+      "C": "İşçilərdə yuxululuq yaradır və reaksiya sürətini zəiflədir",
+      "D": "Onlara sevinc gətirir, əhval-ruhiyyəsini, iş qabiliyyətini və əmək məhsuldarlığını artırır"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "35. İstehsalat prosesində yaranan zərərli və təhlükəli amillər insan orqanizminə təsirinə görə neçə qrupa bölünür?",
+    "options": {
+      "A": "3",
+      "B": "4",
+      "C": "5",
+      "D": "6"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "36. İstehsalat prosesində yaranan zərərli və təhlükəli amillər insan orqanizminə təsirinə görə hansı qruplara bölünür?",
+    "options": {
+      "A": "Fiziki, kimyəvi, bioloji, psixofizioloji amillər",
+      "B": "Mexaniki, termiki, elektrik, akustik amillər",
+      "C": "Texnoloji, ekoloji, sosial, iqtisadi amillər",
+      "D": "İnzibati, təşkilati, fərdi, kollektiv amillər"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "37. İnsan orqanizminə təsir göstərən zərərli fiziki amillərə nələr daxildir?",
+    "options": {
+      "A": "Toksik maddələr, qələvilər, turşular, ağır metalların duzları",
+      "B": "İşçi zonadakı hava, yüksək tozluluq, qazlılıq, yüksək və ya alçaq temperatur, səs-küy və titrəyiş, ionlaşdırıcı elektromaqnit şüalar",
+      "C": "Bakteriyalar, viruslar, göbələklər, yoluxucu mikroorqanizmlər",
+      "D": "Əsəb-psixiki gərginlik, monotonluq, statik yüklər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "38. İnsan orqanizminə təsir göstərən zərərli kimyəvi amillərə nələr daxildir?",
+    "options": {
+      "A": "Mutagen, kanserogen, bioloji aktiv maddələr",
+      "B": "Səs-küy, vibrasiya, ultrasəs dalğaları",
+      "C": "Ümumi toksiklik, dağıdıcı, mutagen",
+      "D": "Toz, rütubət, infraqırmızı şüalanma"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "39. Kimyəvi qrupdan olan zərərli istehsalat amilləri daha çox insan orqanizminin hansı nahiyələrinə təsir göstərir?",
+    "options": {
+      "A": "Dayaq-hərəkət aparatına və sümüklərə",
+      "B": "Tənəffüs yollarına və dəri örtüyünə",
+      "C": "Mərkəzi sinir sisteminə və eşitmə orqanlarına",
+      "D": "Həzm sisteminə və görmə bucağına"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "40. Bioloji zərərli istehsalat amillərinə nələr aiddir?",
+    "options": {
+      "A": "Bakteriyalar, viruslar, göbələk törədici bakteriyalar, bitki və heyvanların bəziləri",
+      "B": "Aerozollar, sənaye tozları və ağır qazlar",
+      "C": "Statik və dinamik yüklənmələr, monotonluq",
+      "D": "Elektrik cərəyanı, statik elektrik və maqnit sahələri"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "41. Psixofizioloji zərərli istehsalat amillərinə nələr aiddir?",
+    "options": {
+      "A": "İonlaşdırıcı şüalanma və elektromaqnit sahələrinin təsiri",
+      "B": "Kanserogen maddələrin qana daxil olması",
+      "C": "Sənaye tullantılarının dərini qıcıqlandırması",
+      "D": "Bu insanın fiziki və əsəbi yüklənməsindən ibarət olmaqla özünü göstərir"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "42. Fiziki yüklənmə özünü hansı halda göstərir?",
+    "options": {
+      "A": "Mexaniki, kinetik, potensial",
+      "B": "Statik, dinamik, hidrodinamik",
+      "C": "Aktiv, passiv, neytral",
+      "D": "Termiki, elektrik, maqnit"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "43. İnsanın əsəb yüklənməsinə nə səbəb ola bilər?",
+    "options": {
+      "A": "İstehsalat sahəsində havanın temperaturunun kəskin dəyişməsi",
+      "B": "Ağır fiziki yüklərin bir yerdən başqa yerə daşınması",
+      "C": "Zehni əmək gərginliyi, əməyin monotonluğu, həddindən artıq işləmə",
+      "D": "Müəssisədə fərdi mühafizə vasitələrinin çatışmaması"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "44. İstehsalat prosesində yaranan zərərli amillər nələrə yol aça bilir?",
+    "options": {
+      "A": "Peşə zərərləri, peşə xəstəlikləri və ya peşə zəhərlənmələri",
+      "B": "Texnoloji qəzalara və mülkiyyətin sıradan çıxmasına",
+      "C": "İş vaxtının uzadılmasına və istehsalat itkilərinə",
+      "D": "Avadanlıqların sürətinin və gücünün azalmasına"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "45. Səs tellərinin müntəzəm gərginləşməsi nəticəsində hansı xəstəlik əmələ gələ bilir?",
+    "options": {
+      "A": "Bronxial astma",
+      "B": "Tonzillit",
+      "C": "Xroniki laringit",
+      "D": "Faringit"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "46. Zərərli və təhlükəli amillərinin səviyyəsini hansı cihazların köməyilə müəyyən etmək olar?",
+    "options": {
+      "A": "Barometr, hiqrometr, lüksmetr, voltmetr",
+      "B": "Şumomer, vibroqraf, termometr, anemometr, qazanalizator",
+      "C": "Dinamometr, spidometr, seysmoqraf, dozimetr",
+      "D": "Manometr, multi-metr, osilloqraf, taxometr"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "47. Bina daxilində yüngül işlərdə işləyən işçilər və ağır işlərdə işləyən işçilər üçün havanın temperaturu nə qədər olmalıdır?",
+    "options": {
+      "A": "22-25; 18-20",
+      "B": "18-21; 14-16",
+      "C": "16-18; 12-14",
+      "D": "20-22; 15-17"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "48. Məzmun və təyinatına görə təlimatın hansı növləri var?",
+    "options": {
+      "A": "Giriş, ilkin, vaxtaşırı, növbədənkənar və birdəfəlik",
+      "B": "Cari, illik, rüblük, növbəli və planlı",
+      "C": "Şifahi, yazılı, əyani, rəsmi və daxili",
+      "D": "Ümumi, sahəvi, fərdi, xüsusi və növbəli"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "49. Hansı işçilər travmatizmə daha həssasdır?",
+    "options": {
+      "A": "Orta yaşlı və iş stajı 5 ildən 10 ilə qədər olanlar",
+      "B": "Yalnız gənc və heç bir təcrübəsi olmayan işçilər",
+      "C": "İş stajı bir ilə qədər olan və iş stajı çox olan",
+      "D": "Fiziki cəhətdən tam sağlam və gürbəgür olanlar"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "50. İşçilərin bədbəxt hadisələrə məruz qalma təhlükəsini gücləndirən amilləri neçə qrupa bölmək olar?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "51. İşçilərin bədbəxt hadisələrə məruz qalma təhlükəsini gücləndirən amilləri hansı qruplara bölmək olar?",
+    "options": {
+      "A": "Daxili və xarici səbəblər",
+      "B": "Texniki çatışmazlıqlar və təşkilati qüsurlar",
+      "C": "İşçilərin təhlükəyə daim məruz qalmasını artdıran və müvəqqəti artdıran",
+      "D": "Psixoloji gərginlik və fiziki yetərsizlik"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "52. İşçilərin təhlükəyə daim məruz qalmasını artdıran səbəblərə nə aiddir?",
+    "options": {
+      "A": "İş yerində işıqlandırmanın qəfil kəsilməsi və ya cihazın nasazlığı",
+      "B": "Xəstəlik və ya ona yaxın vəziyyətdə olan adamların əsəb sistemində və ya başqa orqanlarında daimi baş verən funksional dəyişikliklər",
+      "C": "Müvəqqəti yorğunluq, yuxusuzluq və ya emosional gərginlik",
+      "D": "Təlimatların vaxtında keçirilməməsi və nəzarətsizlik"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "53. Təhlükəsizlik nöqteyi-nəzərincə insan iş seçimini necə etməlidir?",
+    "options": {
+      "A": "Yalnız yüksək əməkhaqqı təklif edən sahələrə görə",
+      "B": "İnsan öz maraq və qabiliyyətinə uyğun",
+      "C": "Valideynlərinin və ya dostlarının tövsiyələrinə əsasən",
+      "D": "Vakansiyanın yaşayış yerinə yaxınlığına görə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "54. Təcrübəsizlik iş yerlərində nələrə təsir edir?",
+    "options": {
+      "A": "Yalnız işçinin kollektivlə olan münasibətlərinə",
+      "B": "Avadanlıqların amortizasiya müddətinə",
+      "C": "İşçinin bütün hərəkətlərinə, iş ritminə, tempinə və intensivliyinə",
+      "D": "Müəssisənin illik maliyyə hesabatlarına"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "55. Ehtiyatsızlıq nə ilə nəticələnə bilər?",
+    "options": {
+      "A": "Əmək məhsuldarlığının artması",
+      "B": "Bədbəxt hadisə",
+      "C": "Peşə xəstəliyi",
+      "D": "İş vaxtının ixtisarı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "56. Yorğunluq nə zaman baş verir?",
+    "options": {
+      "A": "Orqanizmdə müxtəlif qüsurlardan",
+      "B": "Qidalanma rejiminin tamamilə dəyişməsi zamanı",
+      "C": "İş vaxtının düzgün bölüşdürülməməsindən",
+      "D": "Yalnız ağır yük qaldırma prosesində"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "57. Psixoloji yorğunluq nə zaman baş verir?",
+    "options": {
+      "A": "Ağır fiziki işlərin fasiləsiz icrası zamanı",
+      "B": "Əzələlərdə laktat turşusunun toplanması nəticəsində",
+      "C": "Mərkəzi sinir sisteminin yüklənməsi zamanı",
+      "D": "Görmə orqanlarının uzun müddət işıqsız qalması halında"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "58. ƏTSS-ə əsasən istehsalatda görülən işlər fiziki əmək sərfi ilə əlaqədar neçə qrupa bölünür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "59. ƏTSS-ə əsasən istehsalatda görülən işlər fiziki əmək sərfi ilə əlaqədar hansı qruplara bölünür?",
+    "options": {
+      "A": "Oturaq, ayaqüstü və qarışıq işlər",
+      "B": "Təhlükəsiz, az təhlükəli və zərərli işlər",
+      "C": "Mexaniki, avtomatlaşdırılmış və əl əməyi işləri",
+      "D": "Yüngül, orta və ağır işlər"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "60. Hansı alimin fikrincə “əsas yorulma mərkəzi əsəb sisteminin həddən artıq gərgin işlənməsindən asılıdır”?",
+    "options": {
+      "A": "Seçenov",
+      "B": "Pavlov",
+      "C": "Lomonosov",
+      "D": "Mendeleyev"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "61. Əmək mühafizəsinin hüquqi əsasları dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Müəssisə rəhbərinin imzaladığı daxili əmrlər toplusu",
+      "B": "Qüvvədə olan qanunvericilik sistemi",
+      "C": "Həmkarlar ittifaqının qəbul etdiyi qərarlar",
+      "D": "Beynəlxalq standartlaşdırma təşkilatının (ISO) tövsiyələri"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "62. Əmək hüququnun mənbələri nəyin nəticəsidir?",
+    "options": {
+      "A": "Səlahiyyətli dövlət orqanlarının yaradıcılıq fəaliyyəti nəticəsidir",
+      "B": "İşçilərin fərdi müraciətləri və şikayətləri nəticəsidir",
+      "C": "Beynəlxalq konvensiyaların birbaşa tərcümə edilməsinin nəticəsidir",
+      "D": "Müəssisə daxili münaqişələrin məhkəmə həlli nəticəsidir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "63. Cəmiyyətin, dövlətin eləcə də işçi və işəgötürənlərin maraqlarını nə əks etdirir?",
+    "options": {
+      "A": "İnzibati xətalar məcəlləsi",
+      "B": "Mülki məcəllə",
+      "C": "Əmək hüququ",
+      "D": "Cinayət məcəlləsi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "64. Əmək hüququnun mənbələri içərisində ən mühümü və əsası hansıdır?",
+    "options": {
+      "A": "Azərbaycan Respublikasının əmək məcəlləsi",
+      "B": "Nazirlər Kabinetinin normativ qərarları",
+      "C": "Beynəlxalq Əmək Təşkilatının konvensiyaları",
+      "D": "Azərbaycan Respublikasının 12 noyabr 1995-ci ildə qəbul edilmiş Konstitusiyası"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "65. Respublikanın qanunvericilik sisteminin əsası nədir?",
+    "options": {
+      "A": "Konstitusiya",
+      "B": "Əmək Məcəlləsi",
+      "C": "Beynəlxalq Müqavilələr",
+      "D": "Ali Məhkəmənin Plenum Qərarları"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "66. Əmək hüququnun mənbələri içərisində başlıca yeri nə tutur?",
+    "options": {
+      "A": "Mülki Qanunvericilik Aktları",
+      "B": "Azərbaycan Respublikasının əmək məcəlləsi",
+      "C": "Kollektiv Müqavilələr Baş Sazişi",
+      "D": "Daxili İntizam Qaydaları Təlimatı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "67. Əmək məcəlləsi nə zaman qüvvəyə minmişdir?",
+    "options": {
+      "A": "1995-ci il, noyabrın 12-i",
+      "B": "1999-cu il, iyulun 1-i",
+      "C": "2001-ci il, yanvarın 1-i",
+      "D": "2004-cü il, aprelin 28-i"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "68. Əmək müqaviləsi nədir?",
+    "options": {
+      "A": "İşçi ilə işəgötürən müəssisə arasında bağlanan kontraktdır",
+      "B": "İşçinin işə qəbul olunması haqqında yazdığı rəsmi ərizədir",
+      "C": "Həmkarlar ittifaqı ilə rəhbərlik arasında bağlanan sazişdir",
+      "D": "İşçinin aylıq maaş cədvəlini göstərən rəsmi sənəddir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "69. Əmək müqavilələri necə bağlanır?",
+    "options": {
+      "A": "Məcburi qaydada",
+      "B": "Dövlətin təyinatı ile",
+      "C": "Sərbəst",
+      "D": "Həmkarlar ittifaqının təzyiqi ilə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "70. Əmək müqaviləsi hansı zaman çərçivəsində bağlana bilər?",
+    "options": {
+      "A": "Yalnız 1 illik müddətə",
+      "B": "Müddətsiz və ya 5 ilədək",
+      "C": "Hər ay yenilənmək şərtilə",
+      "D": "Maksimum 10 ilə qədər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "71. Kollektiv müqavilə hansı zaman çərçivəsində bağlana bilər?",
+    "options": {
+      "A": "1 ildən, 3 ilədək",
+      "B": "6 aydan, 1 ilədək",
+      "C": "3 ildən, 5 ilədək",
+      "D": "5 ildən, 10 ilədək"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "72. Əmək təhlükəsizliyinin Standartlar sisteminin məqsədi nədir?",
+    "options": {
+      "A": "İşçilərin əməkhaqqı dərəcələrinə və mükafatlandırma normalarını təyin etməkdir",
+      "B": "Müəssisənin illik gəlir və xərc balansını standartlaşdırmaqdır",
+      "C": "İstehsalat amillərinə görə ümumi tələbatı, istehsalat prosesinə və istehsalat avadanlıqlarına ümumi təhlükəsizlik texnikası tələbatı, əmək təhlükəsizliyi fərdi mühafizə vasitələrinə tələbatını müəyyən etməkdir",
+      "D": "İstehsalat sahələrinin coğrafi yerləşməsini və memarlıq quruluşunu tənzimləməkdir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "73. ƏTSS neçənci ildə yaradılmışdır?",
+    "options": {
+      "A": "1968",
+      "B": "1974",
+      "C": "1982",
+      "D": "1991"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "74. ƏTSS neçə kateqoriya standartlarını əhatə edir?",
+    "options": {
+      "A": "3",
+      "B": "4",
+      "C": "5",
+      "D": "6"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "75. ƏTSS hansı kateqoriya standartlarını əhatə edir?",
+    "options": {
+      "A": "Beynəlxalq, regional, milli və yerli standartlar",
+      "B": "Texniki, texnoloji, sanitar və ekoloji standartlar",
+      "C": "Ümumittifaq dövlət, sahə, respublika və müəssisə standartları",
+      "D": "İnzibati, hüquqi, iqtisadi və sosial standartlar"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "76. İş vaxtının növləri hansılardır?",
+    "options": {
+      "A": "Gündəlik, həftəlik və aylıq iş vaxtı",
+      "B": "Tam, qısaldılmış və natamam",
+      "C": "Növbəli, növbədənkənar və sərbəst iş vaxtı",
+      "D": "Aktiv, passiv və qarışıq iş vaxtı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "77. Gündəlik iş vaxtının müddəti nə qədərdir?",
+    "options": {
+      "A": "6 saat",
+      "B": "7 saat",
+      "C": "8 saat",
+      "D": "9 saat"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "78. İş vaxtından artıq işlərə kimlərin cəlb olunması qadağandır?",
+    "options": {
+      "A": "İş stajı bir ildən az olan gənc mütəxəssislərin",
+      "B": "Ağır sənaye sahələrində çalışan rəhbər şəxslərin",
+      "C": "Hamilə qadınlar və bir yaşınadək uşağı olan qadınlar",
+      "D": "Müəssisədə müddətli müqavilə ilə işləyən işçilərin"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "79. Bir yaşından 8 yaşınadək uşağı olan qadınlar və əlillər nə zaman iş vaxtından artıq işlərə cəlb oluna bilərlər?",
+    "options": {
+      "A": "Müəssisə rəhbərliyinin xüsusi əmri və icazəsi olduqda",
+      "B": "Yalnız onların razılığı ilə",
+      "C": "Həmkarlar ittifaqının qərarı ilə məcburi olaraq",
+      "D": "Hər hansı bir şərt olmadan, rəhbərliyin tələbi ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "80. Əmək qanunvericiliyinə əsasən hansı formada istirahət vaxtının verilməsi müəyyən edilmişdir?",
+    "options": {
+      "A": "İstirahət və nahar üçün fasilə, istirahət günləri, bayram günləri, illik məzuniyyət",
+      "B": "Yalnız həftəsonu günləri və növbəli məzuniyyətlər",
+      "C": "Hər dörd saatdan bir verilən 30 dəqiqəlik qısamüddətli fasilələr",
+      "D": "Müəssisə direktoru tərəfindən fərdi olaraq təyin edilən sərbəst günlər"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "81. İşçinin bir iş günü ilə növbəti iş günü arasındakı gündəlik istirahət vaxtı ən az nə qədər olmalıdır?",
+    "options": {
+      "A": "8 saat",
+      "B": "10 saat",
+      "C": "12 saat",
+      "D": "16 saat"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "82. İşçilərə ödənişli məzuniyyət neçə gün verilməlidir?",
+    "options": {
+      "A": "15 gündən az olmayaraq",
+      "B": "21 gündən az olmayaraq",
+      "C": "30 təqvim günü",
+      "D": "14 iş günü"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "83. İş yerlərinin attestasiyasının keçirilməsi qaydaları necə tənzimlənir?",
+    "options": {
+      "A": "Azərbaycan Respublikası Nazirlər Kabineti tərəfindən qəbul edilən normativ-hüquqi aktla",
+      "B": "Müəssisənin daxili idarə heyətin qərarı ilə",
+      "C": "Əmək və Əhalinin Sosial Müdafiəsi Nazirliyinin regional şöbələrinin təlimatları ilə",
+      "D": "Beynəlxalq Əmək Təşkilatının standart layihələrinə əsasən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "84. Hansı işçilərə attestasiya keçirilə bilər?",
+    "options": {
+      "A": "İş yerində ən azı altı ay çalışmış işçilərə",
+      "B": "Müəssisədə rəhbər vəzifə tutan bütün şəxslərə",
+      "C": "İş yerində yeni işə başlamış sınaq müddətindəki şəxslərə",
+      "D": "İş yerində ən azı bir il çalışmış işçilərə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "85. Attestasiya hansı məqsəd ilə həyata keçirilə bilər?",
+    "options": {
+      "A": "İşçilərin peşəkarlıq səviyyəsinin yoxlanılması, ixtisasına, sənətinə müvafiq olaraq onların tutduğu vəzifəyə uyğun olduğunu aşkara çıxarmaq",
+      "B": "İşçilərin intizam məsuliyyətinə cəlb edilməsi və əməkhaqqının azaldılması üçün əsas yaratmaq",
+      "C": "Müəssisədə ştatların ixtisar edilməsi prosesini sürətləndirmək",
+      "D": "İşçilərin səhhətinin fiziki cəhətdən işə yararlı olub-olmadığını təyin etmək"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "86. Təxliyə nədir?",
+    "options": {
+      "A": "İşçilərin istehsalat xəsarətlərindən qorunması üçün fərdi mühafizə vasitələri ilə təmin edilməsi",
+      "B": "Əhalinin fəlakət zonasından çıxarılaraq təhlükəsiz ərazilərə yerləşdirilməsi",
+      "C": "Sənaye müəssisələrində yaranan zəhərli qazların xüsusi ventilyasiya vasitəsilə kənara atılması",
+      "D": "Yararsız avadanlıqların müəssisə balansından silinərək kənarlaşdırılması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "87. Nə zaman təxliyəyə ehtiyac yarana bilər?",
+    "options": {
+      "A": "Təbii fəlakətlər, istehsalat qəzaları, müharibə və fövqəladə hallar zamanı",
+      "B": "Müəssisədə planlı təmir işləri aparıldıqda və avadanlıqlar yeniləndikdə",
+      "C": "İşçilərin tibbi müayinədən keçirilməsi zərurəti yarandıqda",
+      "D": "Yeni rəhbər heyətin təyinatı və struktur dəyişikliyi zamanı"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "88. Təxliyə zamanı insanlar necə hərəkət etməlidir?",
+    "options": {
+      "A": "Fərdi qərarlar əsasında və ən yaxın çıxışlara doğru qaçaraq",
+      "B": "Müəssisə rəhbərinin şifahi göstərişini gözləməklə",
+      "C": "Xüsusi siqnallar və rəsmi qurumların informasiyası əsasında",
+      "D": "Binanın yuxarı mərtəbələrinə doğru toplanaraq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "89. Təxliyə planı neçə hissədən ibarət olmalıdır?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "90. Təxliyə planı hansı hissələrdən ibarət olmalıdır?",
+    "options": {
+      "A": "Sxematik və rəqəmsal",
+      "B": "Qrafik və mətn",
+      "C": "Giriş və yekun",
+      "D": "Şəkilli və cədvəlli"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "91. Təxliyə planının qrafik hissəsinə nələr aiddir?",
+    "options": {
+      "A": "Qaçış yollarının, fövqəladə çıxışların və ya həyat qurtaran qurğuların yerləri, qəza çıxışları, tüstüdən azad pilləkənlər, xarici açıq pilləkənlərin sxematik təsviri",
+      "B": "Yanğın zamanı zəng edilməli olan qurumların telefon nömrələri və məsul şəxslərin siyahısı",
+      "C": "Binanın ümumi sahəsi, otaqların nömrələri və pəncərələrin yerləşmə sxemi",
+      "D": "Binanın daxili su şəbəkəsinin və elektrik xətlərinin mühəndis layihəsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "92. Təxliyə planının mətn hissəsinə nələr aiddir?",
+    "options": {
+      "A": "Binanın inşasında istifadə olunan materialların odadavamlılıq dərəcəsinin təsviri",
+      "B": "İlkin tibbi yardım çantalarının daxilindəki dərmanların siyahısı və istifadə qaydaları",
+      "C": "Fövqəladə vəziyyət barədə xəbərdarlıq üsulları, təxliyə qaydası və ardıcıllığı, insanların məsuliyyəti və hərəkətləri daxil olmaqla təsvir edilmişdir",
+      "D": "Müəssisənin sığorta şərtləri və qəza zamanı ödəniləcək kompensasiya məbləğləri"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "93. Təxliyə planları hansı bölmələr üzrə bölünür?",
+    "options": {
+      "A": "Mərtəbəli, bölmə, yerli və ümumi",
+      "B": "Fərdi, kollektiv, sahəvi və regional",
+      "C": "Daxili, xarici, əsas və köməkçi",
+      "D": "İlkin, növbəti, qəza və yekun"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "94. Əsas qəza çıxışlarına aparan yol hansı rənglə işarələnməlidir?",
+    "options": {
+      "A": "Qırmızı",
+      "B": "Sarı",
+      "C": "Göy",
+      "D": "Yaşıl"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "95. Təxliyə planındakı yazıların şriftinin hündürlüyü nə qədər olmalıdır?",
+    "options": {
+      "A": "3 mm",
+      "B": "5 mm",
+      "C": "7 mm",
+      "D": "10 mm"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "96. Yerli təxliyə planları nə üçün hazırlanır?",
+    "options": {
+      "A": "Fərdi otaqlar",
+      "B": "Bütün bina üçün",
+      "C": "Hər bir mərtəbə üçün ayrılıqda",
+      "D": "Müəssisənin həyətyanı sahəsi üçün"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "97. İlk yardım dedikdə nə nəzərdə tutulur?",
+    "options": {
+      "A": "Hadisə yerinə gələn təcili tibbi yardım həkimi tərəfindən edilən professional müdaxilə",
+      "B": "Xəstəxanada həkim nəzarəti altında aparılan reanimasiya tədbirləri",
+      "C": "Təsadüfi şahid tərəfindən minimal tibbi ləvazimatlarla və ya onsuz, vəziyyəti dəyərləndirdikdən sonra göstərilən tibbi yardım",
+      "D": "Aptek məntəqələrində resept əsasında verilən dərman müalicəsi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "98. Tibbi yardım ilə ilk yardım arasında nə kimi fərq var?",
+    "options": {
+      "A": "Tibbi yardımı yalnız tibb bacısı, ilk yardımı isə yalnız həkim edə bilər",
+      "B": "İlk yardımı istənilən şəxs edə bilər",
+      "C": "Aralarında heç bir fərq yoxdur, hər ikisi eyni anlayışdır",
+      "D": "İlk yardım yalnız xüsusi tibbi avadanlıqlarla xəstəxanada icra olunur"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "99. Yanğın baş verərkən ilk olaraq nə edilməlidir?",
+    "options": {
+      "A": "Dərhal insanların köçürülməsini həyata keçirmək, daha sonra yanğını söndürmək",
+      "B": "Yanğın söndürən maşınların gəlməsini gözləmək və heç bir müdaxilə etməmək",
+      "C": "Qiymətli sənədləri və mülkiyyəti binadan kənara çıxarmağa başlamaq",
+      "D": "Pəncərələri tam açaraq tüstünün təmizlənməsini təmin etmək"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "100. Yanğını nələrin vasitəsilə söndürmək olar?",
+    "options": {
+      "A": "Kimyəvi turşular, brezent parça, sintetik örtüklər",
+      "B": "Oksigen balonları, torpaq, su",
+      "C": "Su, qum, odsöndürən",
+      "D": "Alkoqollu məhlullar, sintetik köpük, neft"
+    },
+    "correct": "C"
+  }
+];
+
+/** ====== PARAMETRLƏR ====== */
+const QUESTION_COUNT = 25;
+const TIME_LIMIT = 30 * 60; // saniyə
+const SCORE_CORRECT = 2;
+const SCORE_WRONG = -1;
+
+/** ====== STATE ====== */
+let TIME = TIME_LIMIT;
+let interval = null;
+let started = false;
+
+let baseScore = 0;             // giriş balı
+let quizQuestions = [];        // seçilmiş 25 sual (şaffl edilmiş)
+let answers = new Map();       // idx -> seçilən variant (A/B/C/D)
+
+/** ====== UTIL ====== */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function formatTime(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function decodeHTML(str) {
+  // &lt; &gt; &quot; kimi entity-ləri real simvola çevirir
+  const t = document.createElement("textarea");
+  t.innerHTML = str;
+  return t.value;
+}
+
+function safeSetText(el, str) {
+  el.textContent = decodeHTML(str);
+}
+
+/** ====== QUIZ HAZIRLA ====== */
+function pickNewQuiz() {
+  const pool = ALL_QUESTIONS.slice();
+  shuffle(pool);
+  const picked = pool.slice(0, Math.min(QUESTION_COUNT, pool.length));
+
+  // hər sualda variantları qarışdır və correct hərfini yenilə
+  quizQuestions = picked.map((q) => {
+    const entries = Object.entries(q.options); // [ ["A","..."], ... ]
+    shuffle(entries);
+
+    const newOptions = {};
+    const letters = ["A","B","C","D"];
+    let newCorrect = null;
+
+    entries.forEach(([oldKey, val], idx) => {
+      const newKey = letters[idx];
+      newOptions[newKey] = val;
+      if (oldKey === q.correct) newCorrect = newKey;
+    });
+
+    return {
+      q: q.q,
+      options: newOptions,
+      correct: newCorrect
+    };
+  });
+
+  answers = new Map();
+  renderQuiz();
+  updateProgress();
+  document.getElementById("result").innerHTML = "";
+}
+
+function renderQuiz() {
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.dataset.index = String(idx);
+
+    const title = document.createElement("div");
+    title.className = "q-title";
+    safeSetText(title, q.q);
+
+    block.appendChild(title);
+
+    const letters = Object.keys(q.options);
+    letters.forEach((key) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = key;
+
+      input.addEventListener("change", () => {
+        answers.set(idx, key);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      // variantlar artıq &lt;...&gt; kimidir, ona görə innerHTML ilə göstəririk
+      span.innerHTML = `<b>${key})</b> `;
+      span.appendChild(document.createTextNode(decodeHTML(q.options[key])));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    });
+
+    // "Boş" (cavab verməmək) variantı
+    // Seçiləndə cavabı silirik ki, sistem bunu "boş" kimi saysın.
+    {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = "__SKIP__";
+
+      input.addEventListener("change", () => {
+        answers.delete(idx);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      span.innerHTML = `<b>E)</b> `;
+      span.appendChild(document.createTextNode("Boş (cavab yoxdur)"));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    }
+
+    quiz.appendChild(block);
+  });
+
+  document.getElementById("finishBtn").style.display = "block";
+}
+
+/** ====== TIMER ====== */
+function startTimer() {
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    TIME--;
+    document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(Math.max(TIME, 0));
+    if (TIME <= 0) {
+      clearInterval(interval);
+      finish(true);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  TIME = TIME_LIMIT;
+  document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(TIME);
+}
+
+/** ====== PROGRESS ====== */
+function calculateStats() {
+  let correct = 0, wrong = 0, skipped = 0;
+
+  quizQuestions.forEach((q, idx) => {
+    const sel = answers.get(idx);
+    if (!sel) {
+      skipped++;
+    } else if (sel === q.correct) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  return { correct, wrong, skipped };
+}
+
+function updateProgress() {
+  const { correct, wrong, skipped } = calculateStats();
+  const answered = correct + wrong;
+
+  document.getElementById("progressText").textContent = `Cavablanan: ${answered} / ${quizQuestions.length}`;
+  document.getElementById("okCount").textContent = String(correct);
+  document.getElementById("noCount").textContent = String(wrong);
+  document.getElementById("skipCount").textContent = String(skipped);
+
+  const pct = quizQuestions.length ? (answered / quizQuestions.length) * 100 : 0;
+  document.getElementById("barFill").style.width = pct.toFixed(1) + "%";
+}
+
+/** ====== FINISH ====== */
+function finish(auto=false) {
+  // bir dəfə bitirsin
+  document.getElementById("finishBtn").disabled = true;
+  if (interval) clearInterval(interval);
+
+  const { correct, wrong, skipped } = calculateStats();
+  const examScore = correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+  const score = baseScore + correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+
+  // blokları rənglə
+  const blocks = document.querySelectorAll(".question-block");
+  blocks.forEach((block) => {
+    const idx = Number(block.dataset.index);
+    const q = quizQuestions[idx];
+    const sel = answers.get(idx);
+
+    block.classList.remove("correct-ans", "wrong-ans", "skipped-ans");
+
+    if (!sel) block.classList.add("skipped-ans");
+    else if (sel === q.correct) block.classList.add("correct-ans");
+    else block.classList.add("wrong-ans");
+
+    // doğru cavabı yaz
+    const info = document.createElement("div");
+    info.style.marginTop = "10px";
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + (!sel ? "b-skip" : (sel === q.correct ? "b-ok" : "b-no"));
+    badge.textContent = !sel ? "BOŞ" : (sel === q.correct ? "DÜZ" : "SƏHV");
+
+    const text = document.createElement("span");
+    text.className = "muted";
+    text.style.marginLeft = "8px";
+    const selTxt = sel ? sel : "-";
+    text.innerHTML = `Sənin cavabın: <b>${selTxt}</b> · Düzgün cavab: <b>${q.correct}</b>`;
+
+    info.appendChild(badge);
+    info.appendChild(text);
+
+    // eyni sualda təkrar finish etməsin deyə əvvəlki info-ları sil
+    const old = block.querySelector(".muted")?.parentElement;
+    if (old && old.parentElement === block && old !== info) {
+      // nothing
+    }
+    // remove previous info blocks if exists
+    [...block.querySelectorAll("div")].forEach(d => {
+      if (d !== block.firstChild && d.className === "" && d.querySelector(".badge")) d.remove();
+    });
+    block.appendChild(info);
+  });
+
+  const result = document.getElementById("result");
+  result.innerHTML = `
+    <hr />
+    <h3>Nəticə</h3>
+    <div class="row">
+      <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
+      <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
+      <div><b>Boş:</b> ${skipped}</div>
+    </div>
+    <p><b>Sınaq balı:</b> ${examScore}</p>
+    <p><b>Giriş balı:</b> ${baseScore}</p>
+    <p style="font-size: 18px;"><b>Yekun bal:</b> ${score}</p>
+    <button type="button" onclick="location.reload()">Yenidən başla</button>
+  `;
+
+  if (auto) {
+    const warn = document.createElement("p");
+    warn.style.color = "#c0392b";
+    warn.innerHTML = "<b>Vaxt bitdi!</b> İmtahan avtomatik tamamlandı.";
+    result.prepend(warn);
+  }
+}
+
+/** ====== START ====== */
+function askBaseScore() {
+  const raw = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+  const val = Number(raw);
+  if (Number.isFinite(val) && val >= 0 && val <= 50) return Math.floor(val);
+  return 0;
+}
+
+function start() {
+  if (started) return;
+  started = true;
+
+  baseScore = askBaseScore();
+  resetTimer();
+  pickNewQuiz();
+  startTimer();
+
+  document.getElementById("finishBtn").addEventListener("click", () => finish(false));
+  document.getElementById("regenBtn").addEventListener("click", () => {
+    if (confirm("Yeni 25 sual seçilsin? (mövcud cavablar silinəcək)")) {
+      document.getElementById("finishBtn").disabled = false;
+      resetTimer();
+      startTimer();
+      pickNewQuiz();
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (confirm("Bütün cavablar silinsin?")) {
+      answers = new Map();
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      document.getElementById("result").innerHTML = "";
+      document.getElementById("finishBtn").disabled = false;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", start);
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  if(document.body.classList.contains("dark")){
+    localStorage.setItem("theme","dark");
+  } else {
+    localStorage.setItem("theme","light");
+  }
+}
+
+window.addEventListener("load", function(){
+  if(localStorage.getItem("theme")==="dark"){
+    document.body.classList.add("dark");
+  }
+});
+
+</script>
+</body>
+</html>
