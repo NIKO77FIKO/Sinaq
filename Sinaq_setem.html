@@ -1,0 +1,3413 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Sınaq Sistemi By Nurali and Nihat</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; margin-top: 5px; }
+    h2 { text-align: center; color: #333; margin-top: 5px; }
+    #meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin: 10px 0 20px; }
+    #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; flex: 0 0 220px; }
+    #progress { flex: 1; min-width: 220px; background:#f0f0f0; border-radius: 5px; padding: 10px; }
+    .bar { height: 10px; background: #ddd; border-radius: 999px; overflow:hidden; }
+    .bar > div { height: 100%; width: 0%; background: #2ecc71; }
+    #progress small { display:block; color:#555; margin-top:6px; }
+    .question-block { margin-bottom: 16px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.2s; }
+    .question-block:hover { border-color:#cfcfcf; }
+    .q-title { font-weight: 700; margin-bottom: 10px; }
+    .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 6px; border: 1px solid #eee; user-select:none; }
+    .option:hover { background: #f9f9f9; }
+    .option input { margin-right: 8px; }
+    button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; }
+    button:hover { background: #27ae60; }
+    #result { margin-top: 20px; }
+    .correct-ans { background-color: #d4edda !important; border-color:#c3e6cb !important; }
+    .wrong-ans { background-color: #f8d7da !important; border-color:#f5c6cb !important; }
+    .skipped-ans { background-color: #fff3cd !important; border-color:#ffeeba !important; }
+    .badge { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .b-ok { background:#d4edda; }
+    .b-no { background:#f8d7da; }
+    .b-skip { background:#fff3cd; }
+    .muted { color:#666; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .row > div { flex:1; min-width: 200px; }
+    .top-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+    .secondary { background:#3498db; }
+    .secondary:hover { background:#2d86c1; }
+    .danger { background:#e74c3c; }
+    .danger:hover { background:#d63c2f; }
+    .danger { margin-bottom: 25px; }
+  
+/* ===== DARK MODE ===== */
+body.dark { background-color: #121212 !important; color: #e0e0e0 !important; }
+body.dark .container { background: #1e1e1e !important; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
+body.dark h1, body.dark h2 { color: #ffffff !important; }
+body.dark #timer { background:#c0392b !important; }
+body.dark #progress { background:#2a2a2a !important; }
+body.dark .bar { background:#444 !important; }
+body.dark .question-block { background:#1a1a1a !important; border-color:#333 !important; }
+body.dark .option { border-color:#333 !important; }
+body.dark .option:hover { background:#2a2a2a !important; }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <h2>By Nurali and Nihat</h2>
+    
+    <div id="meta">
+      <div id="timer">Qalan vaxt: 30:00</div>
+      <div id="progress">
+        <div class="bar"><div id="barFill"></div></div>
+        <small id="progressText">Cavablanan: 0 / 25</small>
+        <small class="muted">Düz: <b id="okCount">0</b> · Səhv: <b id="noCount">0</b> · Boş: <b id="skipCount">25</b></small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" onclick="toggleTheme()" class="secondary">🌙 Dark / Light</button>
+      <button class="secondary" id="regenBtn" type="button">25 sualı yenidən seç (random)</button>
+      <button class="danger" id="clearBtn" type="button">Cavabları sıfırla</button>
+    </div>
+
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" type="button" style="display:none;">İmtahanı Bitir</button>
+    <div id="result"></div>
+  </div>
+
+<script>
+/** ====== MƏLUMAT ====== */
+const ALL_QUESTIONS = [
+  {
+    "q": "1. SƏTƏM nə deməkdir?",
+    "options": {
+      "A": "Sağlamlıq, əməyin təhlükəsizliyi və ətraf mühitin mühafizəsi",
+      "B": "Sənaye, əmək, təhsil və mədəniyyət",
+      "C": "Səhiyyə, ekologiya, təhlükəsizlik və idarəetmə",
+      "D": "Sosial əmək və təsərrüfatın mühafizəsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "2. Sağlamlıq nədir?",
+    "options": {
+      "A": "Yalnız idmanla məşğul olmaq halı",
+      "B": "Orqanizmin bədən üzvlərinin hamısının öz funksiyasını tam yerinə yetirdiyi hal, ağrı və xəstəliyin olmaması",
+      "C": "Hər gün tibbi müayinədən keçmək prosesi",
+      "D": "Yalnız fiziki gücün yüksək olması vəziyyəti"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "3. SƏTƏM-in iş prinsiplərinə nələr daxildir?",
+    "options": {
+      "A": "İnsanalara ziyan verməmək, mülkiyyətə, ətraf mühitə ziyan vurmamaq və bədbəxt hadisələrin qarşısını almaq",
+      "B": "Yalnız istehsalat planını doldurmaq və mənfəəti artırmaq",
+      "C": "İş vaxtını uzatmaq və xərcləri minimuma endirmək",
+      "D": "Yalnız sənədləşmə işlərini qaydaya salmaq"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "4. Sağlamlığı öyrənən elmlərə hansılar aiddir?",
+    "options": {
+      "A": "Riyaziyyat, fizika, kimya, biologiya",
+      "B": "Tarix, coğrafiya, sosiologiya, fəlsəfə",
+      "C": "Psixologiya, psixiatriya, tibbi sosiologiya, gigiyena",
+      "D": "Geologiya, astronomiya, anatomiya, ekologiya"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "5. Əmeiyin təhlükəsizliyi nədir?",
+    "options": {
+      "A": "İş yerində yüksək maaşın olmasıdır",
+      "B": "Şəxsin ciddi xəsarət alma riskinin olmamasıdır",
+      "C": "İşçinin hər gün təlim keçməsidir",
+      "D": "Müəssisənin mühafizə xidmətinin fəaliyyətidir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "6. Əmək mühafizəsinin məqsədi nədir?",
+    "options": {
+      "A": "İşçilərin asudə vaxtını təşkil etmək",
+      "B": "İstehsalatda işləyənlərə sağlam və təhlükəsiz əmək şəraitinin yaradılması və istehsalatda zərərçəkmə və peşə zədələnmələrinin və xəstəliklərinin qarşısını almaq",
+      "C": "İdarəetmə strukturunu təkmilləşdirmək",
+      "D": "Yalnız texnoloji avadanlıqların ömrünü uzatmaq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "7. Əmək mühafizəsi qarşısında duran məsələlər hansı qaydalar əsasında tənzim edilir?",
+    "options": {
+      "A": "Yalnız müəssisə rəhbərinin şifahi göstərişləri ilə",
+      "B": "Beynəlxalq konvensiyaların tərcüməsi əsasında",
+      "C": "Azərbaycan dövlətinin qüvvədə olan konstitutsiyasına uyğun, qanunvericilik aktları, əmək məcəlləsi, xüsusi qaydalar və normalar",
+      "D": "Yalnız işçilərin kollektiv tələbləri əsasında"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "8. Əmək mühafizəsi hansı fənnlərlə sıx əlaqədədir?",
+    "options": {
+      "A": "İstehsalat sanitariyası və gigiyena, əmək psixologiyası, istehsalat estetikası, erqonomika",
+      "B": "Ali riyaziyyat, nəzəri mexanika, materiallar müqaviməti",
+      "C": "İnformatika, kibernetika, statistika, iqtisadiyyat",
+      "D": "Botanika, zoologiya, coğrafiya, tarix"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "9. “Texnika ilə onu idarə edən insan arasındakı uyğunsuzluq nəticəsində təkcə 1900-1950-ci illər arasında, yəni cəmi 50 il ərzində 250 milyon adam həlak olması” haqqında hansı alim yazmışdır?",
+    "options": {
+      "A": "Lomonosov",
+      "B": "Q.Y.Panov",
+      "C": "Stekolnikov",
+      "D": "Pavlov"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "10. Dünya miqyasında hər bir gün ərzində neçə min insan avtomobil qəzaları ilə bağlı həlak olur?",
+    "options": {
+      "A": "10000",
+      "B": "50000",
+      "C": "250000",
+      "D": "500000"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "11. Ümumdünya Əməyin Mühafizəsi günü nə zamandır?",
+    "options": {
+      "A": "1 May",
+      "B": "28 aprel",
+      "C": "15 İyun",
+      "D": "31 Dekabr"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "12. Ümumdünya Əməyin Mühafizəsi günü Azərbaycanda neçənci ildən qeyd olunur?",
+    "options": {
+      "A": "1995",
+      "B": "2000",
+      "C": "2004",
+      "D": "2010"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "13. Əmək mühafizəsinə dair ilk elmi-tədqiqat işlərin hansı alim tərəfindən aparılmışdır?",
+    "options": {
+      "A": "Lomonosov",
+      "B": "Mendeleyev",
+      "C": "Nobel",
+      "D": "Nyuton"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "14. Əmək mühafizəsinin hansı əhəmiyyətli tərəfləri vardır?",
+    "options": {
+      "A": "Siyasi, mədəni və mənəvi",
+      "B": "İqtisadi, sosial və hüquqi",
+      "C": "Daxili, xarici və beynəlxalq",
+      "D": "Texniki, texnoloji və elmi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "15. Əmək mühafizəsi neçə müstəqil bölməni əhatə edir?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "16. Əmək mühafizəsi hansı müstəqil bölmələri əhatə edir?",
+    "options": {
+      "A": "İqtisadiyyat, menecment, marketinq, audit",
+      "B": "Əmək mühafizəsinə dair qanunvericilik, tibbi sığorta, əmək haqqı, məzuniyyət sistemi",
+      "C": "Əmək mühafizəsinin hüquqi və təşkilatı əsasları, istehsalat sanitariyasının əsasları, təhlükəsizlik texnikasının əsasları, yanğın təhlükəsizliyinin əsasları",
+      "D": "İlk yardım, xəstəxana daxili qaydalar, sığorta işi, ekologiya"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "17. Hansı alim tikinti obyektlərinin ildırımdan mühafizə məsələsini həll etmişdir?",
+    "options": {
+      "A": "Stekolnikov",
+      "B": "Panov",
+      "C": "Pavlov",
+      "D": "Lomonosov"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "18. İş prosesində ətraf mühitin mühafizəsi nə deməkdir?",
+    "options": {
+      "A": "Yalnız müəssisənin həyətini təmiz saxlamaq",
+      "B": "Əmək fəaliyyəti zamanı ətraf mühitin çirklənməsinə yol verməmək və çirklənmənin qarşısını almaq",
+      "C": "Ağacların və yaşıllıqların sayını hesablamaq",
+      "D": "Tullantıları digər ərazilərə daşımaq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "19. Atmosferin çirklənməsi hansı yolla və hansı halda baş verə bilər?",
+    "options": {
+      "A": "Təbii proseslər və insan fəaliyyətinin nəticəsində atmosferə yeni maddələrin qatılması və ya onun təbii durumunun dəyişilməsi",
+      "B": "Yalnız fəsillərin dəyişməsi nəticəsində",
+      "C": "Yalnız yağış və qar yağması halında",
+      "D": "Atmosferdə oksigen miqdarının öz-özünə artması ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "20. Ətraf mühitin çirklənməsinin əsas mənbəyi nədir?",
+    "options": {
+      "A": "Kosmik tədqiqatlar və peyklər",
+      "B": "Kənd təsərrüfatında heyvandarlığın inkişafı",
+      "C": "İstehsalat və cəmiyyətin həyat fəaliyyəti prosesində əmələ gələn külli miqdarda tulantıların atılması",
+      "D": "Yalnız vulkan püskürmələri"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "21. Son illərdə istehsalat proseslərinin yüksək texniki inkişafı işçilərin fəaliyyətinə nə kimi müsbət təsir göstərmişdir?",
+    "options": {
+      "A": "İş saatlarını yarıbayarı azaltmışdır",
+      "B": "İşçilərin fiziki yüklənməsini azaltmışdır",
+      "C": "Maaşların avtomatik artmasına səbəb olmuşdur",
+      "D": "İşçilərin təhsil səviyyəsini yüksəltmişdir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "22. İstehsalat proseslərinin yüksək texniki inkişafı işçilərin sağlamlığına nə kimi mənfi təsir göstərmişdir?",
+    "options": {
+      "A": "Fiziki gücün tamamilə itməsinə səbəb olur",
+      "B": "Onların hissiyat orqanlarının (görmə, eşitmə, yüksək diqqətliliyin) psixoloji yüklənməsinin artmasına, gərginləşməsinə səbəb olur",
+      "C": "Yuxusuzluq və iştahasızlıq yaradır",
+      "D": "İşçilərin daxili orqanlarının funksiyasını tam dayandırır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "23. İnsanların pisxoloji yükünün artmasına nə səbəb olur?",
+    "options": {
+      "A": "Maşın konstruksiyasının mürəkəbləşməsi",
+      "B": "İş yerində səssizliyin olması",
+      "C": "Əmək haqqının vaxtında verilməsi",
+      "D": "Yüngül fiziki işlərin yerinə yetirilməsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "24. İnsan və maşın qarşılıqlı əlaqələrinin öyrənilməsindən hansı elm sahələri meydana çıxmışdır?",
+    "options": {
+      "A": "Sosial psixologiya, kibernetika, maşınşünaslıq",
+      "B": "Əmək gigiyenası, mühəndis pisxologiyası, erqonomika",
+      "C": "Biologiya, fizika, antropologiya",
+      "D": "Sənaye sosiologiyası, idarəetmə, iqtisadiyyat"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "25. Erqonomika sözü nə deməkdir?",
+    "options": {
+      "A": "Latın sözü olub: erqo-insan, nomos-ətraf mühit",
+      "B": "Yunan sözü olub: erqon-iş, nomon-işə qanun",
+      "C": "İngilis sözü olub: erqo-təhlükəsizlik, nomos-qayda",
+      "D": "Alman sözü olub: erqon-maşın, nomon-nizam"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "26. Hansı elm sahəsi “İnsan-maşın-mühit\" sistemində istehsalat mühitini insan orqanizminin imkanlarına uyğunlaşdırmaq üçün tədbirlər işləyib hazırlayır?",
+    "options": {
+      "A": "Əmək gigiyenası",
+      "B": "Mühəndis psixologiyası",
+      "C": "Erqonomika",
+      "D": "Texniki estetika"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "27. Hansı elm sahəsi İMM sistemini örgənərək müxtəlif cihaz və idarəetmə orqanlarının optimal parametrlərini işləyib hazırlayır?",
+    "options": {
+      "A": "Əmək gigiyenası",
+      "B": "Mühəndis psixologiyası",
+      "C": "Sosial fəlsəfə",
+      "D": "Maşın hissələri"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "28. İMM sistemini örgənərək müxtəlif cihaz və idarəetmə orqanlarının optimal parametrlərini işlənib hazırlanmağınının müsbət nəticələri hansılardır ?",
+    "options": {
+      "A": "İşçilərin tez yorulmasının qarşısını almaq və əmək məhsuldarlığının yüksəlməsi",
+      "B": "Avadanlıqların maya dəyərinin aşağı düşməsi",
+      "C": "İş saatlarının rəsmi olaraq artırılması",
+      "D": "Müəssisədə fəhlə sayının azaldılması"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "29. Erqonomika nə haqqında elmdir?",
+    "options": {
+      "A": "Təbiət qanunları haqqında",
+      "B": "Maşınların daxili quruluşu haqqında",
+      "C": "Əmək qanunları haqqında",
+      "D": "Cəmiyyətin inkişafı haqqında"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "30. Erqonomika hansı elm sahələrinin örgəndiyi məslələri özündə birləşdirir?",
+    "options": {
+      "A": "Riyaziyyat, coğrafiya, tarix, sosiologiya",
+      "B": "Texniki, psixologiyann, fiziologiyanın, əməyin gigiyenasının",
+      "C": "Hüquq, iqtisadiyyat, siyasət, fəlsəfə",
+      "D": "Fizika, kimya, astronomiya, geologiya"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "31. Erqonomikanın əsas məqsədi nədir?",
+    "options": {
+      "A": "İMM sistemində əmək məhsuldarlığı ən yüksək, işçinin təhlükəsizliyi minimuma enməklə onun özünü hiss etməsini ən optimal olsun",
+      "B": "Yalnız maşınların sürətini artırmaq",
+      "C": "İşçilərin sayını maksimum dərəcədə çoxaltmaq",
+      "D": "Müəssisənin xarici görünüşünü gözəlləşdirmək"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "32. Erqonomika hansı məsələləri həll edir?",
+    "options": {
+      "A": "Məhsulun satışı və marketinq strategiyasını",
+      "B": "Əlverişli iş şəraitinin təmini, ən rahat işçi mühiti, işçi üzərinə düşən pisxoloji yükün azalması, işçiyə düşən fiziki yükün azalması",
+      "C": "Müəssisənin hüquqi sənədlərinin hazırlanmasını",
+      "D": "İşçilərin maaş və mükafat sisteminin təyinini"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "33. Texniki estetikanın məqsədi nədir?",
+    "options": {
+      "A": "Gözəl, eyni zamanda səmərəli forma və ölçülərdə avadanlıq yaratmaqdır",
+      "B": "Yalnız istehsalat binalarını rəngləməkdir",
+      "C": "İşçilərə bədii təhsil verməkdir",
+      "D": "Avadanlıqların mexaniki gücünü artırmaqdır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "34. Avadanlıqların rənginin düzgün seçilməsi işçilərə nə kimi təsir göstərir?",
+    "options": {
+      "A": "Onların diqqətini tamamilə yayındırır",
+      "B": "Göz yorğunluğunu artırır və işi ləngidir",
+      "C": "Onlara sevinc gətirir, əhval ruhiyyəsini, iş qabiliyyətini və işə əmək məhsuldarlığını artırır",
+      "D": "Heç bir psixoloji təsir göstərmir"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "35. İstehsalat prosesində yaranan zərərli və təhlükəli amillər insan orqanizminə təsirinə görə neçə qrupa bölünür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "36. İstehsalat prosesində yaranan zərərli və təhlükəli amillər insan orqanizminə təsirinə görə hansı qruplara bölünür?",
+    "options": {
+      "A": "Daxili, xarici, təbii, süni amillər",
+      "B": "Fiziki, kimyəvi, bioloji, psixofizioloji amillər",
+      "C": "Mexaniki, elektrik, istilik, səs amilləri",
+      "D": "Sosial, iqtisadi, hüquqi, mədəni amillər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "37. İnsan orqanizminə təsir göstərən zərərli fiziki amillərə nələr daxildir?",
+    "options": {
+      "A": "Zəhərli qazlar, turşular, qələvilər",
+      "B": "Bakteriyalar, viruslar, göbələklər",
+      "C": "İşçi zonadakı hava, yüksək tozluluq, qazlılıq, yüksək və ya alçağ temperatur, səs-küy və titrəyiş, ionlaşdırıcı elektromaqnit şüalar",
+      "D": "Zehni gərginlik, monotonluq, yorğunluq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "38. İnsan orqanizminə təsir göstərən zərərli kimyəvi amillərə nələr daxildir?",
+    "options": {
+      "A": "Səs-küy, vibrasiya, radiasiya",
+      "B": "Ümumi toksiklik, dağıdıcı, mutagen",
+      "C": "Monotonluq, fiziki gərginlik",
+      "D": "Bakteriyalar və patogen mikroorqanizmlər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "39. Kimyəvi qruptan olan zərərli istehsalat amilləri daha çox insan orqanizminin hansı nahiyyələrinə təsir göstərir?",
+    "options": {
+      "A": "Yalnız sümük sisteminə",
+      "B": "Tənəffüs yollarına və dəri örtüyünə",
+      "C": "Görmə və eşitmə orqanlarına",
+      "D": "Mərkəzi sinir sisteminə və ürəyə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "40. Bioloji zərərli istehsalat amillərinə nələr aiddir?",
+    "options": {
+      "A": "Elektromaqnit sahələri və rentgen şüaları",
+      "B": "Bakteriyalar, viruslar, göbələk törədici bakteriyalar, bitki və heyvanların bəziləri",
+      "C": "Toz, duman, dəm qazı",
+      "D": "Ağır fiziki əmək və oturaq iş şəraiti"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "41. Pisxofizioloji zərərli istehsalat amillərinə nələr aiddir?",
+    "options": {
+      "A": "Bakterioloji silahlar və virus infeksiyaları",
+      "B": "Sənaye zəhərləri və kaustik maddələr",
+      "C": "Bu insanın fiziki və əsəbi yüklənməsindən ibarət olmaqla özünü göstərir",
+      "D": "İnfrasəs və ultrasəs dalğaları"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "42. Fiziki yüklənmə özünü hansı halda gğstərir?",
+    "options": {
+      "A": "Daxili, xarici, qarışıq",
+      "B": "Müvəqqəti, daimi, dövri",
+      "C": "Statik, dinamik, hidrodinamik",
+      "D": "Yüngül, orta, kəskin"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "43. İnsanın əsəb yüklənməsinə nə səbəb ola bilər?",
+    "options": {
+      "A": "Zehni əmək gərginliyi, əməyin monotonluğu, həddindən artıq işləmə",
+      "B": "İş yerində idman fasilələrinin təşkili",
+      "C": "Rahat və erqonomik oturacaqların istifadəsi",
+      "D": "Fiziki hərəkətlərin tam olmaması"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "44. İstehsalat prosesində yaranan zərərli amillər nələrə yol aça bilir?",
+    "options": {
+      "A": "İş vaxtının qısalmasına və istirahətə",
+      "B": "Peşə zərərləri, peşə xəstəlikləri və ya peşə zəhərlənmələri",
+      "C": "Əmək haqqının artmasına və ixtisasa",
+      "D": "Müəssisənin texnoloji yenilənməsinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "45. Səs tellərinin müntəzəm gərginləşməsi nəticəsində hansı xəstəlik əmələ gələ bilir?",
+    "options": {
+      "A": "Xroniki laringit",
+      "B": "Pnevmoniya",
+      "C": "Bronxit",
+      "D": "Radikulit"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "46. Zərərli və təhlükəli amillərin səviyyəsini hansı cihazların köməyilə müəyyən etmək olar?",
+    "options": {
+      "A": "Barometr, hiqrometr, spidometr",
+      "B": "Şumomer, vibroqraf, termometr, anemometr, qazanalizator",
+      "C": "Voltmetr, ampermetr, multimetr",
+      "D": "Seysmoqraf, mikroskop, teleskop"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "47. Bina daxilində yüngül işlərdə işləyən işçilər və ağır işlərdə işləyən işçilər üçün havanın temperaturu nə qədər olmalıdır?",
+    "options": {
+      "A": "25-30; 20-22",
+      "B": "18-21; 14-16",
+      "C": "15-17; 10-12",
+      "D": "22-24; 18-20"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "48. Məzmun və təyinatına görə təlimatın hansı növləri var?",
+    "options": {
+      "A": "Yazılı, şifahi, əyani, praktiki",
+      "B": "Giriş, ilkin, vaxtaşırı, növbədən kənar və birdəfəlik",
+      "C": "Ümumi, xüsusi, daxili, xarici",
+      "D": "Hüquqi, texniki, tibbi, inzibati"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "49. Hansı işçilər travmatizimə daha həsassdır?",
+    "options": {
+      "A": "Orta yaşlı və təhsilli işçilər",
+      "B": "İş stajı bir ilə qədər olan və iş stajı çox olan",
+      "C": "Yalnız qadın işçilər",
+      "D": "İş stajı 5-10 il arası olan işçilər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "50. İşçilərin bədbəxt hadisələrə məruz qalma təhlükəsini gücləndirən amilləri neçə qrupa bölmək olar?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "51. İşçilərin bədbəxt hadisələrə məruz qalma təhlükəsini gücləndirən amilləri hansı рqruplara bölmək olar?",
+    "options": {
+      "A": "Fiziki və kimyəvi amillər",
+      "B": "Daxili və xarici amillər",
+      "C": "İşçilərin təhlükəyə daim məruz qalmasını artdıran və müvəqqəti artdıran",
+      "D": "Sosial və iqtisadi amillər"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "52. İşçilərin təhlükəyə daim məruz qalmasını artdıran səbəblərə nə aiddir?",
+    "options": {
+      "A": "İşçinin təcrübəsinin çox olması",
+      "B": "Xəstəlik və ya ona yaxın vəziyyətdə olan adamların əsəb sistemində və ya başqa orqanlarında daimi baş verən funksional dəyişikliklər",
+      "C": "İş yerində havalandırma sisteminin işləməsi",
+      "D": "Müvəqqəti yorğunluq və yuxusuzluq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "53. Təhlükəsizlik nöqteyi-nəzərincə insan iş seçimini necə etməlidir?",
+    "options": {
+      "A": "Yalnız ən yüksək maaş verən sahəyə görə",
+      "B": "İnsan öz maraq və qabiliyyətinə uyğun",
+      "C": "Evə ən yaxın məsafədə yerləşən yerə görə",
+      "D": "Yalnız dostlarının tövsiyəsi əsasında"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "54. Təcrübəsizlik iş yerlərində nələrə təsir edir?",
+    "options": {
+      "A": "Yalnız işçinin geyim formasına",
+      "B": "İşçinin bütün hərəkətlərinə, iş ritminə, tempinə və intensivliyinə",
+      "C": "Müəssisənin daxili nizam-intizam qaydalarına",
+      "D": "İşçilərin bir-biri ilə sosial əlaqələrinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "55. Ehtiyatsızlıq nə ile nəticələnə bilər?",
+    "options": {
+      "A": "İşin vaxtından tez bitməsi ilə",
+      "B": "Bədbəxt hadisə",
+      "C": "Əmək haqqının artması ilə",
+      "D": "Heç bir mənfi nəticə verməz"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "56. Yorğunluq nə zaman baş verir?",
+    "options": {
+      "A": "Orqanizimdə müxtəlif qüsurlardan",
+      "B": "Düzgün qidalanma zamanı",
+      "C": "Yaxşı istirahət etdikdən sonra",
+      "D": "Yüngül işləri icra edərkən"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "57. Pisxological yorğunluq nə zaman baş verir?",
+    "options": {
+      "A": "Əzələlərin həddindən artıq gərginliyi zamanı",
+      "B": "Mərkəzi sinir sisteminin yüklənməsi zamanı",
+      "C": "Açıq havada gəzinti zamanı",
+      "D": "Uzun müddət ac qaldıqda"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "58. ƏTSS-ə asasən istehsalatda görülən işlər fiziki əmək sərfi ilə əlaqədar neçə qrupa bölünür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "59. ƏTSS-ə asasən istehsalatda görülən işlər fiziki əmək sərfi ilə əlaqədar hansı qruplara bölünür?",
+    "options": {
+      "A": "Zehni, mexaniki, fiziki işlər",
+      "B": "Müəssisə daxili, açıq hava, qapalı sahə işləri",
+      "C": "Yüngül, orta və ağır işlər",
+      "D": "Daimi, müvəqqəti, mövsümi işlər"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "60. Hansı alim fikirincə “əsas yorulma mərkəzi əsəb sisteminin həddən artıq gərgin işlənməsindən asılıdır”?",
+    "options": {
+      "A": "Lomonosov",
+      "B": "Pavlov",
+      "C": "Panov",
+      "D": "Stekolnikov"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "61. Əmək mühafizəsinin hüquqi əsaları dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Müəssisə rəhbərliyinin daxili qərarları",
+      "B": "Qüvvədə olan qanunvericilik sistemi",
+      "C": "Yalnız beynəlxalq əmək müqavilələri",
+      "D": "Məhkəmə qərarlarının məcmusu"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "62. Əmək hüququnun mənbələri nəyin nəticəsidir?",
+    "options": {
+      "A": "Səlahiyyətli dövlət orqanlarının yaradıcılıq fəaliyyəti nəticəsidir",
+      "B": "Yalnız ənənə və adətlərin nəticəsidir",
+      "C": "İşçilərin tətillərinin nəticəsidir",
+      "D": "Müəssisə sahiblərinin qarşılıqlı razılaşmasıdır"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "63. Cəmiyyətin, dövlətin eləcədə işçi və işə götürənlərin maraqlarını nə əks etdirir?",
+    "options": {
+      "A": "Mülki hüquq",
+      "B": "Cinayət hüququ",
+      "C": "Əmək hüququ",
+      "D": "İnzibati hüquq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "64. Əmək hüququnun mənbələri içərisində ən mühümü və əsası hansıdır?",
+    "options": {
+      "A": "Azərbaycan Respublikasının 12 noyabr 1995-ci ildə qəbul edilmiş Konstitusiyası",
+      "B": "Əmək Mühafizəsi üzrə Dövlət Proqramı",
+      "C": "Həmkarlar İttifaqları haqqında Qanun",
+      "D": "Müəssisənin nizamnaməsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "65. Respublikanın qanunvericilik sisteminin əsası nədir?",
+    "options": {
+      "A": "Əmək Məcəlləsi",
+      "B": "Konstitusiya",
+      "C": "Prezident fərmanları",
+      "D": "Nazirlər Kabinetinin qərarları"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "66. Əmək hüququnun mənbələri içərisində başlıca yeri nə tutur?",
+    "options": {
+      "A": "Azərbayca Respublikasının əmək məcəlləsi",
+      "B": "Mülki Məcəllə",
+      "C": "Vergi Məcəlləsi",
+      "D": "İnzibati Xətalar Məcəlləsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "67. Əmək məcəlləsi nə zaman qüvvəyə minmişdir?",
+    "options": {
+      "A": "1995-ci il, noyabrın 12-si",
+      "B": "1999-cu il, iyulun 1-i",
+      "C": "2001-ci il, yanvarın 1-i",
+      "D": "2004-cü il, aprelin 28-i"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "68. Əmək müqaviləsi nədir?",
+    "options": {
+      "A": "İşçi ilə işəgötürən müəssisə arasında bağlanan kontraktdır",
+      "B": "Yalnız fəhlələr arasında bağlanan şifahi razılaşmadır",
+      "C": "Dövlət orqanları arasında bağlanan sazişdir",
+      "D": "Müəssisənin daxili nizamnamə sənədidir"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "69. Əmək müqavilələri necə bağlanır?",
+    "options": {
+      "A": "Məcburi şəkildə",
+      "B": "Sərbəst",
+      "C": "Yalnız dövlət təyinatı ilə",
+      "D": "Məhkəmə qərarı əsasında"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "70. Əmək müqaviləsi hansı zaman çərçivəsində bağlana bilər?",
+    "options": {
+      "A": "Yalnız 1 illik müddətə",
+      "B": "Müddətsiz və ya 5 ilədək",
+      "C": "Maksimum 10 illik müddətə",
+      "D": "Yalnız 6 aylıq sınaq müddətinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "71. Kollektiv müqavilə hansı zaman çərçivəsində bağlana bilər?",
+    "options": {
+      "A": "6 aydan 1 ilədək",
+      "B": "1 ildən, 3ilədək",
+      "C": "5 ildən 10 ilədək",
+      "D": "Həmişə müddətsiz bağlanır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "72. Əmək təhlükəsizliyinin Standartlar sisteminin məqsədi nədir?",
+    "options": {
+      "A": "Məhsulun keyfiyyətini və satış qiymətini standartlaşdırmaq",
+      "B": "İstehsalat amillərinə görə ümumi tələbatı, istehsalat prosesinə və istehsalat avadanlıqlarına ümumi təhlükəsizlik texnikası tələbatı, əmək təhlükəsizliyi fərdi mühafizə vasitələrinə tələbatını müəyyən etməkdir",
+      "C": "İşçilərin geyim formalarını eyniləşdirmək",
+      "D": "Yalnız iş saatlarının qrafikini tənzimləmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "73. ƏTSS neçənci ildə yaradılmışdır?",
+    "options": {
+      "A": "1960",
+      "B": "1970",
+      "C": "1974",
+      "D": "1985"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "74. ƏTSS nəçə kateqoriya standartlarını əhatə edir?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "75. ƏTSS hansı kateqoriya standartlarını əhatə edir?",
+    "options": {
+      "A": "Beynəlxalq, regional, milli və yerli standartlar",
+      "B": "Ümumittifaq dövlət, sahə, respublika və müəssisə standartları",
+      "C": "Texniki, ekoloji, sanitar və yanğın standartları",
+      "D": "Fərdi, kollektiv, xüsusi və ümumi standartlar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "76. İş vaxtının növləri hansılardır?",
+    "options": {
+      "A": "Gündüz, gecə və növbəli iş vaxtı",
+      "B": "Tam, qısaldılmış və natamam",
+      "C": "Daimi, müvəqqəti və mövsümi iş vaxtı",
+      "D": "Həftəlik, aylıq və illik iş vaxtı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "77. Gündəlik iş vaxtının müddəti nə qədərdir?",
+    "options": {
+      "A": "6 saat",
+      "B": "7 saat",
+      "C": "8 saat",
+      "D": "12 saat"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "78. İş vaxtından artıq işlərə kimlərin cəlb olunması qadağandır?",
+    "options": {
+      "A": "Yalnız yüksək ixtisaslı mütəxəssislərin",
+      "B": "Hamilə qadınlar və bir yaşınadək uşağı olan qadınlar",
+      "C": "İş stajı 10 ildən çox olan şəxslərin",
+      "D": "Yalnız rəhbər vəzifədə çalışanların"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "79. Bir yaşından 8 yaşınadək uşağı olan qadınlar və əlillər nə zaman iş vaxtından artıq işlərə cəlb oluna bilərlər?",
+    "options": {
+      "A": "Müəssisə rəhbərinin birtərəfli əmri ilə",
+      "B": "Yalnız onların razılığı ile",
+      "C": "Həmkarlar ittifaqının tələbi ilə",
+      "D": "Heç bir halda cəlb oluna bilməzlər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "80. Əmək qanunvericiliyinə əsasən hansı formada istirahət vaxtının verilməsi müəyyən edilmişdir?",
+    "options": {
+      "A": "Yalnız həftəsonu istirahəti",
+      "B": "İstirahət və nahar üçün fasilə, istirahət günləri, bayram günləri, illik məzuniyyət",
+      "C": "Yalnız iş vaxtı verilən qısa 5 dəqiqəlik fasilələr",
+      "D": "İşçinin öz istədiyi istənilən vaxtda işdən uzaqlaşması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "81. İşçinin bir iş günü ilə növbəti iş günü arasındakı gündəlik istirahət vaxtı ən az nəqədər olmalıdır?",
+    "options": {
+      "A": "8 saat",
+      "B": "10 saat",
+      "C": "12 saat",
+      "D": "24 saat"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "82. İşçilərə ödənişli məzuniyyət neçə gün verilməlidir?",
+    "options": {
+      "A": "15 gündən az olmayaraq",
+      "B": "21 gündən az olmayaraq",
+      "C": "30 gündən az olmayaraq",
+      "D": "14 təqvim günü"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "83. İş yerlərinin attestasiyasının keçirilməsi qaydaları necə tənzimlənir?",
+    "options": {
+      "A": "Azərbaycan Respublikası Nazirlər Kabineti tərəfindən qəbul edilən normativ-hüquqi aktla",
+      "B": "Yalnız müəssisənin daxili komissiyasının qərarı ilə",
+      "C": "Dövlət Satisitika Komitəsinin təlimatları əsasında",
+      "D": "Beynəlxalq Standartlaşdırma Təşkilatının qaydaları ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "84. Hansı işçilərə attestasiya keçirilə bilər?",
+    "options": {
+      "A": "Yeni işə qəbul olunmuş və sınaq müddətində olan işçilərə",
+      "B": "İş yerində ən azı bir il çalışmış işçilərə",
+      "C": "Yalnız müəssisənin rəhbər heyətinə",
+      "D": "Yalnız təqaüd yaşına çatmış işçilərə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "85. Attestasiya hansı məqsəd ilə həyata keçirilə bilər?",
+    "options": {
+      "A": "Yalnız işçilərin sayını ixtisar etmək üçün",
+      "B": "İşçilərin peşəkarlıq səviyyəsinin yoxlanılması, ixtisasına, sənətinə müvafiq olaraq onların tutduğu vəzifəyə uyğun olduğunu aşkara çıxarmaq",
+      "C": "İşçilərin siyasi baxışlarını öyrənmək üçün",
+      "D": "Müəssisənin illik gəlirini hesablamaq üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "86. Təxliyyə nədir?",
+    "options": {
+      "A": "İşçilərin digər vəzifəyə keçirilməsidir",
+      "B": "Əhalinin fəlakət zonasından çııxarılaraq təhlükəsiz ərazilərə yerləşdirilməsi",
+      "C": "Müəssisənin tamamilə bağlanması prosesidir",
+      "D": "Zədələnmiş avadanlıqların təmiri və bərpasıdır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "87. Nə zaman təxliyyə ehtiyyac yarana bilər?",
+    "options": {
+      "A": "İllik hesabat dövründə və audit zamanı",
+      "B": "Təbii fəlakətlər, istehsalat qəzaları, müharibə və fövqəladə hallar zamanı",
+      "C": "İşçilərin kütləvi şəkildə məzuniyyətə çıxması halında",
+      "D": "Yeni avadanlıqlar müəssisəyə gətirilərkən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "88. Təxliyyə zamanı insanların necə hərəkəti etməlidir?",
+    "options": {
+      "A": "Hər kəs öz bildiyi istiqamətdə və fərdi şəkildə",
+      "B": "Xüsusi siqnallar və rəsmi qrumların informasiyası əsasında",
+      "C": "Dərhal bütün əmlakı özü ilə götürməyə çalışaraq",
+      "D": "Heç bir yerə tərpənmədən gözləməklə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "89. Təxliyyə planı neçə hissədən ibarət olmalıdır?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "90. Təxliyyə planı hansı hissələrdən ibarət olmalıdır?",
+    "options": {
+      "A": "Rəqəmsal və mexaniki",
+      "B": "Qrafik və mətn",
+      "C": "Şifahi və yazılı",
+      "D": "Daxili və xarici"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "91. Təxliyyə planın qrafik hissəsinə nələr aiddir?",
+    "options": {
+      "A": "Müəssisənin rəhbərliyinin fotoşəkilləri və siyahısı",
+      "B": "Qaçış yollarının, fövqəladə çıxışların və ya həyat qurtaran qurğuların yerləri, qəza çıxışları, tüstüdən azad pilləkənlər, xarici açıq pilləkənlərinin sxematik təsviri",
+      "C": "Yanğın zamanı istifadə olunacaq kimyəvi maddələrin formulları",
+      "D": "İşçilərin ev ünvanları və telefon nömrələri sxemi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "92. Təxliyyə planın mətn hissəsinə nələr aiddir?",
+    "options": {
+      "A": "Müəssisənin tarixi və nailiyyətləri haqqında məlumatlar",
+      "B": "Fövqəladə vəziyyət barədə xəbərdarlıq üsulları, təxliyə qaydası və ardıcıllığı, insanların məsuliyyəti və hərəkətləri daxil olmaqla təsvir edilmişdir",
+      "C": "Əmək qanunvericiliyinin maddələrinin tam mətni",
+      "D": "İlkin tibbi yardım zamanı istifadə olunan dərmanların siyahısı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "93. Təxliyyə planları hansı bölmələr üzrə bölünür?",
+    "options": {
+      "A": "Siyasi, iqtisadi, hərbi və mülki",
+      "B": "Mərtəbəli, bölmə, yerli və ümumi",
+      "C": "Gündüz, gecə, növbəli və mövsümi",
+      "D": "İlkin, orta, son və yekun"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "94. Əsas qəza çıxışlarına aparan yol hansı rənglə işarələnməlidri?",
+    "options": {
+      "A": "Qırmızı",
+      "B": "Sarı",
+      "C": "Yaşıl",
+      "D": "Göy"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "95. Təxliyyə planındakı yazıların şriftin hündürlüyü nə qədər olmalıdır?",
+    "options": {
+      "A": "2 mm",
+      "B": "5 mm",
+      "C": "10 mm",
+      "D": "12 mm"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "96. Yerli təxliyyə planları nə üçün hazırlanır?",
+    "options": {
+      "A": "Bütün şəhər və qəsəbələr üçün",
+      "B": "Fərdi otaqlar",
+      "C": "Yalnız böyük anbarlar üçün",
+      "D": "Müəssisənin xarici ərazisi üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "97. İlk yardım dedikdə nə nəzərdə tutulur?",
+    "options": {
+      "A": "Xəstəxanada həkim tərəfindən aparılan cərrahiyyə əməliyyatı",
+      "B": "Təsadüfi şahid tərəfindən minimal tibbi ləvazimatlarla və ya onsuz, vəziyyəti dəyərləndirdikdən sonra göstərilən tibbi yardım",
+      "C": "Təcili yardım maşınında edilən professional müdaxilə",
+      "D": "Aptekdən dərman alıb xəstəyə vermək prosesi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "98. Tibbi yardım ilə ilk yardım arasında nə kimi fərq var?",
+    "options": {
+      "A": "Heç bir fərq yoxdur, hər ikisi eyni anlayışdır",
+      "B": "İlk yardımı istənilən şəxs edə bilər",
+      "C": "İlk yardımı yalnız xüsusi ali təhsilli həkimlər edə bilər",
+      "D": "Tibbi yardım daha tez və ləvazimatsız icra olunur"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "99. Yanğın baş verərkən ilk olaraq nə edilməlidir?",
+    "options": {
+      "A": "Sənədləri və qiymətli əşyaları seyfə yığmaq",
+      "B": "Dərhal insanların köçürülməsini həyata keçirmək, daha sonra yanğını söndürmək",
+      "C": "Yanğının səbəbini araşdırmağa başlamaq",
+      "D": "Müəssisə rəhbərinin gəlməsini gözləmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "100. Yanğını nələrin vasitəsilə söndürmək olar?",
+    "options": {
+      "A": "Oksigen balonu, sintetik parçalar, yağlar",
+      "B": "Su, qum, odsöndürən",
+      "C": "Yalnız quru ot və torpaq qarışığı",
+      "D": "Hər hansı bir kimyəvi qaz növü ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "101. İlkin yanğınsöndürmə cihazlarına nələr aiddir?",
+    "options": {
+      "A": "Avtomatik idarəetmə pultları, siqnal xətləri",
+      "B": "Yanğınsöndürmə balonları, şitləri, şlanqları, köpük generatorları, avtomatik yanğınsöndürmə sistemləri",
+      "C": "Təxliyə nərdivanları, xüsusi geyimlər",
+      "D": "Yanğın su hovuzları, qaz maskaları"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "102. Odsöndürənlərin vəziyyətinə baxış hansı müddətdən bir olmalıdır?",
+    "options": {
+      "A": "İldə 1 dəfə",
+      "B": "Həftədə 1 dəfə",
+      "C": "Ayda 1 dəfə (ən azı)",
+      "D": "3 ayda 1 dəfə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "103. Yanğın zamanı nə etmək olmaz?",
+    "options": {
+      "A": "Qapı və pəncərələri sıx bağlamaq",
+      "B": "Hava cərəyanı yaratmaq",
+      "C": "Təxliyə planına əməl etmək",
+      "D": "Yanğın söndürən balondan istifadə etmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "104. Təhlükəsizlik etiketləri hansı materiallardan hazırlanır?",
+    "options": {
+      "A": "Adi kağızdan",
+      "B": "Yapışqanlı vinildən",
+      "C": "Şüşə və keramikadan",
+      "D": "Sinklənmiş dəmirdən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "105. Xəbərdaredici nişanlardan nə üçün istifadə edilir?",
+    "options": {
+      "A": "İş vaxtının bitdiyini elan etmək üçün",
+      "B": "Müəssisənin maliyyə göstəricilərini nümayiş etdirmək üçün",
+      "C": "Müxtəlif təhlükəsizlik təlimatları, prosedur nişanları və digər ümumi məlumatları işçilərə çatdırmaq üçün",
+      "D": "İşçilərin davamiyyətinə nəzarət etmək üçün"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "106. Əmək gigiyenası nəyi örgənir?",
+    "options": {
+      "A": "Əmək prosesinin və istehsalat mühitinin insanın sağlamlığına və işgüzarlığına təsirini",
+      "B": "Yalnız bədbəxt hadisələrin statistik uçotunu",
+      "C": "İstehsal olunan məhsulların keyfiyyət standartlarını",
+      "D": "Avadanlıqların təmir xərclərini"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "107. Əmək gigiyenasının əsas məqsədi nədir?",
+    "options": {
+      "A": "İşçilərin maaşlarının artırılmasını təmin etmək",
+      "B": "Zəhmətkeşlərin sağlamlığının təmin olunmasına və ən əlverişli əmək şəraiti yaradılmasına yönəldilmiş sanitariya-gigiyena tədbirlərini hazırlamaqdan ibarətdir",
+      "C": "İstehsalat sahələrini genişləndirmək",
+      "D": "Müəssisənin xammal tədarükünü tənzimləmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "108. “Əməyin təşkilini, istirahəti onun forma və üsullarını, əmək fəaliyyəti prosesində orqanizmin vəziyyətini, işçinin hərəkətlərinə xarakterini və xüsusiyyətini, iş vaxtı insan bədəninin vəziyyətini” nə örgənir?",
+    "options": {
+      "A": "İstehsalat texnologiyası",
+      "B": "Əməyin gigiyenası",
+      "C": "Texniki təhlükəsizlik",
+      "D": "Erqonomika və logistika"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "109. “İşçilərə zərərli istehsalat amillərinin təsirinin qarşısını alan təşkilati, gigiyenik və sanitariya-texniki tədbirlər sistemi” dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Əmək müqaviləsi",
+      "B": "İstehsalat sanitariyası",
+      "C": "Mülki müdafiə",
+      "D": "Yanğın profilaktikası"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "110. Work yerlərinin mikroiqlimi nəyə təsir göstərir?",
+    "options": {
+      "A": "Yalnız məhsulun qablaşdırılmasına",
+      "B": "İşçinin sağlamlığına, təhlükəsizliyinə və onun əmək məhsuldarlığına",
+      "C": "Avadanlıqların amortizasiya müddətinə",
+      "D": "Müəssisənin daxili nizamnaməsinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "111. İstehsalat havasının meteoroloji şəraiti nələrlə xarakterizə edilir?",
+    "options": {
+      "A": "Temperatur, nisbi nəmlik, havanın hərəkət sürəti və təzyiqi, həmçinin qızdırılmış avadanlıq, emal edilmiş material və məmulatların istilik şüalanması",
+      "B": "Oksigen və azotun faiz nisbəti ile",
+      "C": "Tozun kimyəvi tərkibi və toksikliyi ilə",
+      "D": "İş qrafiki və növbəlilik ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "112. Optimal mikroiqlim şəraiti dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Orqanizmin soyuqdan titrədiyi şərait",
+      "B": "Orqanizmin normal funksional və istilik vəziyyəti asanlıqla termotənzimlənmə qabiliyyəti gərginləşmədən təmin olunur, istilik rahatlığı hissi yaranır",
+      "C": "Yüksək rütubətli və dumanlı mühit",
+      "D": "Süni olaraq yaradılmış oksigen çatışmazlığı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "113. Termotənzimləmə nə deməkdir?",
+    "options": {
+      "A": "Temperaturu ölçən cihazların təmiri",
+      "B": "Orqanizmin xarici mühitlə istilik mübadiləsini tənzimləmə qabiliyyəti",
+      "C": "Havada olan su buxarının artması",
+      "D": "İstehsalat tullantılarının utilizasiyası"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "114. Bədənin sabit istilik göstəricisi nədir?",
+    "options": {
+      "A": "35,5",
+      "B": "36,6",
+      "C": "37,2",
+      "D": "38,0"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "115. İnsan orqanizmində həyat fəaliyyəti nəticəsində əmələ gələn istilik ətraf mühitə hansı yollar ilə ötürülür?",
+    "options": {
+      "A": "Difvuziya, udulma, filtrasiya",
+      "B": "Konveksiya, şüalanma, buxarlanma",
+      "C": "Kondensasiya, ərimə, donma",
+      "D": "Şüalanma, konveksiya, sublimasiya"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "116. İnsan orqanizmində həyat fəaliyyəti nəticəsində əmələ gələn istilik ətraf mühitə neçə yolla ötürülür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "117. Güclü tərləmə zamanı orqanizmdən nələr kənar olunur?",
+    "options": {
+      "A": "Yalnız karbohidratlar",
+      "B": "Su və C, B vitaminləri",
+      "C": "Yağlar və kalsium",
+      "D": "Protein və A vitamini"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "118. Güclü tərləmə zamanı orqanizmdən su ilə birlikdə, C və B vitaminləri kənar olunarsa, bu zaman orqanizmdə hansı proseslər gedər?",
+    "options": {
+      "A": "Qan təzyiqi düşər və görmə kəskinləşər",
+      "B": "Qanın laxtalanması, qanda şəkər və kalsiumun miqdarının artması, mədə şirəsinin turşuluğunun azalması",
+      "C": "Maddələr mübadiləsi tamamilə dayanar",
+      "D": "Leykositlərin sayı sürətlə azalar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "119. Ətraf mühit temperaturunun artması orqanizmdən istilik ayrılmasını çətinləşdirməsi prosesi orqanizmdə nələrə səbəb olur?",
+    "options": {
+      "A": "İştaha artır, yuxusuzluq tamamilə yox olur",
+      "B": "Bədənin temperaturu artır, ürək döyüntüsü başlayır, tərləmə güclənir, diqqət zəifləyir, hərəkətlərin əlaqəliyi pozulur, görmə və eşitmə qabiliyyəti zəifləyir",
+      "C": "Qan dövranı sürətlənir bit əzələlər güclənir",
+      "D": "İmmunitet kəskin şəkildə yüksəlir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "120. Ətraf mühitin temperaturunun aşağı düşməsi zamanı bu orqanizmdə özünü necə göstərir?",
+    "options": {
+      "A": "Diqqət və konsentrasiya maksimum dərəcəyə çatır",
+      "B": "Bədən həddən artıq soyuyur, qan dövranı pozulur, qanın immunobioloji xassələri zəifləyir, nəfəs yolları xəstələnir, yel zökəm və digər soyuqdəymə xəstəlikləri yaranır",
+      "C": "Tərləmə prosesi sürətlənir",
+      "D": "Mədə şirəsinin ifrazı tamamilə dayanar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "121. Atmosfer təzyiqinin dəyişməsi zamanı orqanizmdə nə baş verə bilər?",
+    "options": {
+      "A": "Sümək sıxlığının artması",
+      "B": "Zəiflik, baş gicəllənməsi, ürək bulanması, burun və ağızdan qan axması",
+      "C": "Eşitmə qabiliyyətinin kəskin artması",
+      "D": "Dəri rənginin tamamilə ağarması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "122. Yüngül işlərdə otağın istilik dərəcəsi neçə dərəcə olmalıdır?",
+    "options": {
+      "A": "14-16 dərəcə",
+      "B": "16-18 dərəcə",
+      "C": "18-21 dərəcə",
+      "D": "22-25 dərəcə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "123. Orta ağırlıqlı işlərdə otağın istilik dərəcəsi neçə dərəcə olmalıdır?",
+    "options": {
+      "A": "14-16 dərəcə",
+      "B": "16-18 dərəcə",
+      "C": "18-21 dərəcə",
+      "D": "25-28 dərəcə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "124. Ağır işlərdə otağın istilik dərəcəsi neçə dərəcə olmalıdır?",
+    "options": {
+      "A": "14-16 dərəcə",
+      "B": "16-18 dərəcə",
+      "C": "18-21 dərəcə",
+      "D": "10-12 dərəcə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "125. Havada olan su buxarının qramlarla miqdarına nə deyilir?",
+    "options": {
+      "A": "Nisbi nəmlik",
+      "B": "Mütləq nəmlik",
+      "C": "Kondensasiya dərəcəsi",
+      "D": "Atmosfer rütubəti"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "126. Toz əsasən insanın hansı orqanına təsir edir?",
+    "options": {
+      "A": "Həzm orqanlarına",
+      "B": "Tənəffüs orqanlarına",
+      "C": "Dayaq-hərəkət sisteminə",
+      "D": "Sinir sisteminə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "127. İstehsalat tozlarının mənşəyinə görə hansı növləri var?",
+    "options": {
+      "A": "Yumşaq, bərk, maye",
+      "B": "Üzvi, qeyri-üzvi, qarışıq",
+      "C": "Təbii, süni, sintetik",
+      "D": "Toksik, neytral, radioaktiv"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "128. Üzvi tozlara nələr aiddir?",
+    "options": {
+      "A": "Sement və qum tozları",
+      "B": "Bitki və heyvan mənşəli tozlar",
+      "C": "Metal və kömür qırıntıları",
+      "D": "Kimyəvi reaktivlər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "129. Qeyri-üzvi tozlara nələr aiddir?",
+    "options": {
+      "A": "Pambıq və un tozları",
+      "B": "Mineral duzlar, sement, saxsı, metal tozları",
+      "C": "Yun və ipək lifləri",
+      "D": "Ağac qırıntıları və qabıqlar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "130. Qarışıq tozlara nələr aiddir?",
+    "options": {
+      "A": "Yalnız süni liflər",
+      "B": "Üzvi və qeyri-üzvi tozlar",
+      "C": "Maye damcıları və qazlar",
+      "D": "Radioaktiv elementlər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "131. Toz insan bədəninin hansı hissələrinə zərərli təsir edir?",
+    "options": {
+      "A": "Yalnız dırnaqlara və saça",
+      "B": "Nəfəs yoluna, ciyərlərə, gözlərə və dəriyə",
+      "C": "Dayaq-hərəkət sisteminə",
+      "D": "Daxili sekresiya vəzilərinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "132. Tozların uzunmüddətli təsirindən nə baş verə bilər?",
+    "options": {
+      "A": "Sümük sınmaları",
+      "B": "Nəfəs yollarında iltihab prosesi",
+      "C": "Görmə qabiliyyətin tamamilə itməsi",
+      "D": "Qan təzyiqinin kəskin düşməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "133. Mineral tozlar əsasən hara təsir edir?",
+    "options": {
+      "A": "Ciyərlərə",
+      "B": "Dəriyə",
+      "C": "Mədəyə",
+      "D": "Sümüklərə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "134. İşlədilmə tərzindən asılı olaraq mühafizə vasitələri neçə qrupa bölünür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "135. İşlədilmə tərzindən asılı olaraq mühafizə vasitələri hansı qruplara bölünür?",
+    "options": {
+      "A": "Daxili və xarici",
+      "B": "Kollektiv və fərdi",
+      "C": "Əsas və köməkçi",
+      "D": "Keçici və daimi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "136. Travmalar neçə cür olur?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "137. Travmaların hansı növləri vardır?",
+    "options": {
+      "A": "Yüngül, orta, kəskin",
+      "B": "İstehsalat travması, peşə xəstəliyi və peşə zəhərlənmələri",
+      "C": "Mexaniki, kimyəvi, bioloji",
+      "D": "Daxili, xarici, qarışıq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "138. Travma nədir?",
+    "options": {
+      "A": "Uzun sürən xroniki xəstəliyin kəskinləşməsi",
+      "B": "Qəfil xarici təsir nəticəsində insan orqanizmində toxumaların ani olaraq zədələnməsi və ya öz fizioloji funksiyasını dəyişməsi",
+      "C": "Müəssisədə avadanlığın sıradan çıxması",
+      "D": "İş rejiminin pozulması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "139. Travma sözünün mənası nə deməkdir?",
+    "options": {
+      "A": "Latın sözü olub, xəstəlik deməkdir",
+      "B": "Yunan sözü olub, zədələnmə, əzilmə, xəsarət alma deməkdir",
+      "C": "Ərəb sözü olub, bədbəxt hadisə deməkdir",
+      "D": "İngilis sözü olub, təhlükə deməkdir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "140. İstehsalat travması nəyin təsirindən baş verə bilər?",
+    "options": {
+      "A": "Yalnız yorğunluqdan",
+      "B": "Cərəyanın təsirindən, kimyəvi zəhərlənmədən, radioaktiv şüalanmadan, qeyri-normal əmək şəraitində",
+      "C": "İş vaxtının düzgün bölünməməsindən",
+      "D": "Yalnız psixoloji gərginlikdən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "141. Peşə xəstəliyi nədir?",
+    "options": {
+      "A": "Ev şəraitində yoluxan virus xəstəliyi",
+      "B": "Müəyyən iş üçün səciyyəvi olan zərərli istehsalat amillərinin təsiri nəticəsində inkişaf edən xəstəlik",
+      "C": "Anadan gəlmə patoloji qüsur",
+      "D": "İdman zədələnmələri"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "142. Peşə zəhərlənmələri hansı formalarda ola bilər?",
+    "options": {
+      "A": "Keçici və qalıcı",
+      "B": "Şiddətli və xronik",
+      "C": "Gizli və aşkar",
+      "D": "Yüngül və ağır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "143. İstehsalat prosesində nə zaman insan orqanizmində zəhərlənmə baş verə bilər?",
+    "options": {
+      "A": "Keyfiyyətsiz qida qəbul etdikdə",
+      "B": "Zəhərli preparatlardan ayrılan hissəciklərin insan orqanizminə təsiri nəticəsində",
+      "C": "Otağın havası çox isti olduqda",
+      "D": "Fiziki işlə həddindən artıq məşğul olduqda"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "144. İstehsalat zərərçəkmələri və peşə xəstəliklərinin əsas səbəblərini neçə qrupa ayırmaq olar?",
+    "options": {
+      "A": "4",
+      "B": "5",
+      "C": "6",
+      "D": "7"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "145. İstehsalat zərərçəkmələri və peşə xəstəliklərinin əsas səbəblərini hansı qruplara ayırmaq olar?",
+    "options": {
+      "A": "İlkin, orta, sonrakı səbəblər",
+      "B": "Texniki, təşkilati, sanitar-gigiyenik, psixofizioloji, yanğın, maddi səbəblər",
+      "C": "İqlim, coğrafi, bioloji səbəblər",
+      "D": "Şəxsi, ailəvi, ictimai səbəblər"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "146. Bədbəxt hadisələr nəticəsində işçilərdə hansı xəsarət halları yarana bilər?",
+    "options": {
+      "A": "Yalnız yüngül qorxu hissi yaranır",
+      "B": "Əmək qabiliyyəti müvəqqəti itir, yaralanır, müəyyən dərəcədə əlil qalır, ölüm baş verə bilər",
+      "C": "İşə davamiyyət kəskin şəkildə artır",
+      "D": "Heç bir ciddi xəsarət yaranmır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "147. Müəssisədə bədbəxt hadisələr baş vermə şəraitinə, xüsusiyyətinə və vəziyyətinə görə hansı qruplara bölünür?",
+    "options": {
+      "A": "Zavoddaxili və zavodxarici",
+      "B": "İstehsalatla əlaqəsi olmayan, istehsalatla əlaqəsi olan, məişətlə əlaqədar olan bədbəxt hadisələr",
+      "C": "Qış və yay aylarında baş verənlər",
+      "D": "Təbii və süni bədbəxt hadisələr"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "149. İstehsalatla əlaqəsi olmayan bədbəxt hadisələr necə baş verə bilər?",
+    "options": {
+      "A": "Rəhbərliyin birbaşa tapşırığı yerinə yetirilərkən",
+      "B": "İşçi, müəssisənin avadanlıqlarından öz şəxsi məqsədi üçün istifadə etdikdə",
+      "C": "İş yerində yanğın baş verdikdə",
+      "D": "İstehsalat intizamına tam əməl olunduqda"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "150. İstehsalatla əlaqəsi olan bədbəxt hadisələr necə baş verə bilər?",
+    "options": {
+      "A": "Istirahət günündə evdə təmir işləri apararkən",
+      "B": "Müəssisənin daxili nizam qaydalarına zidd olmayacaq formada istehsalat tapşırığını yerinə yetirərkən",
+      "C": "Şəxsi avtomobillə qonaqlığa gedərkən",
+      "D": "İş vaxtından kənar, tamamilə şəxsi məqsədlərlə avadanlıq işlədərkən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "151. Məişətlə əlaqədar olan bədbəxt hadisələr nə zaman baş verə bilər?",
+    "options": {
+      "A": "Fabrikdə növbə zamanı iş başında olduqda",
+      "B": "Evdə, ailədə, istirahət günlərində, məzuniyyətdə, şəxsi maşınla işə gedib-gəldikdə, yolda",
+      "C": "Ezamiyyətdə rəsmi tapşırıq icra edilərkən",
+      "D": "Müəssisənin idman zalında yarış zamanı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "152. Xəsarət nəyə deyilir?",
+    "options": {
+      "A": "Sümük toxumasının yaşla əlaqədar aşınmasına",
+      "B": "Hər hansı bir xarici faktorun təsirindən toxumanın və orqanın anatomik tamlığını və ya anatomik tamlığı saxlanmaqla fizioloji funksiyasının pozulmasına deyilir",
+      "C": "Bədənin daxili temperaturunun sabit qalmasına",
+      "D": "Hüceyrələrin təbii yenilənmə prosesinə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "153. Xəsarətlərin hansı növləri vardır?",
+    "options": {
+      "A": "Səthi və dərin",
+      "B": "Yüngül, az ağır, ağır",
+      "C": "Keçici, xroniki, kəskin",
+      "D": "Daxili, xarici, görünməyən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "154. Yüngül bədən xəsarəti dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Həyatın tamamilə təhlükə altına düşməsi",
+      "B": "Səhhətin qısa müddətə pozulmasına və ya əmək qabiliyyətinin uzun müddətə cüzi itirilməsinə",
+      "C": "Orqanın funksiyasının tamamilə məhv olması",
+      "D": "Əmək qabiliyyətinin ömürlük itirilməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "155. Az ağır bədən xəsarəti dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Heç bir tibbi müdaxilə tələb olunmayan kiçik cızıqlar",
+      "B": "Həyat üçün təhlükəli olmayan, lakin səhhətin uzun zaman pozulmasına və ya əmək qabiliyyətinin üçdə bir hissəsindən az olmaqla uzun müddətə itirilməsi",
+      "C": "İnsanın ani olaraq huşunu itirib dərhal ayılması",
+      "D": "Ölüm təhlükəsi yaradan zədələr"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "156. Ağır bədən xəsarətləri dedikdə nə başa düşülür?",
+    "options": {
+      "A": "Səhhətin 2-3 gün ərzində tam bərpa olunması",
+      "B": "Həyat üçün təhlükəli olan və hər hansı orqanın funksiyasının itirilməsinə və ya səhhətin başqa cür pozulmasına",
+      "C": "Dərinin səthi cızılması və ya qızarması",
+      "D": "Müvəqqəti yorğunluq hissi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "157. İstehsalat zədələnmələri və ya peşə xəstələnmələri hansı üsullarla təhil olunur?",
+    "options": {
+      "A": "Yalnız şifahi sorğu vasitəsilə",
+      "B": "Statistik, qrup, topoqrafik, texniki, monoqrafik, iqtisadi, erqonomik və psixofizioloji",
+      "C": "Vizual və riyazi modelləşdirmə olmadan, təxmini üsullarla",
+      "D": "Yalnız tibbi ekspertizanın rəyi ilə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "158. Zədələnmiş bir şəxsə ilk tibbi yardım göstərmək nəyə görə vacibdir?",
+    "options": {
+      "A": "Həkimlərin işini tamamilə əvəz etmək üçün",
+      "B": "Zədələnən adamın vəziyyətini yüngülləşdirmək və ağır nəticələrin qarşısının almaq üçün",
+      "C": "Müəssisənin cərimələnməsinin qarşısını almaq üçün",
+      "D": "Xəsarət alan şəxsi dərhal işə qaytarmaq üçün"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "159. Yaralanmanın təhlükəliliyi nədən asılıdır?",
+    "options": {
+      "A": "Yaralanma anındakı hava şəraitindən",
+      "B": "Qanaxma olub-olmamasından və ya yaraya infeksiya keçib-keçməməsindən",
+      "C": "Yaralanan şəxsin yaşından və peşəsindən",
+      "D": "Hadisənin baş verdiyi növbədən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "160. Açıq olan bir yaralanmada ilk olaraq nə etmək lazımdır?",
+    "options": {
+      "A": "Yaraya su töküb gözləmək",
+      "B": "Qanaxma saxlanılmalı və yaraya mikrob keçməsinin qarşısı alınmalı",
+      "C": "Yaralanan hissəni intensiv şəkildə masaj etmək",
+      "D": "Dərhal sümüyün vəziyyətini yoxlamaq üçün ətrafı hərəkət etdirmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "161. Arteriyadan gələn qan hansı formada olur?",
+    "options": {
+      "A": "Tünd qırmızı rəngdə olub, sızıntı ilə axır",
+      "B": "Al qırmızı rəng olub, güclü axınla axır",
+      "C": "Mavi rəngə çalan tünd maye formasında olur",
+      "D": "Çox yavaş və damcı-damcı axır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "162. Venadan gələn qan hansı formada olur?",
+    "options": {
+      "A": "Al qırmızı rəngdə olub, fəvvarə vurur",
+      "B": "Tünd rəngdə olub, zəif axınla axır",
+      "C": "Sarımtıl rəngdə olub, dərhal quruyur",
+      "D": "Köpüklü və sürətli axır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "163. İltihab təhlükəsi törəməməsi üçün nə etmək lazımdır?",
+    "options": {
+      "A": "Yara yerinə isti kompres qoymaq",
+      "B": "Yara yerini dizenfeksiya etmək və bağlamaq",
+      "C": "Yaraya toxunmayıb açıq saxlamaq",
+      "D": "Yara üzərinə toz səpmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "164. Çox sıx bağlanmış sarğı nəyə səbəb olur?",
+    "options": {
+      "A": "Qanaxmanın dərhal tamamilə kəsilməsinə",
+      "B": "Qan dövranını zəifləməsinə və güclü ağrıya",
+      "C": "Toxumaların daha tez sağalmasına",
+      "D": "İltihabın tamamilə yox olmasına"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "165. Sümük sınmaları hansı formalarda olur?",
+    "options": {
+      "A": "Yüngül, orta, ağır, kəskin",
+      "B": "Tam, çatlama, açıq, qapalı",
+      "C": "Daxili, xarici, xətti, şaquli",
+      "D": "Sadə, mürəkkəb, gizli, qalıcı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "166. Sınma zamanı zədələnmiş şəxsə ilk olaraq necə ilk tibbi yardım göstərilməlidir?",
+    "options": {
+      "A": "Sınmış sümüyü dartaraq yerinə salmaq",
+      "B": "Onu rahat vəziyyətə gətirmək və bədənin hərəkətsizliyini təmin etmək",
+      "C": "Zədələnmiş şəxsi dərhal ayağa qaldırıb yeritmək",
+      "D": "Sınmış nahiyəni isti su ilə yumaq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "167. Donma nədir?",
+    "options": {
+      "A": "Bədənin daxili temperaturunun qəfil yüksəlməsi",
+      "B": "Donma orqanizmin toxumalarının soyuğun təsiri ilə yerli zədələnmələrindən ibarətdir",
+      "C": "Atmosfer təzyiqinin aşağı düşməsi prosesi",
+      "D": "Dərinin nəm itirməsi nəticəsində quruması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "168. Donmada nə zaman zərərçəkəni həyata qaytarmar mümkün olmur?",
+    "options": {
+      "A": "Bədən temperaturu 30 dərəcəyə endikdə",
+      "B": "Bədən temperaturu 20 dərəcəyə endikdə",
+      "C": "Bədən temperaturu 25 dərəcəyə endikdə",
+      "D": "Nəfəs daxili mühitdə kəsildikdə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "169. Zəhərlənmənin ümumi göstəriciləri hansılardır?",
+    "options": {
+      "A": "Diqqətin artması, iştahanın açılması",
+      "B": "Baş gicəllənməsi, bədəndə ümumi zəiflik, ürək bulanması, qusma, bədənin temperaturu aşağı düşür və tərləmə baş verir",
+      "C": "Görmə və eşitmənin kəskinləşməsi, bədən temperaturunun artması",
+      "D": "Sümüklərdə şiddətli ağrı və dərinin bərkiməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "170. Yemək məhsulları ilə zəhərlənmə olduqda ilk nə etmək lazımdır?",
+    "options": {
+      "A": "Zərərçəkənə dərhal ağrıkəsici vermək",
+      "B": "Zərərçəkənin mədəsini tez yumaq lazımdır",
+      "C": "Onu dərhal yatırtmaq və hərəkətsiz saxlamaq",
+      "D": "İsti çay içirtmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "171. Günvurma və istivurma insan orqanizimində hansı göstəricilərlə müşahidə olunur?",
+    "options": {
+      "A": "İnsana gümrahlıq verir və qan dövranını tənzimləyir",
+      "B": "Orqanizminin normal fəaliyyətini pozur, ağrıya, yaxud huşun itirilməsinə",
+      "C": "Yalnız dərinin rənginin qaralması ile nəticələnir",
+      "D": "Mədə-bağırsaq sisteminin işini sürətləndirir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "172. Tənəffüs yollarının zəhərlənməsi zamanı ilk yardım necə göstərilməlidir?",
+    "options": {
+      "A": "Zərərçəkənə süni nəfəs verilmədən qapalı otaqda saxlanmalıdır",
+      "B": "Zərərçəkən təmiz havaya çıxarılmalıdır",
+      "C": "Onun sinəsinə ağır kompres qoyulmalıdır",
+      "D": "Üstünə soyuq su tökülməlidir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "173. I dərəcəli yanıq zamanı dəridə hansı dəyişikliklər baş verir?",
+    "options": {
+      "A": "Dərin yaralar və qanaxma olur",
+      "B": "Dəri qızarır və azacıq şişir",
+      "C": "Qızarmış dəridə böyük suluqlar əmələ gəlir",
+      "D": "Toxumalar tamamilə kömürləşir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "174. II dərəcəli yanıq zamanı dəridə hansı dəyişikliklər baş verir?",
+    "options": {
+      "A": "Dəri yalnız yüngülcə qızarır",
+      "B": "Qızarmış dəridə suluqlar əmələ gəlir",
+      "C": "Sümüyə qədər bütün toxumalar zədələnir",
+      "D": "Dəri dərhal quru qabıq bağlayır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "175. Cərəyan vurmuş adama ilk yardım olaraq nə edilməlidir?",
+    "options": {
+      "A": "Dərhal süni tənəffüs vermək",
+      "B": "Elektrik cərəyanının təsirindən xilas etmək",
+      "C": "Ürəyi masaj etmək",
+      "D": "Üstünə soyuq su tökmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "176. Cərəyan vurmuş adam pis nəfəs alır və ya tənəffüs fasiləli və səthidirsə nə etmək lazımdır?",
+    "options": {
+      "A": "Onun tamamilə ayılmasını gözləmək",
+      "B": "Süni tənəffüs",
+      "C": "Bədənini bərk-bərk ovuşdurmaq",
+      "D": "Onu oturaq vəziyyətə gətirmək"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "177. Ürəyin xaricdən masaj edilməsi nəyə imkan yaradır?",
+    "options": {
+      "A": "Nəfəs yollarının tam təmizlənməsinə",
+      "B": "Qan dövranının davam etməsinə",
+      "C": "Bədən temperaturunun dərhal yüksəlməsinə",
+      "D": "Sümüklərin yerinə oturmasına"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "179. Süni tənəffüs və ürəyin masajı düzgün edilərkən cərəyan vurmuş adamın dirilməsini göstərən hansı əlamətlər meydana çıxır?",
+    "options": {
+      "A": "Bədən temperaturu kəskin aşağı düşür",
+      "B": "Sifətin rəngi dəyişib və yaxşılaşır, sərbəst tənəffüs normallaşır, göz bəbəkləri daralır",
+      "C": "Göz bəbəkləri genəlir və hərəkətsiz qalır",
+      "D": "Nəbz tamamilə itir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "180. Elektrik cərəyanından zədələnmiş adamı özünə gətirmək üçün hansı üsulun istifadəsi üzgün deyildir?",
+    "options": {
+      "A": "Süni tənəffüs vermək",
+      "B": "Torpağa basdırmaq",
+      "C": "Ürəyi xaricdən masaj etmək",
+      "D": "Təmiz havaya çıxarmaq"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "181. Odsöndürücü maddə və tərkibləri yanmanı ləğv etmə prinsipinə görə neçə növə ayırmaq olar?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "182. Odsöndürücü maddə və tərkibləri yanmanı ləğv etmə prinsipinə görə hansı növlərə ayırmaq olar?",
+    "options": {
+      "A": "Qazlı, mayeli, bərk, tozvari",
+      "B": "Soyuducu, izoləedici, mühitə qarışanlar və yanma reaksiyasını tormozlayanlar",
+      "C": "Təbii, süni, kimyəvi, mexaniki",
+      "D": "Birbaşa, dolayı, köməkçi, əsas"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "183. Ən geniş yayılmış odsöndürücü vasitə nədir?",
+    "options": {
+      "A": "Köpük",
+      "B": "Su",
+      "C": "Bərk karbon",
+      "D": "Kimyəvi toz"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "184. Alovu parçalayaraq onu mexaniki surətdəsöndürən vasitə hansıdır?",
+    "options": {
+      "A": "Kimyəvi köpük",
+      "B": "Təzyiqlə vurulan su",
+      "C": "Bərk karbon qazı",
+      "D": "Quru qum"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "185. Yanğın zamanı su, köpük və digər vasitələrlə işləmək mümkün olmadığı hallarda nə istifadə edilir?",
+    "options": {
+      "A": "Yaş parça",
+      "B": "Bərk karbon",
+      "C": "Azot qazı",
+      "D": "Xlor məhlulu"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "186. Bərk karbonla, adətən hansı yanğınlar söndürülür?",
+    "options": {
+      "A": "Taxta və kağız anbarlarının yanğını",
+      "B": "Elektrik qurğularının, mühərriklərin, arxivlərin, muzey və sərgilərin",
+      "C": "Metal natrium və kalium yanğınları",
+      "D": "Açıq sahədəki quru ot yanğınları"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "187. Bərk karbon ilə hansı yanğınları söndürmək mümkün deyildir?",
+    "options": {
+      "A": "Elektrik naqillərinin yanğınını",
+      "B": "Maqnezium, metal natrium və kalium yanğınını",
+      "C": "Avtomobil mühərriklərinin yanğınını",
+      "D": "Arxiv materiallarının yanğınını"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "188. Geniş yayılmış izoləedici odsöndürmə vasitəsi nədir?",
+    "options": {
+      "A": "Təzyiqli su",
+      "B": "Köpük",
+      "C": "Karbon qazı",
+      "D": "Quru qum"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "189. Hazırlanma üsuluna görə köpüklərin hansı növləri vardır?",
+    "options": {
+      "A": "Təbii, süni, qarışıq",
+      "B": "Kimyəvi, hava-mexaniki, yüksək alınma nisbəti",
+      "C": "Maye, bərk, qazvari",
+      "D": "Yüngül, ağır, neytral"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "190. Hazırlanma üsuluna görə köpüklər hansı növləri olur?",
+    "options": {
+      "A": "Səthi, dərin, qalıcı",
+      "B": "Kimyəvi, hava-mexaniki və yüksək alınma nisbətli",
+      "C": "Süni, sintetik, kompozit",
+      "D": "Termiki, elektrik, mexaniki"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "191. Yanğının ilk mərhələsində nədən istifadə oluna bilər?",
+    "options": {
+      "A": "Avtomatik irihəcmli sistemlərdən",
+      "B": "Əl odsöndürücülərindən",
+      "C": "Yanğın söndürən maşınların nasoslarından",
+      "D": "Böyük su suanbarlarından"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "192. Əl odsöndürücləri od söndürmə vasitələrinin növünə görə hansı tərkibli ola bilər?",
+    "options": {
+      "A": "Yalnız sulu",
+      "B": "Köpüklü, qazlı, mayelivə ovuntu (toz)",
+      "C": "Yalnız kimyəvi qaz tərkibli",
+      "D": "Quru qum və torpaq tərkibli"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "193. Yanğın haqqında siqnal vermək üçün nədən geniş istifadə olunur?",
+    "options": {
+      "A": "Telefon xətlərindən",
+      "B": "Yanğın siqnalizasiyası (AUUS)",
+      "C": "Səs ucaldan cihazlardan",
+      "D": "Əl zənglərindən"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "194. Yanğın siqnalizasiya qurğuları neçə qrupa bölünür?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "195. Avtomatik xəbərdaredicilər hissiyat elementinin növünün hansı formaları vardır?",
+    "options": {
+      "A": "Mexaniki, elektron, optik",
+      "B": "İstilik, tüstü, işıq və qarışıq",
+      "C": "Səsli, vibrasiyalı, təzyiqli",
+      "D": "Kimyəvi, bioloji, radioaktiv"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "196. İldırım nələrə səbəb ola bilər?",
+    "options": {
+      "A": "Yalnız güclü yağışa",
+      "B": "Yanğın, partlayış, zədələnmə",
+      "C": "Atmosfer təzyiqinin dərhal qalxmasına",
+      "D": "Tikinti materiallarının keyfiyyətinin artmasına"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "197. Yanğınların neçə faizi ildırımların nəticəsində baş veirir?",
+    "options": {
+      "A": "3%",
+      "B": "5%",
+      "C": "7%",
+      "D": "10%"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "198. İldırımın birbaşa bina və qurğulara təsiri zamanı nə baş verə bilər?",
+    "options": {
+      "A": "Binanın bünövrəsi daha da möhkəmlənir",
+      "B": "Böyük dağıtılar, yanğınlar, partlayış və insan təlafatı",
+      "C": "Yalnız elektrik xətlərində gərginlik düşür",
+      "D": "Heç bir ciddi ziyan dəymir"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "199. Atmosferin statik cərəyan boşalmalarının təsirindən insanların, bina və qurğuların avadanlıq və materialların mühafizəsi üçün görülən kompleks tədbirlərə nə deyilir?",
+    "options": {
+      "A": "Yanğın təhlükəsizliyi",
+      "B": "İldırım mühafizəsi",
+      "C": "Topraqlama sistemi",
+      "D": "Katod mühafizəsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "200. Reaksiyanın sürətindən asılı olaraq yanma prosesi neçə formada gedə bilər?",
+    "options": {
+      "A": "2",
+      "B": "3",
+      "C": "4",
+      "D": "5"
+    },
+    "correct": "B"
+  },
+  {
+        "q": "201. Reaksiyanın sürətindən asılı olaraq yanma prosesi hansı formalarda gedə bilər?",
+        "options": {
+            "A": "Oksidləşmə, reduksiya, neytrallaşma",
+            "B": "Buxarlanma, qaynama, kondensasiya",
+            "C": "Közərmə, ərimə, donma",
+            "D": "Yanma özü, partlayış, detonasiya"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "202. Yanma prosesinin əmələ gəlməsi və dəvam etməsi üçün hansı şərtlər lazımdır?",
+        "options": {
+            "A": "Yanacaq, oksidləşdirici, alovlanma impulsu və bunların kəmiyyət və keyfiyyətcə müəyyən nisbəti",
+            "B": "Aşağı temperatur, quru hava, metal səth və azot qazı",
+            "C": "Katalizator, inert qaz, yüksək təzyiq və xüsusi nəm mühiti",
+            "D": "Səs dalğası, ultrabənövşəyi şüa, toz hissəcikləri və sabit vakuum"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "203. Tam yanma nə zaman baş verir?",
+        "options": {
+            "A": "Mühitdə dəm qazının miqdarı artdıqda",
+            "B": "Yanma zonası kifayyət qədər oksigenlə dolduqda",
+            "C": "Alovlanma impulsu tamamilə kəsildikdə",
+            "D": "Yanacaq materialı rütubətli olduqda"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "204. Natamam yanma hansı şəraitdə əmələ gəlir?",
+        "options": {
+            "A": "Yüksək təzyiq şəraitində",
+            "B": "Katalizator istifadə olunduqda",
+            "C": "Oksigen çatışmadıqda",
+            "D": "Temperatur sıfır dərəcədən aşağı düşdükdə"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "205. Oksidləşmə, öz-özünə alovlanma və əsl yanma fazaları hansı maddələrə xasdır?",
+        "options": {
+            "A": "Yalnız amorf bərk cisimlərə",
+            "B": "Bərk, maye, qaz",
+            "C": "Yalnız plazma vəziyyətində olan maddələrə",
+            "D": "Ağır metallara və radioaktiv elementlərə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "206. Mayelər alışma temperaturuna görə hansı siniflərə bölünür?",
+        "options": {
+            "A": "Asan alovlanan və yanan",
+            "B": "Sulu və susuz mayelər",
+            "C": "Yüngül və ağır fraksiyalı mayelər",
+            "D": "Uçucu və sabit daxili quruluşlu mayelər"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "207. Asan alovlanan mayelərə hansı mayelər aiddir?",
+        "options": {
+            "A": "Qaynama temperaturu 100 dərəcədən yuxarı olan",
+            "B": "Donma temperaturu mənfi 10 dərəcəyə bərabər olan",
+            "C": "Alışma temperaturu 90 dərəcədən yuxarı olan",
+            "D": "Alışma temperaturu 45 dərəcədən aşağı olan"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "208. Yanan mayelərə hansı mayelər aiddir?",
+        "options": {
+            "A": "Alışma temperaturu sıfır dərəcədən aşağı olanlar",
+            "B": "Yalnız tərkibində neft məhsulları olmayanlar",
+            "C": "Alışma temperaturu 45 dərəcədən yuxarı olan",
+            "D": "Sıxlığı sudan çox olan bütün mayelər"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "209. Hansı maddələr atmosfer təzyiqində və ya temperaturda öz-özünə alovlana bilir?",
+        "options": {
+            "A": "Torf, kömür, ağac kəpəyi, pambıq",
+            "B": "Qranit, mərmər, sement, qum",
+            "C": "Dəmir qırıntıları, mis məftil, alüminium lövhə",
+            "D": "Şüşə qırıntıları, saxsı qablar, gips fırlatması"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "210. Öz-özünə yanma prosesi hansı dərəcədən başlaya bilər?",
+        "options": {
+            "A": "100-120",
+            "B": "45-55",
+            "C": "10-20",
+            "D": "200-250"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "211. Od və ya yüksək temperatur təsirindən alovlanmayan, közərməyən və kömürləşməyən materiallara nə deyilir?",
+        "options": {
+            "A": "Çətin yanan materiallar",
+            "B": "Yanmayan materiallar",
+            "C": "Üzvi materiallar",
+            "D": "Sintetik materiallar"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "212. Yanmayan materiallara nələr daxildir?",
+        "options": {
+            "A": "Kağız qırıntıları, quru yarpaqlar, neft fraksiyaları, polimer liflər",
+            "B": "Plastik lövhələr, rezin borular, taxta parçaları, bitumlu örtüklər",
+            "C": "Təbbi inşaat materialları, saxsı məmulatlar, şüşə əsaslı məlumatlar, metalların əksəriyyəti",
+            "D": "Pambıq parçalar, sellüloz əsaslı divar kağızları, sintetik xalçalar"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "213. Yanmayan materiallardan hazırlanmış konstruksiyalar nə adlanır?",
+        "options": {
+            "A": "Yanmayankonstruksiyalar",
+            "B": "Kompozit konstruksiyalar",
+            "C": "Davamlı mexaniki bloklar",
+            "D": "İzolyasiya olunmuş panellər"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "214. Od və ya yüksək temperatur təsirindən çətinliklə alovlanan, közərən və ya kömürləşən, od mənbəyi təsir etdikcə bunlar davam edən, od mənbəyi kənar edildikdə isə alovlanma və ya közərməsi dayanan materiallara nə deyilir?",
+        "options": {
+            "A": "Asan alovlanan",
+            "B": "Yanmayan",
+            "C": "Çətin yanan",
+            "D": "Partlayıcı"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "215. Od və ya yüksək temperatur təsiri ilə alovlanan, közərən və ya kömürləşən, od mənbəyi kənar edildikdə belə, yanma və közərməsi davam edən materiallara nə deyilir?",
+        "options": {
+            "A": "Yanan materiallar",
+            "B": "Davamlı materiallar",
+            "C": "İnert materiallar",
+            "D": "Çətin alovlanan materiallar"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "216. Bina və tikililərin yanğın təhlükəsizliyi nə ile təyin olunur?",
+        "options": {
+            "A": "Binanın ümumi sahəsi və pəncərələrin sayı ilə",
+            "B": "Oda davamlılığının",
+            "C": "Tikintidə istifadə olunan daxili rəng çalarları ilə",
+            "D": "Binanın yerləşdiyi coğrafi ərazinin iqlimi ilə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "217. Binalar oda davamlılığ dərəcəsinə görə neçə dərəcəyə bölünür?",
+        "options": {
+            "A": "3",
+            "B": "5",
+            "C": "2",
+            "D": "4"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "218. Maddi sərvətlərin məhv olması ilə nəticələnən, insanların həyatını, sağlamlığını təhlükə qarşısında qoyan və tənzimlənməsi mümkün olmayan yanmaya nə deyilir?",
+        "options": {
+            "A": "Yanğın",
+            "B": "Termiki oksidləşmə",
+            "C": "Közərmə fazası",
+            "D": "Lokal qızışma"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "219. Elektrik avadanlığında yanğınlar əsasən nədən baş verir?",
+        "options": {
+            "A": "Otaq havasının həddindən artıq quru olmasından və statik maqnit sahəsinin intensivliyindən",
+            "B": "Qısaqapanmadan, şəbəkənin həddən artıq yüklənməsindən, böyük keçid müqavimətlərinin yaranmasından, elektrik qurğularının nəzarətsiz işləməsi",
+            "C": "Gərginliyin normadan kəskin şəkildə aşağı düşməsinden və daxili soyutma mayesinin donmasından",
+            "D": "Torpaqlanma xəttinin müqavimətinin tam sıfıra enməsindən və faza bucağının dəyişməsindən"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "220. Yanğın və partlayışların qarşısını almaq üçün normativlər əsasında işlənib hazılanmış və sistematik tətbiq edilən təşkilati-texniki tədbirlər kompleksi nə adlanır?",
+        "options": {
+            "A": "Fövqəladə xəbərdarlıq qrupu",
+            "B": "Texniki nəzarət xidməti",
+            "C": "Yanğın profilaktikası",
+            "D": "Təhlükəsizlik monitorinqi"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "221. Ən universal enerji növü hansıdır?",
+        "options": {
+            "A": "Kinetik enerji",
+            "B": "Elektrik enerjisi",
+            "C": "İstilik enerjisi",
+            "D": "Nüvə enerjisi"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "222. Elektrik cərəyanı ilə zədələnmə zamanı hansı növ travma almaq olar?",
+        "options": {
+            "A": "Məişət travması",
+            "B": "Psixoloji travma",
+            "C": "Bioloji destruksiya",
+            "D": "Mexaniki travma"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "223. Elektrik cərəyanı ilə zədələnmə təhlükəsinin hansı xarici əlamətləri vardır?",
+        "options": {
+            "A": "Naqillərdən kəskin qoxunun gəlməsi",
+            "B": "Ətraf mühitdə parlaq göy rəngli işığın yaranması",
+            "C": "Əlamət yoxdur",
+            "D": "Cihazların səthində xüsusi titrəyişin qeydə alınması"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "224. Elektrik travmaları zamanı əmək qabiliyyətinin itirilməsi müddəti nə qədər olur?",
+        "options": {
+            "A": "Uzunmüddətli",
+            "B": "Yalnız bir neçə saat",
+            "C": "Qısamüddətli",
+            "D": "Həmişə bir neçə gün"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "225. Elektrik cərəyanı ilə zədələnmə hansı səbəbdən ola bilər?",
+        "options": {
+            "A": "İzolyasiya olunmuş cihazın yaxınlığında dayanma",
+            "B": "Gərginlik altında olan cərəyan aparan hissələrə toxunma",
+            "C": "Sıfırlanmış avadanlıqların kənar gövdəsini təmizləmə",
+            "D": "Elektrik şəbəkəsinin ümumi açarını uzaqdan idarə etmə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "226. Elektrik cərəyanı ilə zədələnməyə təhlükəlilik dərəcəsinə görə binalar hansı hissələrə bölünür?",
+        "options": {
+            "A": "İstehsalat, yaşayış və inzibati binalar",
+            "B": "Açıq tipli, qapalı tipli və yarımqapalı konstruksiyalar",
+            "C": "Yüksək gərginlikli və aşağı gərginlikli sahələr",
+            "D": "Yüksək təhlükəli, xüsusi təhlükəli, az təhlükəli binalar"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "227. Canlı orqanizmdən keçən elektrik cərəyanı ona hansı təsirləri göstərir?",
+        "options": {
+            "A": "Mexaniki, akustik və hidravlik",
+            "B": "Termiki, elektrolitik və bioloji",
+            "C": "Kimyəvi, optik və maqnit",
+            "D": "Radiasiya, rentgen və istilik"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "228. Termiki təsir özünü necə biruzə verir?",
+        "options": {
+            "A": "Orqanizmdə daxili mayelərin kimyəvi tərkibinin tamamilə buxarlanaraq quru qalmasında",
+            "B": "Hissiyyat orqanlarının funksiyasını donduraraq dərinin rənginin ağarmasında",
+            "C": "Bədəndə yanıqların, isitmənin əmələ gəlməsində və qan damarlarının zədələnməsində, ürəyin, beyinin və başqa orqanların həddindən artıq qızmasında",
+            "D": "Sümüklərin daxili strukturunun parçalanmasında və oynaqların hərəkətsiz qalmasında"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "229. Elektrolitik təsir özünü necə biruzə verir?",
+        "options": {
+            "A": "Bədənin xarici temperaturunun kəskin şəkildə aşağı düşməsində göstərir",
+            "B": "Mərkəzi sinir sistemində bioelektrik impulsların sürətinin artmasında göstərir",
+            "C": "Ağciyərlərdə hava mübadiləsininin mexaniki olaraq tamamilə dayanmasında özünü biruzə verir",
+            "D": "Üzvi mayenin, o cümlədən qanın parçalanmasında göstərir, bu da onun tərkibinin, habelə bütövlükdə toxunmanın xeyli dərəcə də pozulmasına səbəb olur"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "230. Bioloji təsir özünü necə göstərir?",
+        "options": {
+            "A": "Dəri örtüyünün elastikliyinin artması və hüceyrələrin yenilənməsi formasında",
+            "B": "Normal fəaliyyət göstərən orqanizmə xas olan və onun həyati funksiyları ilə sıx bağlı daxili bioelektrik proseslərin pozulmasında göstərir",
+            "C": "Qan damarlarının divarlarının qalınlaşması və təzyiqin sabitləşməsi formasında",
+            "D": "Həzm sisteminin fermentasiya qabiliyyətinin tamamilə aktivləşməsi şəklində"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "231. Elektrik cərəyanı ilə əlaqədar bədbəxt hadisələrin hansı formaları var?",
+        "options": {
+            "A": "Lokal qızışma və daxili yanıq",
+            "B": "Cərəyan sızması və gərginlik düşməsi",
+            "C": "Elektrik zədəsi və elekrtik zərbəsi",
+            "D": "Statik boşalma və qısaqapanma zədəsi"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "232. Elektrik zərbəsi nədir?",
+        "options": {
+            "A": "Elektrik cərəyanının bütünlükdə orqanizmdən keçməsi və bu zaman orqanizimdə qismən və ya tam iflic halının olması",
+            "B": "Cərəyanın yalnız bədənin üst dəri qatına toxunaraq keçici qızartı yaratması",
+            "C": "Yüksək gərginlikli naqillərin yaxınlığında yaranan güclü maqnit sahəsinin təsiri",
+            "D": "Cihazın metal gövdəsində statik yüklərin toplanması nəticəsində baş verən qısamüddətli qığılcım"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "233. İnsan üçün ən təhlükəli olan cərəyan tezliyi neçədir?",
+        "options": {
+            "A": "1000-2000 Hs olan yüksək tezlikli cərəyanlar",
+            "B": "50-60 Hs olan sənaye cərəyanları",
+            "C": "10-20 Hs olan aşağı tezlikli cərəyanlar",
+            "D": "500-600 Hs olan xüsusi laboratoriya cərəyanları"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "234. Elektrik zədələnməsindən hansı mühafizə üsulları vardır?",
+        "options": {
+            "A": "Soyutma, havalandırma, rəngləmə və rütubətləndirmə",
+            "B": "İzolyasiya, İkiqat izolyasiya, çəpərləmə və bloklama",
+            "C": "Distant idarəetmə, səs izolyasiyası, kimyəvi təmizləmə",
+            "D": "Vakuum mühiti, qızdırma, absorbsiya və filtrləmə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "235. İkiqat izolyasiya nədən ibarətdir?",
+        "options": {
+            "A": "Hava boşluğu və maye dielektrikdən",
+            "B": "Metal çəpər və rezin qatdan",
+            "C": "Əlavə və işçi izolyatordan",
+            "D": "Daxili qoruyucu və xarici torlu qatdan"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "236. Qəza vəziyyətində elektrik qurğularını ani olaraq dövrədən ayırmaq üçün nə tətbiq edilir?",
+        "options": {
+            "A": "Avtomatik ayrıcılar",
+            "B": "Transformatorlar",
+            "C": "Kondensatorlar",
+            "D": "Reostatlar"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "237. Yerləbirləşdirmənin əsas məqsədi nədir?",
+        "options": {
+            "A": "Elektrik enerjisinin sərfiyyatını minimuma endirməkdən",
+            "B": "Qurğunun gövdəsindəki gərginliyi təhlükəsiz həddə çatdırmaqdan",
+            "C": "Cihazın daxili temperaturunu sabit saxlamaqdan",
+            "D": "Şəbəkədəki cərəyanın tezliyini artırmaqdan"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "238. Yerləbirləşdirilmiş gövdəyə toxunan insana elektrik cərəyanı necə təsir edir?",
+        "options": {
+            "A": "Təsir etmir",
+            "B": "Yüngül yanıq yaradır",
+            "C": "İflic vəziyyətinə salır",
+            "D": "Yalnız əzələ qıcolmalarına səbəb olur"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "239. Yerləbirləşdiricilərin hansı növləri olur?",
+        "options": {
+            "A": "Daxili və xarici",
+            "B": "Kimyəvi və mexaniki",
+            "C": "Sabit və dəyişən",
+            "D": "Təbii və süni"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "240. Elektrik qurğularının normal vəziyyətdə gərginlik altında olmayan metal hissələrinin «sıfır» xəttinə birləşdirilməsi nə adlanır?",
+        "options": {
+            "A": "İzolyasiya",
+            "B": "Sıfırlama",
+            "C": "Bloklama",
+            "D": "Topraqlama"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "241. İş zonasında havanın normal əmək şəraitə uyğun temperaturunu təmin etmək üçün nədən istifadə olunur?",
+        "options": {
+            "A": "Yerli və mərkəzi isitmə sistemlərindən",
+            "B": "Xüsusi absorbsiya və qurutma balonlarından",
+            "C": "Açıq pəncərə və süni kölgəliklərdən",
+            "D": "Yüksək tezlikli ventilyator aparatlarından"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "242. Yerli isitmə sistemində nədən istifadə olunur?",
+        "options": {
+            "A": "Mərkəzi qazanxana və yeraltı magistral xətlərdən",
+            "B": "Soba, qaz və elektrik cihazları",
+            "C": "Buxar boruları və sənaye kaloriferlərindən",
+            "D": "Kondisioner və xüsusi soyuducu qurğulardan"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "243. Mərkəzi isitmə sistemləri istilik daşıyıcısının növünə görə hansı sistemlərə bölünür?",
+        "options": {
+            "A": "Su, buxar və hava sistemlərinə",
+            "B": "Yağ, qaz və kömür sistemlərinə",
+            "C": "Elektrik, maqnit və radiasiya sistemlərinə",
+            "D": "Kimyəvi, mexaniki və statik sistemlərə"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "244. Hava ilə isidilmə sistemində otaqlara verilən hava harada qızdırılır?",
+        "options": {
+            "A": "Kompressorlarda",
+            "B": "Filtrlərdə",
+            "C": "Buxar qazanlarında",
+            "D": "Kaloriferlərdə"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "245. Sanitariya-gigiyena cəhətdən hansı isidilmə sistemləri daha əlverişlidir?",
+        "options": {
+            "A": "Buxar",
+            "B": "Su",
+            "C": "Qaz",
+            "D": "Hava"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "246. İstehsalat binalarının havasını əsasən nə çirkləndirir?",
+        "options": {
+            "A": "Oksigen və azot molekullarının sıxlığı ilə",
+            "B": "Zərərli qaz, buxar và tozlarla",
+            "C": "Səs dalğaları və ultrabənövşəyi radiasiya ilə",
+            "D": "İnert qazlar və su buxarının təbii balansı ilə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "247. Otaqlarda havanın metreoloji şəraitini və təmizliyini təmin etmək üçün nədən istifadə olunur?",
+        "options": {
+            "A": "Ventilyasiya sistemi",
+            "B": "İzolyasiya panelləri",
+            "C": "İstilik sensorları",
+            "D": "Barometr cihazları"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "248. Vəzifəsinə görə ventilyasiya sistemləri hansı tiplərə ayrılır?",
+        "options": {
+            "A": "Daxili, xarici və qarışıq",
+            "B": "Təbii, mexaniki və pnevmatik",
+            "C": "Lokal, ümumi və nöqtəvi",
+            "D": "Üfürücü, sorucu və üfürücü-sorucu"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "249. Hava mübadiləsinin təşkili üsuluna görə ventilyasiya sistemlərə hansı hissələrə bölünür?",
+        "options": {
+            "A": "Təbii və süni",
+            "B": "Açıq və qapalı",
+            "C": "Statik və dinamik",
+            "D": "Avtomat və mexaniki"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "250. İstehsalat otaqlarının işıqlandırılmasının hansı üsulları var?",
+        "options": {
+            "A": "Parlaq, tutqun və kölgəli",
+            "B": "Daxili, xarici və lokal",
+            "C": "Təbii, süni və birgə",
+            "D": "Lüminesent, közərmə və lazer"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "251. Təbii işıqlandırma insana necə təsir göstərir?",
+        "options": {
+            "A": "Bioloji və psixoloji təsir göstərir, onda təbiətlə əlaqə hissiyatı yaradır və sinir sistemini sakitləşdirir",
+            "B": "Göz bəbəklərini böyüdərək vizual yorğunluğu maksimum dərəcəyə çatdırır",
+            "C": "Dərinin temperaturunu kəskin artırır və qan dövranını ləngidir",
+            "D": "Heç bir təsir göstərmir, yalnız əşyaların görünməsini təmin edir"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "252. İstehsalatda təbii işıqlanma hansı formada aparılır?",
+        "options": {
+            "A": "Yalnız döşəmə səviyyəsindən daxili əks olunma ilə",
+            "B": "Xüsusi güzgülər vasitəsilə uzaqdan yönəltmə ilə",
+            "C": "Süni işıq süzgəclərinin köməkliyi ilə qapalı mühitdə",
+            "D": "Yandan, üstdən və üstdən və yandan işıqlandırma"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "253. Təyinatına görə süni işıqlandırmanın neçə növü var?",
+        "options": {
+            "A": "2",
+            "B": "3",
+            "C": "5",
+            "D": "4"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "254. İşıqlandırıcı cihazların hansı formaları var?",
+        "options": {
+            "A": "Daxili və xarici işıqlandırma",
+            "B": "Sabit və daşına bilən",
+            "C": "Açıq və qoruyucu qatlı",
+            "D": "Yüksək və aşağı gərginlikli"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "255. İşıqlandırıcı cihazlar işığı səpələmə xassəsinə görə neçə qrupa bölünür?",
+        "options": {
+            "A": "2",
+            "B": "4",
+            "C": "3",
+            "D": "5"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "256. Səs necə hadisədir?",
+        "options": {
+            "A": "Kimyəvi",
+            "B": "Fiziki",
+            "C": "Bioloji",
+            "D": "Psixoloji"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "257. Müxtəlif intensivlikdə və tezlikdə səslər məcmusunun insanda yaratdığı xoşa gəlməz təəssürat nə adlanır?",
+        "options": {
+            "A": "Səs dalğası",
+            "B": "Akustik rezonans",
+            "C": "Səs-küy",
+            "D": "Titrəyiş spektri"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "258. Səs dalğalarının yayılma sürəti nədən asılıdır?",
+        "options": {
+            "A": "Mühitin elastikliyindən və sıxlığından",
+            "B": "Səsi yaradan mənbəyin rəngindən və çəkisindən",
+            "C": "İşıqlanma dərəcəsinindən və otağın hündürlüyündən",
+            "D": "Atmosferdəki oksigenin faiz göstəricisindən"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "259. Səs-küy eşitmə qabiliyyətinə necə təsir edir?",
+        "options": {
+            "A": "Müvəqqəti olaraq artırır",
+            "B": "Heç bir təsir göstərmir",
+            "C": "Yalnız fərqli tezlikləri tənzimləyir",
+            "D": "Azaldır"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "260. Səs-küy insanda nələrə səbəb ola bilər?",
+        "options": {
+            "A": "İştahanın artmasına və yaddaşın güclənməsinə",
+            "B": "Yorğunluğa, diqqətsizliyə, baş ağrılarına və əsəbiliyə",
+            "C": "Hərəkət sürətinin artmasına və görmə qabiliyyətinin kəskinləşməsinə",
+            "D": "Qanda şəkərin azalmasına və bədən temperaturunun düşməsinə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "261. Titrəyişlərin təsirindən insanda nə baş verir?",
+        "options": {
+            "A": "Görmə qabiliyyətinin yaxşılaşması və əzələlərin dincəlməsi",
+            "B": "Daxili orqanların fəaliyyətinin sürətlənməsi və sümüklərin möhkəmlənməsi",
+            "C": "Əllərin soyuması, keyləşməsi, yorğunluq, yuxusuzluq, baş ağrıları, qan təzyiqinin yüksəlməsi, ürək damarlarının spazması",
+            "D": "Bədənin immun sisteminin kəskin şəkildə güclənməsi"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "262. Səs-küyün eşitmə üzvlərinə təsirinin hansı formaları var?",
+        "options": {
+            "A": "Lokal karlıq, daxili iltihab və travmatik qanaxma",
+            "B": "Yoğunluq, səs-küy zədəsi və peşə ağıreşitmələri",
+            "C": "Müvəqqəti adaptasiya, akustik şok və tam korluq",
+            "D": "Sinir iflici, qulaq pərdəsinin qalınlaşması və rezonans zədəsi"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "263. Böyük intensivlikdə, dəvamiyyətli səs-küy nəyə zərərli təsir göstərir?",
+        "options": {
+            "A": "Həzm sisteminə",
+            "B": "Sümük strukturuna",
+            "C": "Mərkəzi sinir sisteminə",
+            "D": "Dəri örtüyünə"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "264. İş yerlərində səs-küyün əhəmiyyətli dərəcədə azaldılması mümkün olmadıqda hansı mühafizə vasitələrindən istifadə edilir?",
+        "options": {
+            "A": "Kollektiv",
+            "B": "Fərdi",
+            "C": "Avtomatlaşdırılmış",
+            "D": "Kimyəvi"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "265. Bərk cisimlərin mexaniki rəqsləri nə adlanır?",
+        "options": {
+            "A": "Səs dalğası",
+            "B": "Rezonans",
+            "C": "Akustika",
+            "D": "Titrəyiş"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "266. Titrəyişlər insanın nə zamanı keçir?",
+        "options": {
+            "A": "Titrəyən cisimlə təmas zamanı",
+            "B": "Cihazlardan uzaq məsafədə dayandıqda",
+            "C": "Yalnız yüksək səs mühitində olduqda",
+            "D": "Havanın rütubəti normadan çox olduqda"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "267. Titrəyişlər insanın yalnızca əllərinə təsir etdikdə bu hansı titrəyiş adlanır?",
+        "options": {
+            "A": "Ümumi titrəyiş",
+            "B": "Səthi titrəyiş",
+            "C": "Yerli titrəyiş",
+            "D": "Mexaniki titrəyiş"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "268. Titrəyişlər insanın bütün bədəninə təsir etdikdə bu hansı titrəyiş adlanır?",
+        "options": {
+            "A": "Yerli titrəyiş",
+            "B": "Ümumi titrəyiş",
+            "C": "Daxili titrəyiş",
+            "D": "Sistemli titrəyiş"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "269. Maşın və mexanizmlərin təhlükəli zonalarına düşmənin qarşısını almaq üçün hansı mexanikləşdirmə və avtomatlaşdırma vasitələrindən istifadə olunur?",
+        "options": {
+            "A": "Xüsusi ventilyasiya boruları, nəmləndirmə cihazları və daxili divarların səs izolyasiyası panelləri",
+            "B": "Çəpərləmə texnikası, mühafizə-bloklama quruluşları, distansion idarəetmə və siqnalizasiya sistemləri, təhlükəsiz iş aparmaq üçün fərdi mühafizə",
+            "C": "Cihazların daxili yağlanma mexanizmləri, sürət tənzimləyici reostatlar və əlavə yay qurğuları",
+            "D": "Yüksək gərginlikli avtomatlar, xüsusi topraqlama xətləri və daxili soyutma radiatorları"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "270. Bloklayıcı quruluşların iş prinsipi necədir?",
+        "options": {
+            "A": "Avadanlığın təhlükəli zonalarının açıq qaldığı hallarda xəbərdaredici səs və ya işıq siqnalı sistemini işə salır, və ya maşının işə düşməsinə imkan vermir",
+            "B": "Cihazın ümumi elektrik sərfiyyatını ölçərək gərginliyi avtomatik olaraq iki dəfə aşağı salır",
+            "C": "İşçinin hərəkət sürətini qeydə alaraq otağın havalandırma sistemini maksimum rejimə keçirir",
+            "D": "Mexaniki hissələrin sürtünməsini azaldaraq daxili yağlama funksiyasını işə salır"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "271. Çilingərlik işləri zamanı bədbəxt hadisələrin əsas səbəbi nədir?",
+        "options": {
+            "A": "Otaq temperaturunun aşağı olması",
+            "B": "İş vaxtının normadan az olması",
+            "C": "Nasaz və işə yararsız alətlərdən istifadə",
+            "D": "Materialların düzgün rənglənməməsi"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "272. Çilingər quraşdırma işlərində çalışan işçilər hansı xüsusi geyimlərlə təmin olunmalıdır?",
+        "options": {
+            "A": "Yundan hazırlanmış qalın palto və rezin çəkmələr",
+            "B": "Kombinezon, əlcək, sınmayan şüşəli eynək",
+            "C": "Sintetik idman forması və xüsusi maska",
+            "D": "Yalnız dəri önlük və yüngül papaq"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "273. Ağacın emalı zamanı baş verəcək müxtəlif zədələnmələrin əsas səbəbləri nədir?",
+        "options": {
+            "A": "Ağacın növünün düzgün seçilməməsi və binaların rütubətli olması",
+            "B": "İş sahəsinin təbii işıqlandırılmasının normadan çox olması və süni ventilyasiya çatışmazlığı",
+            "C": "Nasaz alətlə işləmək, iş priyomlarını düzgün yerinə yetirməmək, alətlərin saxlanma qaydalarının pozulması, təhlükəsizlik texnikası qaydalarına riayət olunmaması",
+            "D": "Emal olunan materialın çəkisinin az olması və elektrik mühərrikinin aşağı sürətlə işləməsi"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "274. Hansı alətlər, adətən, təkrar olunan qısamüddətli iş şəraiti üçün hesablanmışdır?",
+        "options": {
+            "A": "Pnevmatik",
+            "B": "Mexaniki",
+            "C": "Hidravlik",
+            "D": "Elektrik"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "275. Elektrik alətlərində uzun müddət fasiləsiz işlədilməsi zamanı nə baş verir?",
+        "options": {
+            "A": "Cərəyanın tezliyi kəskin şəkildə artır",
+            "B": "Mühərriki şiddətli qızır və alət qismən korlanır",
+            "C": "Alətin çəkisi mexaniki olaraq ağırlaşır",
+            "D": "Daxili izolyasiya qatı öz-özünə qalınlaşır"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "276. Çilingərlik işlərinə nələr aiddir?",
+        "options": {
+            "A": "Əymə, düzəltmə, qayçı ilə kəsmə, çapma, yeyələmə, məmulatların yığılması",
+            "B": "Yalnız ağac hissələrin yapışdırılması və rənglənməsi",
+            "C": "Yüksək gərginlikli xətlərin çəkilməsi və transformatorların təmiri",
+            "D": "Kimyəvi məhlulların hazırlanması və laboratoriya analizlərinin aparılması"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "277. Elektrik qaynağı prosesi zamanı o hangi orqana təsir göstərir?",
+        "options": {
+            "A": "Qulaq (eşitmə)",
+            "B": "Göz (görmə)",
+            "C": "Dəri örtüyü",
+            "D": "Tənəffüs yolları"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "278. Parlaqlığın və ultrabənövşəyi şüanın gözə uzun müddət təsiri nəyə səbəb ola bilər?",
+        "options": {
+            "A": "Gözün xroniki xəstələnməsinə və korluqa",
+            "B": "Göz bəbəyinin daxili təzyiqinin tamamilə sıfırlanmasına",
+            "C": "Müvəqqəti vizual itilik hissinin yaranmasına",
+            "D": "Göz yaşının kimyəvi tərkibinin dəyişərək turşulaşmasına"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "279. Qaz qaynağı əsasən nə ilə aparılır?",
+        "options": {
+            "A": "Azot və karbon qazının qarışığı ilə",
+            "B": "Yalnız təmiz sıxılmış hava axını ilə",
+            "C": "Metan və helium qazlarının sintezi ilə",
+            "D": "Oksigen və asetilenin qarışığı ilə"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "280. Lehimləmə zamanı hansı bədbəxt hadisələr baş verə bilər?",
+        "options": {
+            "A": "Mexaniki olaraq sümüklərin sınması və daxili qanaxma",
+            "B": "Orqanizmin müxtəlif hissələrinin yanması və zəhərlənmə",
+            "C": "Yüksək tezlikli səs travması və eşitmənin itirilməsi",
+            "D": "Statik elektrik boşalması nəticəsində iflic"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "281. Laboratoriya otaqlarında havanın temperaturu neçə dərəcə olmalıdır?",
+        "options": {
+            "A": "25-30 dərəcə",
+            "B": "12-15 dərəcə",
+            "C": "10-14 dərəcə",
+            "D": "17-20 dərəcə"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "282. Laboratoriya otaqlarda günəş işığının şüaları şagird və tələbələrə hansı tərəfindən düşməlidir?",
+        "options": {
+            "A": "Sağ",
+            "B": "Arxa",
+            "C": "Sol",
+            "D": "Ön"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "283. Fizika laboratoriyalarında əsasən nələr olur?",
+        "options": {
+            "A": "Yalnız bioloji preparatlar, mikroskoplar, şüşə qablar və kimyəvi reaktivlər",
+            "B": "Müxtəlif cihaz və avadanlıq, istilik və şüalanma mənbələri, yanan maye və qazlar, texniki təlim vasitələri, mexaniki avadanlıqlar",
+            "C": "Dərman preparatları, tibbi ləvazimatlar, steril geyimlər və dezinfeksiyaedici məhlullar",
+            "D": "Coğrafi xəritələr, qlobuslar, geoloji süxur nümunələri və maketlər"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "284. Laboratoriyalara və elektrik avadanlıqlarına gələn elektrik naqillərinin hansı xüsusiyyəti olmalıdır?",
+        "options": {
+            "A": "Yaxşı izolyasiya qabiliyyəti",
+            "B": "Yüksək mexaniki çəkisi",
+            "C": "Metal örtüyünün qalın olması",
+            "D": "Xarici rənginin mütləq qara olması"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "285. Yüksək elektrik təhlükəsi olan tədris laboratoriyasına hansı otaqlar aiddir?",
+        "options": {
+            "A": "Kimya otaqları",
+            "B": "Fizika otaqları",
+            "C": "Biologiya kabinetləri",
+            "D": "Tarix və coğrafiya otaqları"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "286. Hansı maddələr yanıq əmələ gətirə bilər?",
+        "options": {
+            "A": "Distillə olunmuş su, mineral yağlar, təbii gips",
+            "B": "Turşu, qələvi və duz məhlulları, yanan qazlar",
+            "C": "Quru qum, gil məhlulu, təbaşir tozu",
+            "D": "Nişasta, şəkər tozu, bitki mənşəli yağlar"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "287. Orta məktəblərdə hansı maddə ilə işləməyə icazə verilmir?",
+        "options": {
+            "A": "Yod",
+            "B": "Təbaşir",
+            "C": "Civə",
+            "D": "Spirt"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "288. Orta ümumtəhsil məktəblərində informatika və hesablama texnikasının əsasları öyrənilməsinin əsas məqsədi nədir?",
+        "options": {
+            "A": "Şagirdlərdə kompüterin imkanlarını dərk etdirmək və ondan müxtəlif məsələlərin həllində praktik istifadə etmək üçün tələb olunan bilik, bacarıq və vərdişlərin formalaşdırılmasıdır",
+            "B": "Yalnız kompüter hissələrinin mexaniki sökülüb-yığılmasını və fiziki təmiri qaydalarını şagirdlərə dərindən öyrətməkdir",
+            "C": "Şəbəkə kabellərinin çəkilməsi və daxili server otaqlarının təhlükəsizlik qaydalarını praktik mənimsətməkdir",
+            "D": "Yüksək sürətli qrafik oyunların proqramlaşdırılması üçün kommersiya vərdişlərini inkişaf etdirməkdir"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "289. Rəsmxət və rəsm kabinetlərində görülən işlərin xarakterinə görə otağın vəziyyəti necə olmalıdır?",
+        "options": {
+            "A": "Havanın temperaturu sıfıra yaxın, pəncərələr tamamilə qapalı və kölgəli olmalıdır",
+            "B": "Süni işıqlandırma minimum səviyyədə, daxili rütubət isə normadan çox olmalıdır",
+            "C": "İşıqlanma yüksək, havanın temperaturu və nəmliyi normal olmalıdır",
+            "D": "Otaq tamamilə qaranlıq və xüsusi akustik panellərlə izolyasiya olunmuş vəziyyətdə olmalıdır"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "290. Rəsmxət kabinetlərində zədələnmələrin baş vermə səbəbləri hansılardır?",
+        "options": {
+            "A": "Elektrik šokları, kimyəvi zəhərlənmələr və yüksək dərəcəli istilik şüalanması",
+            "B": "Rəsmxət alətləri, ağır əşyaların düşməsi, čertyoj stolları arasındakı məsafələrin normadan kənara çıxması",
+            "C": "Optik cihazların nasazlığı, güclü səs-küyün olması və rütubətin tam sıfıra enməsi",
+            "D": "Lazer şüaları, radioaktiv toz hissəcikləri və bioloji zərərli amillərin təsiri"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "291. Kulinariya kabinetlərində təlim keçən şagird və tələbələr hansı qaydalara əməl etməlidir?",
+        "options": {
+            "A": "Yalnız elektrik cihazlarının daxili sxemlərini bilməli və söküntü işlərini bacarmalıdırlar",
+            "B": "Kimyəvi reaktivlərlə davranış və laboratoriya tərəzilərindən istifadə qaydalarını mənimsəməlidirlər",
+            "C": "Ağır yüklərin daşınması və anbar təhlükəsizliyi qaydalarına xüsusi diqqət yetirməlidirlər",
+            "D": "Sanitar-gigiyenik tələbləri, qızdırıcı plitələrdən, kəsici alətlərdən istifadə zamanı onlara davranışı bilməli və əməl etməlidirlər"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "292. Hansı maddələrlə işləmək insan həyatı üçün təhlükəlidir?",
+        "options": {
+            "A": "İnert",
+            "B": "Radioaktiv",
+            "C": "Üzvi",
+            "D": "Silikat"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "293. Radioaktiv şüalanma buraxılabilən həddən artıq olduqda və uzun müddətli təsir nəticəsində hansı xəstəlik yarana bilər?",
+        "options": {
+            "A": "Kəskin karlıq",
+            "B": "Peşə astması",
+            "C": "Xroniki şüalanma",
+            "D": "Lokal dermatit"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "294. Şüaların fotokimyəvi təsirindən dəridə hansı vitamini əmələ gəlir?",
+        "options": {
+            "A": "C vitamini",
+            "B": "A vitamini",
+            "C": "D vitamini",
+            "D": "B12 vitamini"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "295. Bədəndə radioaktivliyin toplanması nəyə zəmin yaradır?",
+        "options": {
+            "A": "Hüceyrələrin regenerasiya sürətinin artmasına",
+            "B": "Bədənin zədələnməsinə",
+            "C": "Sümük kütləsinin təbii çoxalmasına",
+            "D": "İmmunitetin qısamüddətli güclənməsinə"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "296. Kimlərə radioaktiv işlərdə işləmək olmaz?",
+        "options": {
+            "A": "Təcrübəli mühəndislərə",
+            "B": "Kişi işçilərə",
+            "C": "Ali təhsilli mütəxəssislərə",
+            "D": "Hamilə qadınlara"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "297. Nəyin iş prinsipi atomun həyəcanlandırılmış vəziyyətindən əsas vəziyyətə (az enerjili) keçərkən özündən fotonlar şüalandırmasına əsaslanır?",
+        "options": {
+            "A": "Rentgen aparatının",
+            "B": "Transformatorun",
+            "C": "Lazer",
+            "D": "Elektron mikroskopunun"
+        },
+        "correct": "C"
+    },
+    {
+        "q": "298. Lazer şüalanmaları insan orqanizminə hansı təsirləri göstərir?",
+        "options": {
+            "A": "Mexaniki və kimyəvi",
+            "B": "İstilik və qeyri-istilik",
+            "C": "Akustik və bioloji",
+            "D": "Maqnit və elektrik"
+        },
+        "correct": "B"
+    },
+    {
+        "q": "299. Lazer şüalanmaları insan orqanizminin hansı hissəsinə təsir edir?",
+        "options": {
+            "A": "Dəri",
+            "B": "Sümük daxili",
+            "C": "Dırnaq toxuması",
+            "D": "Saç kökləri"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "300. Ultrabənövşəyi şüalanmaların təbii mənbəyi nədir?",
+        "options": {
+            "A": "Ay",
+            "B": "Ulduzlar",
+            "C": "Yer qabığı",
+            "D": "Günəş"
+        },
+        "correct": "D"
+    },
+    {
+        "q": "301. UBŞ-ın böyük dozalarının dəriyə uzun müddətli təsirindən dəridə nə əmələ gəlir?",
+        "options": {
+            "A": "Güclü qızartı, suluqlama və şiş əmələ gəlir",
+            "B": "Hüceyrələrin tamamilə donması və rəngsizləşməsi baş verir",
+            "C": "Dərinin elastikliyi artır və yeni qoruyucu qat formalaşır",
+            "D": "Heç bir dəyişiklik baş vermir, yalnız temperatur yüksəlir"
+        },
+        "correct": "A"
+    },
+    {
+        "q": "302. İstehsalat şəraitində gözləri UBŞ-dan mühafizə etmək üçün nə istifadə olunur?",
+        "options": {
+            "A": "Plastik maska",
+            "B": "Şüşəli eynək",
+            "C": "Xüsusi linzalar",
+            "D": "Dəri sarğılar"
+        },
+        "correct": "B"
+    }
+];
+
+/** ====== PARAMETRLƏR ====== */
+const QUESTION_COUNT = 25;
+const TIME_LIMIT = 30 * 60; // saniyə
+const SCORE_CORRECT = 2;
+const SCORE_WRONG = -1;
+
+/** ====== STATE ====== */
+let TIME = TIME_LIMIT;
+let interval = null;
+let started = false;
+
+let baseScore = 0;             // giriş balı
+let quizQuestions = [];        // seçilmiş 25 sual (şaffl edilmiş)
+let answers = new Map();       // idx -> seçilən variant (A/B/C/D)
+
+/** ====== UTIL ====== */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function formatTime(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function decodeHTML(str) {
+  // &lt; &gt; &quot; kimi entity-ləri real simvola çevirir
+  const t = document.createElement("textarea");
+  t.innerHTML = str;
+  return t.value;
+}
+
+function safeSetText(el, str) {
+  el.textContent = decodeHTML(str);
+}
+
+/** ====== QUIZ HAZIRLA ====== */
+function pickNewQuiz() {
+  const pool = ALL_QUESTIONS.slice();
+  shuffle(pool);
+  const picked = pool.slice(0, Math.min(QUESTION_COUNT, pool.length));
+
+  // hər sualda variantları qarışdır və correct hərfini yenilə
+  quizQuestions = picked.map((q) => {
+    const entries = Object.entries(q.options); // [ ["A","..."], ... ]
+    shuffle(entries);
+
+    const newOptions = {};
+    const letters = ["A","B","C","D"];
+    let newCorrect = null;
+
+    entries.forEach(([oldKey, val], idx) => {
+      const newKey = letters[idx];
+      newOptions[newKey] = val;
+      if (oldKey === q.correct) newCorrect = newKey;
+    });
+
+    return {
+      q: q.q,
+      options: newOptions,
+      correct: newCorrect
+    };
+  });
+
+  answers = new Map();
+  renderQuiz();
+  updateProgress();
+  document.getElementById("result").innerHTML = "";
+}
+
+function renderQuiz() {
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.dataset.index = String(idx);
+
+    const title = document.createElement("div");
+    title.className = "q-title";
+    safeSetText(title, q.q);
+
+    block.appendChild(title);
+
+    const letters = Object.keys(q.options);
+    letters.forEach((key) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = key;
+
+      input.addEventListener("change", () => {
+        answers.set(idx, key);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      // variantlar artıq &lt;...&gt; kimidir, ona görə innerHTML ilə göstəririk
+      span.innerHTML = `<b>${key})</b> `;
+      span.appendChild(document.createTextNode(decodeHTML(q.options[key])));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    });
+
+    // "Boş" (cavab verməmək) variantı
+    // Seçiləndə cavabı silirik ki, sistem bunu "boş" kimi saysın.
+    {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = "__SKIP__";
+
+      input.addEventListener("change", () => {
+        answers.delete(idx);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      span.innerHTML = `<b>E)</b> `;
+      span.appendChild(document.createTextNode("Boş (cavab yoxdur)"));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    }
+
+    quiz.appendChild(block);
+  });
+
+  document.getElementById("finishBtn").style.display = "block";
+}
+
+/** ====== TIMER ====== */
+function startTimer() {
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    TIME--;
+    document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(Math.max(TIME, 0));
+    if (TIME <= 0) {
+      clearInterval(interval);
+      finish(true);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  TIME = TIME_LIMIT;
+  document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(TIME);
+}
+
+/** ====== PROGRESS ====== */
+function calculateStats() {
+  let correct = 0, wrong = 0, skipped = 0;
+
+  quizQuestions.forEach((q, idx) => {
+    const sel = answers.get(idx);
+    if (!sel) {
+      skipped++;
+    } else if (sel === q.correct) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  return { correct, wrong, skipped };
+}
+
+function updateProgress() {
+  const { correct, wrong, skipped } = calculateStats();
+  const answered = correct + wrong;
+
+  document.getElementById("progressText").textContent = `Cavablanan: ${answered} / ${quizQuestions.length}`;
+  document.getElementById("okCount").textContent = String(correct);
+  document.getElementById("noCount").textContent = String(wrong);
+  document.getElementById("skipCount").textContent = String(skipped);
+
+  const pct = quizQuestions.length ? (answered / quizQuestions.length) * 100 : 0;
+  document.getElementById("barFill").style.width = pct.toFixed(1) + "%";
+}
+
+/** ====== FINISH ====== */
+function finish(auto=false) {
+  // bir dəfə bitirsin
+  document.getElementById("finishBtn").disabled = true;
+  if (interval) clearInterval(interval);
+
+  const { correct, wrong, skipped } = calculateStats();
+  const examScore = correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+  const score = baseScore + correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+
+  // blokları rənglə
+  const blocks = document.querySelectorAll(".question-block");
+  blocks.forEach((block) => {
+    const idx = Number(block.dataset.index);
+    const q = quizQuestions[idx];
+    const sel = answers.get(idx);
+
+    block.classList.remove("correct-ans", "wrong-ans", "skipped-ans");
+
+    if (!sel) block.classList.add("skipped-ans");
+    else if (sel === q.correct) block.classList.add("correct-ans");
+    else block.classList.add("wrong-ans");
+
+    // doğru cavabı yaz
+    const info = document.createElement("div");
+    info.style.marginTop = "10px";
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + (!sel ? "b-skip" : (sel === q.correct ? "b-ok" : "b-no"));
+    badge.textContent = !sel ? "BOŞ" : (sel === q.correct ? "DÜZ" : "SƏHV");
+
+    const text = document.createElement("span");
+    text.className = "muted";
+    text.style.marginLeft = "8px";
+    const selTxt = sel ? sel : "-";
+    text.innerHTML = `Sənin cavabın: <b>${selTxt}</b> · Düzgün cavab: <b>${q.correct}</b>`;
+
+    info.appendChild(badge);
+    info.appendChild(text);
+
+    // eyni sualda təkrar finish etməsin deyə əvvəlki info-ları sil
+    const old = block.querySelector(".muted")?.parentElement;
+    if (old && old.parentElement === block && old !== info) {
+      // nothing
+    }
+    // remove previous info blocks if exists
+    [...block.querySelectorAll("div")].forEach(d => {
+      if (d !== block.firstChild && d.className === "" && d.querySelector(".badge")) d.remove();
+    });
+    block.appendChild(info);
+  });
+
+  const result = document.getElementById("result");
+  result.innerHTML = `
+    <hr />
+    <h3>Nəticə</h3>
+    <div class="row">
+      <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
+      <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
+      <div><b>Boş:</b> ${skipped}</div>
+    </div>
+    <p><b>Sınaq balı:</b> ${examScore}</p>
+    <p><b>Giriş balı:</b> ${baseScore}</p>
+    <p style="font-size: 18px;"><b>Yekun bal:</b> ${score}</p>
+    <button type="button" onclick="location.reload()">Yenidən başla</button>
+  `;
+
+  if (auto) {
+    const warn = document.createElement("p");
+    warn.style.color = "#c0392b";
+    warn.innerHTML = "<b>Vaxt bitdi!</b> İmtahan avtomatik tamamlandı.";
+    result.prepend(warn);
+  }
+}
+
+/** ====== START ====== */
+function askBaseScore() {
+  const raw = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+  const val = Number(raw);
+  if (Number.isFinite(val) && val >= 0 && val <= 50) return Math.floor(val);
+  return 0;
+}
+
+function start() {
+  if (started) return;
+  started = true;
+
+  baseScore = askBaseScore();
+  resetTimer();
+  pickNewQuiz();
+  startTimer();
+
+  document.getElementById("finishBtn").addEventListener("click", () => finish(false));
+  document.getElementById("regenBtn").addEventListener("click", () => {
+    if (confirm("Yeni 25 sual seçilsin? (mövcud cavablar silinəcək)")) {
+      document.getElementById("finishBtn").disabled = false;
+      resetTimer();
+      startTimer();
+      pickNewQuiz();
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (confirm("Bütün cavablar silinsin?")) {
+      answers = new Map();
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      document.getElementById("result").innerHTML = "";
+      document.getElementById("finishBtn").disabled = false;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", start);
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  if(document.body.classList.contains("dark")){
+    localStorage.setItem("theme","dark");
+  } else {
+    localStorage.setItem("theme","light");
+  }
+}
+
+window.addEventListener("load", function(){
+  if(localStorage.getItem("theme")==="dark"){
+    document.body.classList.add("dark");
+  }
+});
+
+</script>
+</body>
+</html>
