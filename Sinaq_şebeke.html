@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Sınaq Sistemi By Nurali and Nihat</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f9; padding: 20px; line-height: 1.6; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #333; margin-top: 5px; }
+    h2 { text-align: center; color: #333; margin-top: 5px; }
+    #meta { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin: 10px 0 20px; }
+    #timer { position: sticky; top: 10px; background: #e74c3c; color: white; padding: 10px; border-radius: 5px; text-align: center; font-weight: bold; z-index: 100; flex: 0 0 220px; }
+    #progress { flex: 1; min-width: 220px; background:#f0f0f0; border-radius: 5px; padding: 10px; }
+    .bar { height: 10px; background: #ddd; border-radius: 999px; overflow:hidden; }
+    .bar > div { height: 100%; width: 0%; background: #2ecc71; }
+    #progress small { display:block; color:#555; margin-top:6px; }
+    .question-block { margin-bottom: 16px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; transition: 0.2s; }
+    .question-block:hover { border-color:#cfcfcf; }
+    .q-title { font-weight: 700; margin-bottom: 10px; }
+    .option { display: block; margin: 8px 0; cursor: pointer; padding: 8px; border-radius: 6px; border: 1px solid #eee; user-select:none; }
+    .option:hover { background: #f9f9f9; }
+    .option input { margin-right: 8px; }
+    button { display: block; width: 100%; padding: 15px; font-size: 18px; background: #2ecc71; color: white; border: none; border-radius: 8px; cursor: pointer; margin-top: 16px; }
+    button:hover { background: #27ae60; }
+    #result { margin-top: 20px; }
+    .correct-ans { background-color: #d4edda !important; border-color:#c3e6cb !important; }
+    .wrong-ans { background-color: #f8d7da !important; border-color:#f5c6cb !important; }
+    .skipped-ans { background-color: #fff3cd !important; border-color:#ffeeba !important; }
+    .badge { display:inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .b-ok { background:#d4edda; }
+    .b-no { background:#f8d7da; }
+    .b-skip { background:#fff3cd; }
+    .muted { color:#666; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; }
+    .row > div { flex:1; min-width: 200px; }
+    .top-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+    .secondary { background:#3498db; }
+    .secondary:hover { background:#2d86c1; }
+    .danger { background:#e74c3c; }
+    .danger:hover { background:#d63c2f; }
+    .danger { margin-bottom: 25px; }
+  
+/* ===== DARK MODE ===== */
+body.dark { background-color: #121212 !important; color: #e0e0e0 !important; }
+body.dark .container { background: #1e1e1e !important; box-shadow: 0 0 20px rgba(0,0,0,0.6); }
+body.dark h1, body.dark h2 { color: #ffffff !important; }
+body.dark #timer { background:#c0392b !important; }
+body.dark #progress { background:#2a2a2a !important; }
+body.dark .bar { background:#444 !important; }
+body.dark .question-block { background:#1a1a1a !important; border-color:#333 !important; }
+body.dark .option { border-color:#333 !important; }
+body.dark .option:hover { background:#2a2a2a !important; }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <h2>By Nurali and Nihat</h2>
+    
+    <div id="meta">
+      <div id="timer">Qalan vaxt: 30:00</div>
+      <div id="progress">
+        <div class="bar"><div id="barFill"></div></div>
+        <small id="progressText">Cavablanan: 0 / 25</small>
+        <small class="muted">Düz: <b id="okCount">0</b> · Səhv: <b id="noCount">0</b> · Boş: <b id="skipCount">25</b></small>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button type="button" onclick="toggleTheme()" class="secondary">🌙 Dark / Light</button>
+      <button class="secondary" id="regenBtn" type="button">25 sualı yenidən seç (random)</button>
+      <button class="danger" id="clearBtn" type="button">Cavabları sıfırla</button>
+    </div>
+
+    <div id="quiz">Suallar hazırlanır...</div>
+    <button id="finishBtn" type="button" style="display:none;">İmtahanı Bitir</button>
+    <div id="result"></div>
+  </div>
+
+<script>
+/** ====== MƏLUMAT ====== */
+const ALL_QUESTIONS = [
+  {
+    "q": "1. Kompüter şəbəkəsi nədir?",
+    "options": {
+      "A": "yalnız fərdi kompüterlərin proqram toplusu",
+      "B": "internetə qoşulma proqramı",
+      "C": "kompüterlərin qarşılıqlı əlaqəsinin ümumiliyi",
+      "D": "kompüterin daxili mikrosxemləri"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "2. WAN nədir?",
+    "options": {
+      "A": "qlobal hesablama şəbəkəsi",
+      "B": "yerli sahə şəbəkəsi",
+      "C": "şəxsi sahə şəbəkəsi",
+      "D": "korporativ məlumat bazası"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "3. LAN nədir?",
+    "options": {
+      "A": "regional şəbəkə",
+      "B": "yerli sahə şəbəkəsi",
+      "C": "şəbəkə protokolu",
+      "D": "qlobal internet şəbəkəsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "4. PAN nədir?",
+    "options": {
+      "A": "peyk rabitəsi şəbəkəsi",
+      "B": "ictimai giriş şəbəkəsi",
+      "C": "analoq rabitə sistemi",
+      "D": "şəxsi sahə şəbəkəsi"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "5. WLAN nədir?",
+    "options": {
+      "A": "naqilli magistral şəbəkə",
+      "B": "simsiz yerli sahə şəbəkəsi",
+      "C": "qlobal simsiz şəbəkə",
+      "D": "qorunan regional şəbəkə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "6. Kiçik ofislərdə, ev daxili və ya kiçik kompüter klublarında hansı şəbəkədən istifadə olunur?",
+    "options": {
+      "A": "WAN",
+      "B": "MAN",
+      "C": "LAN",
+      "D": "PAN"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "7. Naqilsiz qurulan lokal şəbəkə necə adlanır?",
+    "options": {
+      "A": "WLAN",
+      "B": "LAN",
+      "C": "PAN",
+      "D": "MAN"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "8. Hansı kompüter şəbəkələrində bütün kompüterlər eyni hüquqludur?",
+    "options": {
+      "A": "serverli şəbəkə",
+      "B": "eyniranqlı şəbəkə",
+      "C": "mərkəzləşdirilmiş şəbəkə",
+      "D": "iyerarxik şəbəkə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "9. Hansı kompüter şəbəkələrində kompüterlərin sayı 10-dan çox deyil.",
+    "options": {
+      "A": "domen əsaslı şəbəkə",
+      "B": "qlobal şəbəkə",
+      "C": "korporativ şəbəkə",
+      "D": "eyniranqlı şəbəkə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "10. Serverli şəbəkədə nə baş verir?",
+    "options": {
+      "A": "Bütün kompüterlər eyni vaxtda sönür",
+      "B": "Bu şəbəkə müştərilərin sorğuların sürətli emal üçün optimize edilmişdir",
+      "C": "Heç bir təhlükəsizlik qaydası tətbiq olunmur",
+      "D": "Verilənlər yalnız lokal disklərdə saxlanılır"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "11. Çox kompüterdə müştəri və serverlərin kompleks şəbəkənin normal fəaliyyətinin necə təmin olunur?",
+    "options": {
+      "A": "yalnız antivirus proqramı ilə",
+      "B": "ofis proqramları vasitəsilə",
+      "C": "şəbəkənin əməliyyat sistemi ilə",
+      "D": "video kartın gücü ilə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "12. Istifadəçi daxil olma hüququnun və imtiyazların idarə olunması üçün nə lazımdır?",
+    "options": {
+      "A": "yeni monitorun quraşdırılması",
+      "B": "şəbəkənin idarəedilməsi",
+      "C": "mətn redaktorunun yenilənməsi",
+      "D": "IP ünvanın silinməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "13. Kompyüter şəbəkələrində proqram təminatını yükələmək və təkmilləşdirmək üçün nə lazımdır?",
+    "options": {
+      "A": "Şəbəkənin idarə edilməsi",
+      "B": "İnternet provayderinin dəyişdirilməsi",
+      "C": "Kompüterin fiziki təmizlənməsi",
+      "D": "Yeni ana platanın alınması"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "14. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "ulduz",
+      "B": "həlqə",
+      "C": "şın",
+      "D": "ağac"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "15. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "tor",
+      "B": "həlqə",
+      "C": "hibrid",
+      "D": "xətti"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "16. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "ulduz",
+      "B": "hılqə",
+      "C": "şin",
+      "D": "ağac"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "17. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "xətti",
+      "B": "şin",
+      "C": "ikili həlqə",
+      "D": "qarışıq"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "18. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "həlqə",
+      "B": "tor",
+      "C": "ulduz",
+      "D": "şin"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "19. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "tor",
+      "B": "ağac",
+      "C": "ulduz",
+      "D": "şin"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "20. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "həlqə",
+      "B": "ağac",
+      "C": "xətti",
+      "D": "tor"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "21. Sxemdə hansı topologiya təsvir olunmuşdur?",
+    "options": {
+      "A": "şin",
+      "B": "ulduz",
+      "C": "həlqə",
+      "D": "gibrit"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "22. Komüter şəbəkəsənin topologiya tipi...",
+    "options": {
+      "A": "Ulduz (Star)",
+      "B": "Şina (Bus)",
+      "C": "Həlqə (Ring)",
+      "D": "Ağac (Tree)"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "23. Komüter şəbəkəsənin topologiya tipi...",
+    "options": {
+      "A": "Şina (Bus)",
+      "B": "Həlqə (Ring)",
+      "C": "Ulduz (star)",
+      "D": "Tor (Mesh)"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "24. Komüter şəbəkəsənin topologiya tipi...",
+    "options": {
+      "A": "Həlqə (ring)",
+      "B": "Ulduz (star)",
+      "C": "Şina (Bus)",
+      "D": "Hibrid (Hybrid)"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "25. \"Şin\" topologiyasında kompüterlər necə quraşdırılıb?",
+    "options": {
+      "A": "Hər bir kompüter mərkəzi serverə birbaşa qoşulub",
+      "B": "Kompüterlər bir-biri ilə dairəvi şəkildə birləşib",
+      "C": "Bütün kompüterlər bir seqment boyunca bir kabelə bağlıdır",
+      "D": "Kompüterlər yalnız simsiz rabitə ilə əlaqələnib"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "26. \"halqa\" topologiyasında kompüterlər necə quraşdırılıb?",
+    "options": {
+      "A": "Kompüterlər mərkəzi konsentratora ulduzvari qoşulub",
+      "B": "kompüterlər bağlı dairədə kabelə bağlıdır",
+      "C": "Hər bir kompüter müstəqil magistral xəttə malikdir",
+      "D": "Kompüterlər bir-birinə iyerarxik budaqlar şəklində qoşulub"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "27. Şin topologiyasında naqilləri birləşdirmək üçın nədən istifadə edilir?",
+    "options": {
+      "A": "transiver və şlyuz",
+      "B": "mərkəzi hab (hub)",
+      "C": "optik paylayıcı",
+      "D": "barel-konnektor və ya təkrarlayıcı"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "28. Kompüter şəbəkələri üçün baza tapalogiyası hansıdır?",
+    "options": {
+      "A": "yalnız Şin",
+      "B": "yalnız Ulduz",
+      "C": "hamısı",
+      "D": "yalnız Həlqə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "29. \"Ulduz\" topologiyasında kompüterlər necə quraşdırılıb?",
+    "options": {
+      "A": "Ardıcıl olaraq bir xətt üzərində terminal vasitəsilə",
+      "B": "mərkəzi komponent olan konsentratora (hub) kabel seqmentləri vasitəsi ilə",
+      "C": "Kabel olmadan, yalnız peyk antenaları ilə",
+      "D": "Bir-birinin ardınca qapalı zəncirvari şəkildə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "30. Təsvir olunan port necə adlanır?",
+    "options": {
+      "A": "LPT",
+      "B": "COM",
+      "C": "USB",
+      "D": "PS/2"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "31. Təsvir olunan port necə adlanır?",
+    "options": {
+      "A": "LPT",
+      "B": "COM",
+      "C": "HDMI",
+      "D": "VGA"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "32. Verilənlərin mühafızısinin təşkili üçün nə lazımdır?",
+    "options": {
+      "A": "yeni printerin alınması",
+      "B": "monitorun ekran icazəsinin artırılması",
+      "C": "şəbəkənin idarə olunması",
+      "D": "kompüterin söndürülməsi"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "33. Resurslardan istifadəni təmin etmək üçün nə lazımdır?",
+    "options": {
+      "A": "şəbəkənin idarəolunması",
+      "B": "lokal diskin format edilməsi",
+      "C": "proqramlaşdırma dilinin dəyişdirilməsi",
+      "D": "audio kartın yenilənməsi"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "34. Şina topologiyasında elektrik siqnalların əks olunması nəticəsində yaranan küyün qarşısını almaq üçün nədən istifadə olunur?",
+    "options": {
+      "A": "transiver",
+      "B": "konnektor",
+      "C": "terminator",
+      "D": "repetor"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "35. Kompüterlər arasında aparılan verilənlər mübadiləsi qayda və proseduralar necə adlanır?",
+    "options": {
+      "A": "topologiya",
+      "B": "protokol",
+      "C": "interfeys",
+      "D": "drayver"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "36. Etalon olan OSİ modeli neçə laydan ibarətdir",
+    "options": {
+      "A": "4 laylı",
+      "B": "5 laylı",
+      "C": "7 laylı",
+      "D": "9 laylı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "37. OSİ modelinin hansı layı ən yüksək hesab olunur ?",
+    "options": {
+      "A": "fiziki",
+      "B": "tətbiqetmə",
+      "C": "nəqliyyat (daşıma)",
+      "D": "şəbəkə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "38. OSİ modelinində qonşu laylar arasında əlaqə nə vasitəsilə aparılır?",
+    "options": {
+      "A": "protokol",
+      "B": "şlyuz",
+      "C": "marşrutizator",
+      "D": "interfeys"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "39. Təqdimetmə səviyyəsində fəaliyyət göstərən verilənlər vahidi necə adlanır?",
+    "options": {
+      "A": "məlumat",
+      "B": "kadr (frame)",
+      "C": "paket (packet)",
+      "D": "bit"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "40. Redirektor adlanan proqram OSİ madelinin hansı səviyyəsində işləyir?",
+    "options": {
+      "A": "fiziki",
+      "B": "kanal (məlumat bağlantısı)",
+      "C": "təqdimetmə",
+      "D": "şəbəkə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "41. Sessiya layı nəyi təmin edir?",
+    "options": {
+      "A": "bitlərin fiziki ötürülməsini",
+      "B": "dialoqun idarə edilməsi",
+      "C": "marşrutun seçilməsini",
+      "D": "kadrların xətalardan qorunmasını"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "42. Şəbəkə adapterlərin drayverləri harada yerləşir?",
+    "options": {
+      "A": "Fiziki layda",
+      "B": "Tətbiqi layda",
+      "C": "Sessiya layında",
+      "D": "Osi modelinin məlumat bağlantısı layında"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "43. Treyler nədir?",
+    "options": {
+      "A": "paketin IP ünvanı saxlayan başlığı",
+      "B": "paketin səhfsiz ötürülməsini təmin edən paket hissəsi",
+      "C": "ötürmə sürətini artıran xüsusi kabel",
+      "D": "marşrutlaşdırma cədvəli"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "44. Paket OSİ madelinin hansı səviyyəsində formalaşır?",
+    "options": {
+      "A": "Tətbiqi layda",
+      "B": "Seans layında",
+      "C": "Təqdimetmə layında",
+      "D": "Osi modelinin fiziki layında"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "45. Verilənlərin ötürülmə surəti hansı faktordan aslı deyil?",
+    "options": {
+      "A": "kabelin növü",
+      "B": "şəbəkə avadanlığının buraxılış qabiliyyəti",
+      "C": "səhflərindüzəlməsi",
+      "D": "məsafə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "46. OSİ modelinin hansı layı ən aşağı hesab olunur ?",
+    "options": {
+      "A": "tətbiqetmə",
+      "B": "seans",
+      "C": "nəqliyyat",
+      "D": "fiziki"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "47. OSİ madelinin hər səviyyəsinə nələr uyğundur?",
+    "options": {
+      "A": "şəbəkə əməliyyatları, avadanlıqları və protokolları",
+      "B": "yalnız istifadəçi faylları",
+      "C": "yalnız kompüterin daxili yaddaş həcmi",
+      "D": "monitor və klaviaturanın modelləri"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "48. OSİ modelinin hansı layı kompüterler arasında birbaşa əlaqəni yaradır ?",
+    "options": {
+      "A": "təqdimetmə",
+      "B": "tətbiqetmə",
+      "C": "fiziki",
+      "D": "seans"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "49. OSİ modelinin hansı layı şəbəkəyə ümumi daxilolmanı və verilənlər selini idarə edir?",
+    "options": {
+      "A": "fiziki",
+      "B": "kanal",
+      "C": "şəbəkə",
+      "D": "tətbiqetmə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "50. Məlumat bağlantısı yayında verilənlər necə adlanır ?",
+    "options": {
+      "A": "paket (packet)",
+      "B": "kadr",
+      "C": "seqment (segment)",
+      "D": "bit"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "51. OSİ modelinin hansı layı verilənlərim şəbəkələrarası çatdırılmasına cavabdehdir?",
+    "options": {
+      "A": "fiziki",
+      "B": "seans",
+      "C": "şəbəkə",
+      "D": "təqdimetmə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "52. Paketin əsas komponentlərini nədir?",
+    "options": {
+      "A": "IP ünvanı və MAC ünvanı",
+      "B": "başlıq, verilənlər və treyler",
+      "C": "yalnız faylın adı və ölçüsü",
+      "D": "yalnız binar kodlar"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "53. OSİ modelinin hansı layında paketin formalaşması prosesi başlayır?",
+    "options": {
+      "A": "Fiziki layda",
+      "B": "Osi modelinin tətbiqi layında",
+      "C": "Kanal layında",
+      "D": "Şəbəkə layında"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "54. Protokollar steki nədir?",
+    "options": {
+      "A": "şəbəkə kabellərinin cəmi",
+      "B": "protokollar toplusu",
+      "C": "serverlərin otağı",
+      "D": "xətaların siyahısı"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "55. DNS; FTP; TFTP; BOOTP; SNMP;RLOGIN; SMTP; MIME; NFS; FINGER; TELNET; NCP; APPC; AFP; SMB protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Şəbəkə",
+      "B": "Fiziki",
+      "C": "Nəqliyyat",
+      "D": "Tətbiqetmə"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "56. NetBIOS; Names Pipes; Mail Slots; RPC protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Fiziki",
+      "B": "Kanal",
+      "C": "Sessiya",
+      "D": "Tətbiqetmə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "57. TCP, ARP, RARP; SPX, NWLink, NetBIOS / NetBEUI, ATP protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Fiziki",
+      "B": "Daşıma",
+      "C": "Tətbiqetmə",
+      "D": "Seans"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "58. IP; ARP; RARP, ICMP; RIP; OSFP IGMP;IPX, NWLink, NetBEUI, OSI, DDP, DECnet protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Şəbəkə",
+      "B": "Tətbiqetmə",
+      "C": "Fiziki",
+      "D": "Sessiya"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "59. Logical Link Control(LLC) , SAPs, 802.1 OSI Model , 802.2 Logical Link Control , Media Access Control(MAC) , 802.3 CSMA/CD (Ethernet), 802.4 Token Bus (ARCnet), 802.5 Token Ring, 802.12 Demand Priority protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Şəbəkə",
+      "B": "Məlumat Bağlantısı",
+      "C": "Seans",
+      "D": "Tətbiqetmə"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "60. IEEE 802 , IEEE 802.2, ISO 2110, ISDN protokollar və texnalogiyaları hansı layda istifadə olunur?",
+    "options": {
+      "A": "Tətbiqetmə",
+      "B": "Şəbəkə",
+      "C": "Daşıma",
+      "D": "Fiziki"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "61. FDDI nədir?",
+    "options": {
+      "A": "simsiz rabitə üçün tezlik modulyasiyası",
+      "B": "qlobal IP ünvanlama cədvəli",
+      "C": "ötürmə mühiti optovolokon kabel olan lokal şəbəkə texnalogiyası",
+      "D": "faylların arxivləşdirilməsi proqramı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "62. Маркер (token) nədir?",
+    "options": {
+      "A": "kabelin uclarına qoşulan qapaq",
+      "B": "şəbəkə drayverinin adı",
+      "C": "göndərən kompüterin ünvanı",
+      "D": "server otağının açarı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "63. Modem nədir?",
+    "options": {
+      "A": "daxili yaddaşı artıran mikrosxem",
+      "B": "müxtəlif əlaqə kanallarını ayıran qurğu",
+      "C": "şəbəkə topologiyasının növü",
+      "D": "yalnız çap işlərini tənzimləyən qurğu"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "64. Körpü (bridges) nədir?",
+    "options": {
+      "A": "kompüteri cərəyan dalğalanmasından qoruyan texnologiya",
+      "B": "analoq siqnalı rəqəmsala çevirən port",
+      "C": "müxtəlif lokal şebəkələrdə seqmentləri öz arasında birləşdirən qurğu",
+      "D": "internet provayderinin proqramı"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "65. Müxtəlif protokol və arxitekturadan istifadə edən şəbəkələri birləşdirmək üçün nədən istifadə edirlər?",
+    "options": {
+      "A": "Terminator",
+      "B": "Şlyuz (gateways)",
+      "C": "BNC-konnektor",
+      "D": "Barel-konnektor"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "66. Qlobal şəbəkənin komponentləri hansıdır? : a.Modem; b. Təkrarlayıcı; c. Körpü; d. marşrutizator; e. Şlyuz",
+    "options": {
+      "A": "yalnız a və d",
+      "B": "yalnız b, c, e",
+      "C": "а, b, c, d, e",
+      "D": "heç biri"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "67. Şəkildə ...",
+    "options": {
+      "A": "lokal ulduz topologiyası",
+      "B": "uzaqlaşdırılmış körpülər vasıtəsi ilə əlaqələndirilmə",
+      "C": "peyk vasitəsilə birbaşa qoşulma",
+      "D": "fiber-optik magistral xətt"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "68. Şəbəkə Arxitekturası (network architecture)nədir ?",
+    "options": {
+      "A": "Şəbəkə inzibatçısının iş otağının dizaynı",
+      "B": "Kompüterlərin fiziki korpusunun forması",
+      "C": "Şəbəkəni qurmaq üçün zəriri olan standartlar, topologiyalar və protokollar",
+      "D": "Veb-saytların proqramlaşdırılma dili"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "69. Token Ring nədir?",
+    "options": {
+      "A": "İnternet brauzeri",
+      "B": "Fayl sistemi",
+      "C": "Antivirus proqramı",
+      "D": "Şəbəkə Arxitekturası"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "70. Şəbəkə mühitində Kolliziya nədir?",
+    "options": {
+      "A": "Şəbəkə sürətinin maksimum həddə çatması",
+      "B": "Qarşı maraqların toqquşması",
+      "C": "Kabelin qırılması prosesi",
+      "D": "IP ünvanların yenilənməsi"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "71. Ethernet şəbəkəsi üçün 10 Base T –də T nədir?",
+    "options": {
+      "A": "terminal",
+      "B": "telefon",
+      "C": "qalın koaksial",
+      "D": "dolanmış cütlük"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "72. Token Ring arxitekturası digərlərindən nə ilə fərqlənir?",
+    "options": {
+      "A": "İstifadə olunan kabel sistemi və şəbəkəyə markerin ötürülməsi matodu ilə daxil olma",
+      "B": "Yalnız simsiz texnologiyaya əsaslanması ilə",
+      "C": "Daha ucuz və keyfiyyətsiz olması ilə",
+      "D": "Heç bir protokol sistemindən istifadə etməməsi ilə"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "73. Şəkildə nə təsvir olunub?",
+    "options": {
+      "A": "Ethernet şəbəkəsində kolliziya",
+      "B": "Token Ring-də markerlərin hərəkəti",
+      "C": "Ulduz topologiyasında mərkəzi idarəetmə",
+      "D": "Wi-Fi dalğalarının yayılması"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "74. Osi madelinin hansı səviyyəsində təkrarlayıcı (repeaters) işləyir?",
+    "options": {
+      "A": "Şəbəkə səviyyəsində",
+      "B": "Kanal səviyyəsində",
+      "C": "Fiziki səviyyədə",
+      "D": "Tətbiqi səviyyədə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "75. Marşrutizator (routers) nədir?",
+    "options": {
+      "A": "Kabelin uclarını sıxmaq üçün alət",
+      "B": "müxtəlif arxitektura və protokollardan istifadə edən müxtəlif tip şəbəkələri birləşdirən",
+      "C": "Kompüterin qida blokunun bir hissəsi",
+      "D": "Monitorun ekran tezliyini tənzimləyən proqram"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "76. Osi madelinin hansı səviyyəsində Marşrutizator (routers) işləyir?",
+    "options": {
+      "A": "Fiziki səviyyədə",
+      "B": "Şəbəkə səviyyədə",
+      "C": "Seans səviyyəsində",
+      "D": "Təqdimetmə səviyyəsində"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "77. Marşrutizatorlar cədvəlində hansı məlumat yerləşdirilir ? a. şəbəkə ünvanları; b. digər şəbəkələrlə əlaqə yollarl; c. marşrutizatorlar arasında əlaqə ; d. marşrutlar arasın əalaqənin dəyəri",
+    "options": {
+      "A": "yalnız a və b",
+      "B": "yalnız c və d",
+      "C": "heç biri",
+      "D": "а, b, c, d"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "78. Şəkildə hansı kabel təsvir olunub?",
+    "options": {
+      "A": "UTP",
+      "B": "RG-8",
+      "C": "RG-58",
+      "D": "Fiber-optik"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "79. Şəkildə hansı kabel təsvir olunub?",
+    "options": {
+      "A": "RG-6",
+      "B": "STP",
+      "C": "RG-8",
+      "D": "Telefon kabeli"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "80. Şəkildə hansı kabel təsvir olunub?",
+    "options": {
+      "A": "RG-6",
+      "B": "UTP",
+      "C": "RG-58",
+      "D": "Optik kabel"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "81. Şəkildə hansı kabel təsvir olunub?",
+    "options": {
+      "A": "STP",
+      "B": "RG-8",
+      "C": "Koaksial",
+      "D": "UTP"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "82. Şəkildə hansı kabel təsvir olunub?",
+    "options": {
+      "A": "UTP",
+      "B": "STP",
+      "C": "RG-58",
+      "D": "RG-6"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "83. “Nazik” koaksial kabelin diametri nəqədərdir?",
+    "options": {
+      "A": "0, 5 см",
+      "B": "1 см",
+      "C": "2 см",
+      "D": "0,1 sm"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "84. “Qalın” koaksial kabelin diametri nəqədərdir?",
+    "options": {
+      "A": "0,5 sm",
+      "B": "1 см",
+      "C": "1,5 sm",
+      "D": "3 sm"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "85. “Nazik” koaksial kabel üçün hansı markirovka qəbul edilib?",
+    "options": {
+      "A": "RG – 8",
+      "B": "RG – 6",
+      "C": "Cat 5",
+      "D": "RG – 58"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "86. “Qalın” koaksial kabelə qoşulmaq üçün hansı xüsusi qurğudan istifadə edilir?",
+    "options": {
+      "A": "BNC-konnektor",
+      "B": "Transiver",
+      "C": "RJ-45",
+      "D": "RJ-11"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "87. “Nazik” koaksial kabelə qoşulmaq üçün hansı xüsusi qurğudan istifadə edilir?",
+    "options": {
+      "A": "Transiver",
+      "B": "RJ-45 konnektoru",
+      "C": "BNC– konnektor (British Naval Connector)",
+      "D": "USB portu"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "88. Hörüklü cüt naqilin 2 növünü göstərin.",
+    "options": {
+      "A": "nazik və kalın",
+      "B": "ekransız və ekranlaşdırılmış",
+      "C": "tək nüvəli və çox nüvəli",
+      "D": "analoq və rəqəmsal"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "89. hörgülü cüt naqili kompüterə qoşmaq üçün nədən istifadə edilir?",
+    "options": {
+      "A": "BNC T-konnektor",
+      "B": "LPT portu",
+      "C": "4 kontaktlı RJ-11 konnektoru",
+      "D": "8 kotaktlı Rj-45 telephone connector"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "90. Optovolokon kabeldə siqnallar necə paylanır?",
+    "options": {
+      "A": "elektrik cərəyanı şəklində",
+      "B": "radio dalğaları vasitəsilə",
+      "C": "modullaşdırılmış şəbəkə siqnalı şəklində",
+      "D": "səs dalğaları ilə"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "91. Şəbəkə istifadə olunan hası qrup kabeldir?",
+    "options": {
+      "A": "hörgülü cütlük",
+      "B": "fiber-optik",
+      "C": "koaksial",
+      "D": "lentvari kabel"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "92. Şəbəkə qurqkən istifadə olunan hası qrup kabeldir?",
+    "options": {
+      "A": "koaksial",
+      "B": "hörgülü cütlük",
+      "C": "güc kabeli",
+      "D": "magistral şin"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "93. Şəbəkə qurqkən istifadə olunan hası qrup kabeldir?",
+    "options": {
+      "A": "optik lifli",
+      "B": "telefon naqili",
+      "C": "RG-8",
+      "D": "hörgülü cütlük"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "94. Hansı simsiz mühitdir?",
+    "options": {
+      "A": "yalnız radio dalğalar",
+      "B": "yalnız infraqırmızı şüalar",
+      "C": "yalnız peyk rabitəsi",
+      "D": "bütün cavablar doğrudur"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "95. UTP-nin I kateqoriyası hansıdır?",
+    "options": {
+      "A": "yüksək sürətli internet kabeli",
+      "B": "giga-bit ötürücü xətt",
+      "C": "telefon kabeli",
+      "D": "televiziya xətti"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "96. UTP-nin II kateqoriyası hansıdır?",
+    "options": {
+      "A": "verilənləri 4 Мбит/с sürətilə ötürən kabel",
+      "B": "verilənləri 100 Мбит/с sürətilə ötürən kabel",
+      "C": "analoq rejimli magistral xətt",
+      "D": "token ring üçün optik kabel"
+    },
+    "correct": "A"
+  },
+  {
+    "q": "97. UTP-nin III kateqoriyası hansıdır?",
+    "options": {
+      "A": "verilənləri 1000 Мбит/с sürətilə ötürən kabel",
+      "B": "verilənləri 10 Мбит/с sürətilə ötürən kabel",
+      "C": "yalnız səs ötürən naqil",
+      "D": "qorunan hərbi təyinatlı kabel"
+    },
+    "correct": "B"
+  },
+  {
+    "q": "98. UTP-nin IV kateqoriyası hansıdır?",
+    "options": {
+      "A": "verilənləri 2 Мбит/с sürətilə ötürən kabel",
+      "B": "koaksial əvəzləyicisi",
+      "C": "verilənləri 16 Мбит/с sürətilə ötürən kabel",
+      "D": "simsiz şəbəkə antenası"
+    },
+    "correct": "C"
+  },
+  {
+    "q": "99. UTP-nin V kateqoriyası hansıdır?",
+    "options": {
+      "A": "verilənləri 10 Гбит/с sürətilə ötürən kabel",
+      "B": "köhnə nəsil telefon xətti",
+      "C": "qalın magistral kabel",
+      "D": "verilənləri 100 Мбит/с sürətilə ötürən kabel"
+    },
+    "correct": "D"
+  },
+  {
+    "q": "100. Ethernet nədir?",
+    "options": {
+      "A": "Fayl transfer protokolu",
+      "B": "Şəbəkə Arxitekturası",
+      "C": "Şəbəkə idarəetmə proqramı",
+      "D": "IP ünvan təyin etmə sistemi"
+    },
+    "correct": "B"
+  }
+];
+
+/** ====== PARAMETRLƏR ====== */
+const QUESTION_COUNT = 25;
+const TIME_LIMIT = 30 * 60; // saniyə
+const SCORE_CORRECT = 2;
+const SCORE_WRONG = -1;
+
+/** ====== STATE ====== */
+let TIME = TIME_LIMIT;
+let interval = null;
+let started = false;
+
+let baseScore = 0;             // giriş balı
+let quizQuestions = [];        // seçilmiş 25 sual (şaffl edilmiş)
+let answers = new Map();       // idx -> seçilən variant (A/B/C/D)
+
+/** ====== UTIL ====== */
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function formatTime(sec) {
+  const m = String(Math.floor(sec / 60)).padStart(2, "0");
+  const s = String(sec % 60).padStart(2, "0");
+  return `${m}:${s}`;
+}
+
+function decodeHTML(str) {
+  // &lt; &gt; &quot; kimi entity-ləri real simvola çevirir
+  const t = document.createElement("textarea");
+  t.innerHTML = str;
+  return t.value;
+}
+
+function safeSetText(el, str) {
+  el.textContent = decodeHTML(str);
+}
+
+/** ====== QUIZ HAZIRLA ====== */
+function pickNewQuiz() {
+  const pool = ALL_QUESTIONS.slice();
+  shuffle(pool);
+  const picked = pool.slice(0, Math.min(QUESTION_COUNT, pool.length));
+
+  // hər sualda variantları qarışdır və correct hərfini yenilə
+  quizQuestions = picked.map((q) => {
+    const entries = Object.entries(q.options); // [ ["A","..."], ... ]
+    shuffle(entries);
+
+    const newOptions = {};
+    const letters = ["A","B","C","D"];
+    let newCorrect = null;
+
+    entries.forEach(([oldKey, val], idx) => {
+      const newKey = letters[idx];
+      newOptions[newKey] = val;
+      if (oldKey === q.correct) newCorrect = newKey;
+    });
+
+    return {
+      q: q.q,
+      options: newOptions,
+      correct: newCorrect
+    };
+  });
+
+  answers = new Map();
+  renderQuiz();
+  updateProgress();
+  document.getElementById("result").innerHTML = "";
+}
+
+function renderQuiz() {
+  const quiz = document.getElementById("quiz");
+  quiz.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.className = "question-block";
+    block.dataset.index = String(idx);
+
+    const title = document.createElement("div");
+    title.className = "q-title";
+    safeSetText(title, q.q);
+
+    block.appendChild(title);
+
+    const letters = Object.keys(q.options);
+    letters.forEach((key) => {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = key;
+
+      input.addEventListener("change", () => {
+        answers.set(idx, key);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      // variantlar artıq &lt;...&gt; kimidir, ona görə innerHTML ilə göstəririk
+      span.innerHTML = `<b>${key})</b> `;
+      span.appendChild(document.createTextNode(decodeHTML(q.options[key])));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    });
+
+    // "Boş" (cavab verməmək) variantı
+    // Seçiləndə cavabı silirik ki, sistem bunu "boş" kimi saysın.
+    {
+      const label = document.createElement("label");
+      label.className = "option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `q_${idx}`;
+      input.value = "__SKIP__";
+
+      input.addEventListener("change", () => {
+        answers.delete(idx);
+        updateProgress();
+      });
+
+      const span = document.createElement("span");
+      span.innerHTML = `<b>E)</b> `;
+      span.appendChild(document.createTextNode("Boş (cavab yoxdur)"));
+
+      label.appendChild(input);
+      label.appendChild(span);
+      block.appendChild(label);
+    }
+
+    quiz.appendChild(block);
+  });
+
+  document.getElementById("finishBtn").style.display = "block";
+}
+
+/** ====== TIMER ====== */
+function startTimer() {
+  if (interval) clearInterval(interval);
+  interval = setInterval(() => {
+    TIME--;
+    document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(Math.max(TIME, 0));
+    if (TIME <= 0) {
+      clearInterval(interval);
+      finish(true);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  TIME = TIME_LIMIT;
+  document.getElementById("timer").textContent = "Qalan vaxt: " + formatTime(TIME);
+}
+
+/** ====== PROGRESS ====== */
+function calculateStats() {
+  let correct = 0, wrong = 0, skipped = 0;
+
+  quizQuestions.forEach((q, idx) => {
+    const sel = answers.get(idx);
+    if (!sel) {
+      skipped++;
+    } else if (sel === q.correct) {
+      correct++;
+    } else {
+      wrong++;
+    }
+  });
+
+  return { correct, wrong, skipped };
+}
+
+function updateProgress() {
+  const { correct, wrong, skipped } = calculateStats();
+  const answered = correct + wrong;
+
+  document.getElementById("progressText").textContent = `Cavablanan: ${answered} / ${quizQuestions.length}`;
+  document.getElementById("okCount").textContent = String(correct);
+  document.getElementById("noCount").textContent = String(wrong);
+  document.getElementById("skipCount").textContent = String(skipped);
+
+  const pct = quizQuestions.length ? (answered / quizQuestions.length) * 100 : 0;
+  document.getElementById("barFill").style.width = pct.toFixed(1) + "%";
+}
+
+/** ====== FINISH ====== */
+function finish(auto=false) {
+  // bir dəfə bitirsin
+  document.getElementById("finishBtn").disabled = true;
+  if (interval) clearInterval(interval);
+
+  const { correct, wrong, skipped } = calculateStats();
+  const examScore = correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+  const score = baseScore + correct * SCORE_CORRECT + wrong * SCORE_WRONG;
+
+  // blokları rənglə
+  const blocks = document.querySelectorAll(".question-block");
+  blocks.forEach((block) => {
+    const idx = Number(block.dataset.index);
+    const q = quizQuestions[idx];
+    const sel = answers.get(idx);
+
+    block.classList.remove("correct-ans", "wrong-ans", "skipped-ans");
+
+    if (!sel) block.classList.add("skipped-ans");
+    else if (sel === q.correct) block.classList.add("correct-ans");
+    else block.classList.add("wrong-ans");
+
+    // doğru cavabı yaz
+    const info = document.createElement("div");
+    info.style.marginTop = "10px";
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + (!sel ? "b-skip" : (sel === q.correct ? "b-ok" : "b-no"));
+    badge.textContent = !sel ? "BOŞ" : (sel === q.correct ? "DÜZ" : "SƏHV");
+
+    const text = document.createElement("span");
+    text.className = "muted";
+    text.style.marginLeft = "8px";
+    const selTxt = sel ? sel : "-";
+    text.innerHTML = `Sənin cavabın: <b>${selTxt}</b> · Düzgün cavab: <b>${q.correct}</b>`;
+
+    info.appendChild(badge);
+    info.appendChild(text);
+
+    // eyni sualda təkrar finish etməsin deyə əvvəlki info-ları sil
+    const old = block.querySelector(".muted")?.parentElement;
+    if (old && old.parentElement === block && old !== info) {
+      // nothing
+    }
+    // remove previous info blocks if exists
+    [...block.querySelectorAll("div")].forEach(d => {
+      if (d !== block.firstChild && d.className === "" && d.querySelector(".badge")) d.remove();
+    });
+    block.appendChild(info);
+  });
+
+  const result = document.getElementById("result");
+  result.innerHTML = `
+    <hr />
+    <h3>Nəticə</h3>
+    <div class="row">
+      <div><b>Düz:</b> ${correct} (x${SCORE_CORRECT})</div>
+      <div><b>Səhv:</b> ${wrong} (x${SCORE_WRONG})</div>
+      <div><b>Boş:</b> ${skipped}</div>
+    </div>
+    <p><b>Sınaq balı:</b> ${examScore}</p>
+    <p><b>Giriş balı:</b> ${baseScore}</p>
+    <p style="font-size: 18px;"><b>Yekun bal:</b> ${score}</p>
+    <button type="button" onclick="location.reload()">Yenidən başla</button>
+  `;
+
+  if (auto) {
+    const warn = document.createElement("p");
+    warn.style.color = "#c0392b";
+    warn.innerHTML = "<b>Vaxt bitdi!</b> İmtahan avtomatik tamamlandı.";
+    result.prepend(warn);
+  }
+}
+
+/** ====== START ====== */
+function askBaseScore() {
+  const raw = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+  const val = Number(raw);
+  if (Number.isFinite(val) && val >= 0 && val <= 50) return Math.floor(val);
+  return 0;
+}
+
+function start() {
+  if (started) return;
+  started = true;
+
+  baseScore = askBaseScore();
+  resetTimer();
+  pickNewQuiz();
+  startTimer();
+
+  document.getElementById("finishBtn").addEventListener("click", () => finish(false));
+  document.getElementById("regenBtn").addEventListener("click", () => {
+    if (confirm("Yeni 25 sual seçilsin? (mövcud cavablar silinəcək)")) {
+      document.getElementById("finishBtn").disabled = false;
+      resetTimer();
+      startTimer();
+      pickNewQuiz();
+    }
+  });
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    if (confirm("Bütün cavablar silinsin?")) {
+      answers = new Map();
+      document.querySelectorAll('input[type="radio"]').forEach(i => i.checked = false);
+      updateProgress();
+      document.getElementById("result").innerHTML = "";
+      document.getElementById("finishBtn").disabled = false;
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", start);
+
+function toggleTheme(){
+  document.body.classList.toggle("dark");
+  if(document.body.classList.contains("dark")){
+    localStorage.setItem("theme","dark");
+  } else {
+    localStorage.setItem("theme","light");
+  }
+}
+
+window.addEventListener("load", function(){
+  if(localStorage.getItem("theme")==="dark"){
+    document.body.classList.add("dark");
+  }
+});
+
+</script>
+</body>
+</html>
