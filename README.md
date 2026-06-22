@@ -23,7 +23,7 @@ Fərqli fənlər üzrə imtahanlara hazırlaşmaq üçün uyğundur (Riyaziyyat,
 
 ![Sınaq nümunəsi](sinaq-example.png)
 
-## Yerli olaraq necə işə salmaq
+## Offline olaraq necə işə salmaq
 
 1. Repozitoriyanı yükləyin: git clone https://github.com/NIKO77FIKO/Sinaq.git
 2. `Sinaq.html` faylını istənilən brauzerdə açın (Chrome, Edge, Firefox və s.)
