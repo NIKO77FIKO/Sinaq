@@ -239,7 +239,7 @@ const allQuestions = [
     { id: 19, q: "OOP-da çoxlu miras almanın əsas məqsədi nədir?", c: ["Bir sinfin birdən çox supersinifdən miras almasına icazə vermək", "Yalnız bir ana siniflə məhdudlaşmaq", "İnterfeyslərin istifadəsini tamamilə qadağan etmək", "Metodların adını dəyişdirmək"], a: 0 },
     { id: 20, q: "OOP-də dinamik polimorfizm nədir?", c: ["Proqramın yalnız kompilyasiya zamanı işləməsi", "İş vaxtında müxtəlif növlər üçün vahid interfeys təmin etmək imkanı", "Bütün dəyişənlərin eyni tipdə olması", "Statik siniflərin yaradılması"], a: 1 },
     { id: 21, q: "İnkapsulyasiya kontekstində Python-da giriş modifikatorlarının məqsədi nədir?", c: ["Yalnız oxumaq üçün xassələri yaratmaq üçün", "Kodun binar fayla çevrilməsi üçün", "Proqrama yeni kitabxanalar qoşmaq üçün", "Rekursiv funksiyalar yazmaq üçün"], a: 0 },
-    { id: 22, q: "Python-da __metaclass__ atributunun rolu nədir?", c: ["Bir sinfin metasınıfını göstərmək üçün", "Sinif daxilində dövr yaratmaq üçün", "Səhvləri idarə etmək üçün", "İki sinfi bir-birı ilə toplamaq üçün"], a: 0 },
+    { id: 22, q: "Python-da __metaclass__ atributunun rolu nədir?", c: ["Bir sinfin metasınıfını göstərmək üçün", "Sinif daxilində dövr yaratmaq üçün", "Səhvləri idarə etmək üçün", "İki sinfi bir-biri ilə toplamaq üçün"], a: 0 },
     { id: 23, q: "Aşağıdakılardan hansı boş (empty) bir sinif təyin edir?", c: ["class MyClass: pass", "class MyClass: void", "class MyClass: null", "class MyClass[]"], a: 0 },
     { id: 24, q: "Aşağıdakılardan hansı Python funksiyasını düzgün müəyyənləşdirir?", c: ["function def_name():", "def function_name():", "create function_name()", "func function_name():"], a: 1 },
     { id: 25, q: "Python funksiyasında return təlimatının məqsədi nədir?", c: ["Funksiyanı tamamlayır və ya dəyəri qaytarır", "Yeni bir dövr başladır", "Funksiyanı silir", "Konsola mətn çap edir"], a: 0 },
@@ -275,7 +275,7 @@ const allQuestions = [
     { id: 55, q: "Aşağıdakı hallardan hansında Animal sinfi Mammels sinifindən düzgün əlaqələndirilmişdir?", c: ["class Animal:Mammels", "class Animal(Mammels)", "class Animal extends Mammels", "class Animal<-Mammels"], a: 1 },
     { id: 56, q: "Aşağıdakı hallardan hansında Numbers sinfi Oddsnumb sinifindən düzgün əlaqələndirilmişdir?", c: ["class Numbers(Oddnumb)", "class Numbers[Oddnumb]", "class Numbers extends Oddnumb", "class Numbers::Oddnumb"], a: 0 },
     { id: 57, q: "Aşağıdakı hallardan hansında KM754 sinfi SmartStudents sinifindən düzgün əlaqələndirilmişdir?", c: ["class KM754 extends SmartStudents", "class KM754:SmartStudents", "class KM754(SmartStudents)", "class KM754<-SmartStudents"], a: 2 },
-    { id: 58, q: "Aşağıdakılardan hansı obyekt nümunəsinin səhv yaradılmasına gətirib çıxarır?", c: ["pupper = Dog(\"Jamie\")", "pupper = new Dog(\"Jamie\")", "pupper = Dog()", "pupper = create Dog(\"Jamie\")"], a: 1 },
+    { id: 58, q: "Aşağıdakılardan hansı obyekt nümunəsininin səhv yaradılmasına gətirib çıxarır?", c: ["pupper = Dog(\"Jamie\")", "pupper = new Dog(\"Jamie\")", "pupper = Dog()", "pupper = create Dog(\"Jamie\")"], a: 1 },
     { id: 59, q: "Verilmiş proqramın nəticəsi Pythonda necə olacaq?<br><pre>class People():\n  def __init__(self, name):\n      self.name = name\n  def namePrint(self):\n       print(self.name)\nperson1 = People(\"Sally\")\nperson2 = People(\"Louise\")\nperson1.namePrint()</pre>", c: ["Louise", "Sally", "People", "namePrint"], a: 1 },
     { id: 60, q: "Aşağıdakı ifadələrdən hansı obyekt yönümlü proqramlaşdırma ilə bağlı səhvdir?", c: ["konstruktor metodları obyekti işə salmaq üçün, dağıdıcı metodlar isə artıq tələb olunmadıqda obyekti məhv etmək üçün lazımdır.", "siniflər heç vaxt obyekt yarada bilməz, onlar yalnız funksiyaları saxlamaq üçündür.", "miras alma sayəsində kodun təkrar istifadəsi təmin edilir.", "polimorfizm eyni adlı metodların fərqli siniflərdə fərqli işləməsinə şərait yaradır."], a: 1 },
     { id: 61, q: "Açar söz _________ sinif obyektində yerləşəcək məlumatları və sinif obyekti üçün çağırıla bilən funksiyaları göstərən nümunəni müəyyənləşdirir.", c: ["def", "object", "class", "struct"], a: 2 },
@@ -508,6 +508,12 @@ function finishExam() {
 
     document.getElementById("finish-btn").style.display = "none";
     document.getElementById("final-score-box").style.display = "block";
+
+    // Səhifəni avtomatik olaraq nəticələr panelinə (ən aşağıya) rəvan şəkildə sürüşdürür
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
 }
 
 function restartQuiz() {
