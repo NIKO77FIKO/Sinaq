@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Sınaq Sistemi</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --btn-red: #e74c3c;
+            --btn-green: #2ecc71;
+            --border-color: #e1e8ed;
+            --badge-bg: #e8f4fd;
+            --progress-bg: #e1e8ed;
+        }
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --primary-color: #357abd;
+            --border-color: #444444;
+            --badge-bg: #3a3a3a;
+            --progress-bg: #444444;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .quiz-container {
+            max-width: 750px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1, h2 { text-align: center; color: var(--text-color); margin: 5px 0; }
+        .author { text-align: center; font-weight: bold; margin-bottom: 20px; }
+        
+        /* Top Control Panel */
+        .top-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+        .timer-box {
+            background-color: var(--btn-red);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-width: 140px;
+        }
+        .stats-box {
+            background-color: #e2e8f0;
+            color: #333;
+            padding: 12px 15px;
+            border-radius: 6px;
+            flex-grow: 1;
+            font-size: 13px;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .dark-mode .stats-box { background-color: #444; color: white; }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: var(--progress-bg);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--btn-green);
+            transition: width 0.3s ease;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-blue { background-color: #4a90e2; }
+        .btn-red { background-color: var(--btn-red); }
+        .btn-green { background-color: var(--btn-green); }
+
+        /* Questions */
+        .question-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card-correct { background-color: rgba(46, 204, 113, 0.15) !important; border-color: var(--btn-green) !important; }
+        .card-incorrect { background-color: rgba(231, 76, 60, 0.15) !important; border-color: var(--btn-red) !important; }
+        .card-blank { background-color: rgba(241, 196, 15, 0.15) !important; border-color: #f1c40f !important; }
+
+        .question-text { font-size: 15px; font-weight: bold; margin-bottom: 15px; }
+        .q-badge { background-color: var(--badge-bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        pre { background: #23272e; color: #abb2bf; padding: 12px; border-radius: 6px; overflow-x: auto; font-family: monospace; }
+        
+        .options-container { display: flex; flex-direction: column; gap: 8px; }
+        .option-label {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover { background-color: rgba(74, 144, 226, 0.1); }
+        
+        .opt-correct { background-color: rgba(46, 204, 113, 0.25) !important; font-weight: bold; border-color: var(--btn-green) !important; }
+        .opt-incorrect { background-color: rgba(231, 76, 60, 0.25) !important; font-weight: bold; border-color: var(--btn-red) !important; }
+
+        .result-detail {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .final-result-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        .result-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <div class="author">By Nurali and Nihat</div>
+
+    <div class="top-panel">
+        <div id="timer" class="timer-box">Qalan vaxt: 30:00</div>
+        <div class="stats-box">
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="live-stats">
+                Cavablanan: 0 / 25<br>Düz: 0 · Səhv: 0 · Boş: 25
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-action btn-blue" onclick="toggleDarkMode()">🌙 Dark / Light</button>
+    <button class="btn-action btn-blue" onclick="restartQuiz()">25 sualı yenidən seç (random)</button>
+    <button class="btn-action btn-red" onclick="resetAnswers()">Cavabları sıfırla</button>
+
+    <div id="quiz"></div>
+
+    <button id="finish-btn" class="btn-action btn-green" style="padding:15px; font-size:16px;" onclick="finishExam()">İmtahanı Bitir</button>
+
+    <div id="final-score-box" class="final-result-section" style="display:none;">
+        <h2>Nəticə</h2><br>
+        <div class="result-grid">
+            <span id="res-duz">Düz: 0 (x2)</span>
+            <span id="res-sehv">Səhv: 0 (x-1)</span>
+            <span id="res-bos">Boş: 25</span>
+        </div>
+        <div style="font-size:15px; line-height: 1.8;">
+            <b>Sınaq balı:</b> <span id="sc-sinag">0</span><br>
+            <b>Giriş balı:</b> <span id="sc-giris">0</span><br>
+            <hr style="border:0; border-top:1px solid var(--border-color);">
+            <b style="font-size:18px; color:var(--primary-color);">Yekun bal: <span id="sc-yekun">0</span></b>
+        </div>
+        <button class="btn-action btn-green" style="margin-top:20px;" onclick="restartQuiz()">Yenidən başla</button>
+    </div>
+</div>
+
+<script>
+// 100 Suallıq Yenilənmiş Baza Məlumatı
+const allQuestions = [
+    { id: 1, q: "Obyekt yönümlü proqramlaşdırmanın (OOP) əsas məqsədi nədir?", c: ["Proqramın icra sürətini maksimum dərəcədə artırmaq", "Kodun təkrar istifadəsi və modulluğu", "Bütün dəyişənləri qlobal etmək", "Funksional proqramlaşdırmaya keçid etmək"], a: 1 },
+    { id: 2, q: "Pythonda Class nədir?", c: ["Obyektlərin yaradılması", "Standart kitabxana modulu", "Dinamik massiv növü", "Şərt operatoru"], a: 0 },
+    { id: 3, q: "Classda dəyişən nümunəsi nədir?", c: ["Qlobal funksiya arqumenti", "Sinif nümunəsinə xas dəyişən", "Statik metod növü", "Dövr operatoru"], a: 1 },
+    { id: 4, q: "Sinif dəyişəni ilə nümunə dəyişəni arasındakı fərq nədir?", c: ["Heç bir fərq yoxdur, hər ikisi eyni məqsədlə istifadə olunur.", "Sinif dəyişənləri yalnız metod daxilində, nümunə dəyişənləri isə qlobal sahədə təyin olunur.", "Sinif dəyişənləri bütün nümunələr üçün ümumi, nümunə dəyişənləri isə hər bir nümunə üçün spesifikdir.", "Nümunə dəyişənləri dəyişdirilə bilməz, sinif dəyişənləri isə dəyişdirilə bilər."], a: 2 },
+    { id: 5, q: "OOP-da miras sinifə imkan verir:", c: ["Superklassdan xassələri və davranışları miras almasına", "Kodun tamamilə silinməsinə", "Yalnız statik metodların çağırılmasına", "Proqramın interpretasiya edilməməsinə"], a: 0 },
+    { id: 6, q: "Obyektyönlü proqramlaşdırmada polimorfizmlər nədir?", c: ["Sinifdə eyni ada malik bir neçə metodun müəyyən edilməsi", "Məlumatların gizlədilməsi prosesi", "Proqramın yaddaşının idarə olunması", "Obyektlərin fayla yazılması"], a: 0 },
+    { id: 7, q: "Python-da metodun həddindən artıq yüklənməsinə nail olmaq üçün hansı açar sözdən istifadə olunur?", c: ["overload", "override", "artıq yüklənməsini dəstəkləmir", "extends"], a: 2 },
+    { id: 8, q: "OOP-də abstraksiyanın əsas məqsədi nədir?", c: ["Bütün məlumatları istifadəçiyə açıq saxlamaq", "Mürəkkəb sistemlərin sinifləri modelləşdirməklə sadələşdirilməsi", "İnterpretasiya sürətini artırmaq", "Siniflərin sayını məhdudlaşdırmaq"], a: 1 },
+    { id: 9, q: "Mövcud sinfə əsaslanan yeni sinif yaratmaq prosesi üçün termin nədir?", c: ["İnkapsulyasiya", "Polimorfizm", "Abstraksiya", "Miras"], a: 3 },
+    { id: 10, q: "OOP-da inkapsulyasiyadan istifadənin faydası nədir?", c: ["Təkmilləşdirilmiş kod təşkili", "Yaddaşın tamamilə sıfırlanması", "Kodun daha sürətli işləməsi", "Rekursiyanın qarşısının alınması"], a: 0 },
+    { id: 11, q: "Polimorfizm OOP-da kod çevikliyinə necə kömək edir?", c: ["Müxtəlif növlər üçün vahid interfeys təmin etməklə", "Sinifləri bir-birindən tamamilə asılı etməklə", "Kod sətirlərinin sayını artırmaqla", "Yalnız tam ədədlərlə işləməyi məhdudlaşdırmaqla"], a: 0 },
+    { id: 12, q: "Python-da metaclass nədir?", c: ["Siniflər yaratmaq üçün sinif", "Standart bir obyekt nümunəsi", "Funksiyanı bəzəyən dekorator", "Siyahı (list) yaradan struktur"], a: 0 },
+    { id: 13, q: "Python-da @property dekoratorunun məqsədi nədir?", c: ["Sinfi silmək üçün", "Yeni obyekt yaratmaq üçün", "Yalnız oxumaq üçün xüsusiyyətlər yaratmaq üçün", "Metodun icra sürətini ölçmək üçün"], a: 2 },
+    { id: 14, q: "Abc modulundan istifadə edərək Python-da necə abstrakt sinif yarada bilərsiniz?", c: ["@abstractmethod dekoratoru ilə metodları müəyyən etməklə", "Sinfin daxilində \"abstract\" açar sözünü yazmaqla", "Bütün metodları pass ilə boş buraxmaqla", "Yalnız qlobal dəyişənlərdən istifadə etməklə"], a: 0 },
+    { id: 15, q: "Python-da __str__ metodunun məqsədi nədir?", c: ["Obyekti simli təsvirə çevirmək üçün", "Obyektləri müqayisə etmək üçün", "Sinfi tamamilə yaddaşdan silmək üçün", "Yeni obyekt kopyalamaq üçün"], a: 0 },
+    { id: 16, q: "Python-da inkapsulyasiyanı necə həyata keçirə bilərsiniz?", c: ["Qlobal dəyişənlərdən istifadə etməklə", "@property dekoratorundan istifadə etməklə", "Bütün metodları silməklə", "Sinfi başqa bir sinifdən miras almaqla"], a: 1 },
+    { id: 17, q: "Python sinfində __init__ metodunun məqsədi nədir?", c: ["Sinif dəyişənlərinin işə salınması", "Sinif obyektinin məhv edilməsi", "Xarici faylların proqrama daxil edilməsi", "Kodun avtomatik test edilməsi"], a: 0 },
+    { id: 18, q: "İnkapsulyasiya OOP-da məlumatların qorunmasına necə kömək edir?", c: ["Obyektin müəyyən komponentlərinə girişi məhdudlaşdırmaqla", "Bütün məlumatları qlobal etməklə", "Kod sətirlərini şifrələməklə", "Proqramın işini dayandırmaqla"], a: 0 },
+    { id: 19, q: "OOP-da çoxlu miras almanın əsas məqsədi nədir?", c: ["Bir sinfin birdən çox supersinifdən miras almasına icazə vermək", "Yalnız bir ana siniflə məhdudlaşmaq", "İnterfeyslərin istifadəsini tamamilə qadağan etmək", "Metodların adını dəyişdirmək"], a: 0 },
+    { id: 20, q: "OOP-də dinamik polimorfizm nədir?", c: ["Proqramın yalnız kompilyasiya zamanı işləməsi", "İş vaxtında müxtəlif növlər üçün vahid interfeys təmin etmək imkanı", "Bütün dəyişənlərin eyni tipdə olması", "Statik siniflərin yaradılması"], a: 1 },
+    { id: 21, q: "İnkapsulyasiya kontekstində Python-da giriş modifikatorlarının məqsədi nədir?", c: ["Yalnız oxumaq üçün xassələri yaratmaq üçün", "Kodun binar fayla çevrilməsi üçün", "Proqrama yeni kitabxanalar qoşmaq üçün", "Rekursiv funksiyalar yazmaq üçün"], a: 0 },
+    { id: 22, q: "Python-da __metaclass__ atributunun rolu nədir?", c: ["Bir sinfin metasınıfını göstərmək üçün", "Sinif daxilində dövr yaratmaq üçün", "Səhvləri idarə etmək üçün", "İki sinfi bir-birı ilə toplamaq üçün"], a: 0 },
+    { id: 23, q: "Aşağıdakılardan hansı boş (empty) bir sinif təyin edir?", c: ["class MyClass: pass", "class MyClass: void", "class MyClass: null", "class MyClass[]"], a: 0 },
+    { id: 24, q: "Aşağıdakılardan hansı Python funksiyasını düzgün müəyyənləşdirir?", c: ["function def_name():", "def function_name():", "create function_name()", "func function_name():"], a: 1 },
+    { id: 25, q: "Python funksiyasında return təlimatının məqsədi nədir?", c: ["Funksiyanı tamamlayır və ya dəyəri qaytarır", "Yeni bir dövr başladır", "Funksiyanı silir", "Konsola mətn çap edir"], a: 0 },
+    { id: 26, q: "Python-da bir neçə arqument funksiyaya necə ötürülə bilər?", c: ["Arqumentləri fərqli sətirlərdə yazmaqla", "Funksiya çağırıldıqda arqumentləri vergüllə ayırmaq", "Yalnız nöqtəli vergül istifadə etməklə", "Arqumentləri siyahı daxilində ötürməyi tələb etməklə"], a: 1 },
+    { id: 27, q: "Python funksiyasında return təlimatları yoxdursa nə baş verir?", c: ["Proqram sintaksis səhvi verir", "Gizli None əməliyyatını qaytarır", "Funksiya sonsuz dövrə girir", "True dəyəri qaytarılır"], a: 1 },
+    { id: 28, q: "Python-da iki arqumentlə \"my_function\" adlı funksiyanı çağırmaq üçün aşağıdakı üsullardan hansı məqbuldur?", c: ["my_function(arg1, arg2)", "my_function{arg1, arg2}", "my_function[arg1, arg2]", "my_function:arg1, arg2"], a: 0 },
+    { id: 29, q: "Pythonda bir funksiyanı təyin etmək üçün hansı açar söz istifadə olunur?", c: ["function", "fun", "define", "def"], a: 3 },
+    { id: 30, q: "Aşağıdakı ifadələrdən hansı Python-dakı funksiya arqumentlərinə aiddir?", c: ["funksiyalar istənilən sayda arqument götürə bilər", "funksiyalar maksimum 2 arqument götürə bilər", "funksiyalar arqument qəbul edə bilməz", "arqumentlər yalnız tam ədəd olmalıdır"], a: 0 },
+    { id: 31, q: "Return təlimatının funksiyada məqsədi nədir?", c: ["bir funksiyadan məlumat çıxarmaq üçün istifadə olunur", "proqramı tamamilə bağlamaq üçün", "yeni funksiya elan etmək üçün", "funksiyanın adını dəyişdirmək üçün"], a: 0 },
+    { id: 32, q: "Python-da arqumentlər funksiyalara necə ötürülür?", c: ["yalnız qlobal dəyişənlərlə", "mövqeyə görə", "avtomatik olaraq təsadüfi qaydada", "heç bir arqument ötürülə bilməz"], a: 1 },
+    { id: 33, q: "Python funksiyalarında yerli dəyişənlər haqqında aşağıdakı ifadələrdən hansı doğrudur?", c: ["bunlar yalnız müəyyən etdikləri funksiya daxilində mövcuddur", "bunlar bütün proqram tərəfindən oxunur", "bunlar funksiya bitdikdən sonra da yaddaşda qalır", "bunlar \"global\" açar sözü ilə yaradılır"], a: 0 },
+    { id: 34, q: "Python funksiyalarında pass təlimatının məqsədi nədir?", c: ["Funksiyanı dərhal dayandırmaq üçün", "Heç bir tədbir tələb olunmadıqda yer tutucu kimi istifadə olunur", "Dəyəri geriyə qaytarmaq üçün", "Səhvləri konsolda göstərmək üçün"], a: 1 },
+    { id: 35, q: "Python-da arqumentlər olmadan my_function adlı bir funksiyanı çağırmaq üçün aşağıdakı üsullardan hansı düzgündür?", c: ["my_function()", "call my_function", "my_function[]", "my_function{}"], a: 0 },
+    { id: 36, q: "Python-da hər hansı bir funksiyadan kənar elan edilmiş qlobal dəyişənin əhatə dairəsi nədir?", c: ["bütün Python proqramında mövcuddur", "yalnız daxili funksiyalarda işləyir", "heç bir yerdə istifadə edilə bilməz", "proqram bitdikdən sonra yaradılır"], a: 0 },
+    { id: 37, q: "Python ' dakı bir funksiya, sonrakı dəyəri olmayan qayıtma təlimatını ehtiva edərsə nə olar?", c: ["Səhv mesajı göstərilir", "None gizli funksiyası qaytarır", "Proqram donur", "0 (sıfır) qaytarılır"], a: 1 },
+    { id: 38, q: "Python-da bir funksiyanın tamamlanması üçün hansı açar söz istifadə olunur?", c: ["return", "end", "break", "stop"], a: 0 },
+    { id: 39, q: "Python funksiya təriflərində * args parametrinin məqsədi nədir?", c: ["Dəyişən sayda arqument funksiyasını tuple şəklində ötürmək üçün istifadə olunur", "Yalnız lüğət (dictionary) qəbul etmək üçün", "Funksiyanı abstrakt etmək üçün", "Arqumentlərin tipini yoxlamaq üçün"], a: 0 },
+    { id: 40, q: "Aşağıdakı ifadələrdən hansı Python funksiyalarında rekursiyanı dəqiq təsvir edir?", c: ["Rekursiya, funksiyanın heç vaxt işləmədiyi vəziyyətdir", "Rekursiya, funksiyanın özünü çağırdığı bir üsuldur", "Rekursiya, yalnız sinif daxilində istifadə olunan metoddur", "Rekursiya, i̇ki funksiyanın paralel işləməsidir"], a: 1 },
+    { id: 41, q: "Python funksiya təriflərində * * kwargs parametri nə deməkdir?", c: ["açar sözlərlə istənilən sayda arqument götürməsi", "yalnız tam ədədlərdən ibarət siyahı götürməsi", "funksiyanın heç bir arqument qəbul etməməsi", "funksiyanın obyekt qaytarması"], a: 0 },
+    { id: 42, q: "Aşağıdakı Python-da Lambda funksiyasını ən yaxşı təsvir edən nədir?", c: ["Lambda funksiyası adı olmayan açar sözündən istifadə etməklə müəyyən edilmiş funksiyadır", "Lambda funksiyası çox sətirli mürəkkəb funksiyadır", "Lambda funksiyası obyektləri silmək üçün istifadə olunur", "Lambda funksiyası yalnız class daxilində işləyir"], a: 0 },
+    { id: 43, q: "Python-da iç içə funksiyada nonlocal açar sözü nə üçün istifadə olunur?", c: ["dəyişənləri iç içə bir funksiyada xarici (daxil olmaqla) bölgədən dəyişdirməyə imkan verir", "qlobal dəyişənləri tamamilə silmək üçün", "funksiyanı qlobal sahəyə çıxarmaq üçün", "riyazi hesablamaları sürətləndirmək üçün"], a: 0 },
+    { id: 44, q: "Python-da standart arqument dəyərləri olan bir funksiyanı təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def my_function(default_arg:=value):", "def my_function(default_arg=value):", "def my_function(value->default_arg):", "def my_function:default_arg=value"], a: 1 },
+    { id: 45, q: "__init__ metodunun python classlarda mənası nədir?", c: ["sinif obyektini işə salın", "sinfi silmək üçün təlimat vermək", "siniflər arasında miras əlaqəsi yaratmaq", "proqramı dayandırmaq"], a: 0 },
+    { id: 46, q: "Python-da hansı təlimat generator funksiyasını dəqiq təsvir edir?", c: ["generator funksiyası tənbəlliklə dəyərlər ardıcıllığını yaradan funksiyadır", "generator funksiyası yalnız bir dəfə işləyən və yaddaşı dolduran funksiyadır", "generator funksiyası heç bir dəyər qaytarmır", "generator funksiyası mütləq lambda ilə yazılmalıdır"], a: 0 },
+    { id: 47, q: "Pythonda map() funksiyasının məqsədi nədir?", c: ["siyahını əlifba sırası ilə düzmək", "verilmiş funksiyanı bir ardıcıllığın hər bir elementinə tətbiq etmək", "iterable-da nəticələrin siyahısını qaytarır", "proqramda səhvləri axtarmaq üçün"], a: 2 },
+    { id: 48, q: "Aşağıdakı ifadələrdən hansı Python-da dekoratoru dəqiq təsvir edir?", c: ["Dekorator başqa bir funksiyaya funksionallıq əlavə edən bir xüsusiyyətlər", "Dekorator başqa bir funksiyaya funksionallıq əlavə edən bir xüsusiyyətdir", "Dekorator proqramın vizual görünüşünü dizayn edir", "Dekorator yalnız riyazi hesablamalarda istifadə olunur"], a: 1 },
+    { id: 49, q: "Aşağıdakı proqramın nəticəsi necədir ?<br><pre>class MyClass:\n  x = 5\np1 = MyClass()\nprint(p1.x)</pre>", c: ["None", "5", "MyClass", "0"], a: 1 },
+    { id: 50, q: "Aşağıdakı proqramın nəticəsi necədir ?<br><pre>class Animal:\n  a = “Lion”\np1 = Animal()\nprint(p1.a)</pre>", c: ["“Animal”", "None", "“Lion”", "Səhv mesajı"], a: 2 },
+    { id: 51, q: "Aşağıdakı proqramın nəticəsi necədir ?<br><pre>class Human:\n  c = “Aysha”\nresult = Human()\nprint(result.c)</pre>", c: ["“Aysha”", "result", "“Human”", "False"], a: 0 },
+    { id: 52, q: "Aşağıdakı proqramın nəticəsi necədir ?<br><pre>class NumBer:\n  D= 7\nPa = NumBer()\nprint(Pa.D)</pre>", c: ["D", "Pa", "0", "7"], a: 3 },
+    { id: 53, q: "Aşağıdakı proqramın nəticəsi necədir ?<br><pre>class Num :\n  number = 56 \na1 = Num()\nprint(a1.number)</pre>", c: ["Num", "56", "a1", "number"], a: 1 },
+    { id: 54, q: "Aşağıdakı hallardan hansında CricketFan sinfi PartyAnimal sinifindən düzgün əlaqələndirilmişdir?", c: ["class CricketFan(PartyAnimal)", "class CricketFan extends PartyAnimal", "class CricketFan:PartyAnimal", "class CricketFan implements PartyAnimal"], a: 0 },
+    { id: 55, q: "Aşağıdakı hallardan hansında Animal sinfi Mammels sinifindən düzgün əlaqələndirilmişdir?", c: ["class Animal:Mammels", "class Animal(Mammels)", "class Animal extends Mammels", "class Animal<-Mammels"], a: 1 },
+    { id: 56, q: "Aşağıdakı hallardan hansında Numbers sinfi Oddsnumb sinifindən düzgün əlaqələndirilmişdir?", c: ["class Numbers(Oddnumb)", "class Numbers[Oddnumb]", "class Numbers extends Oddnumb", "class Numbers::Oddnumb"], a: 0 },
+    { id: 57, q: "Aşağıdakı hallardan hansında KM754 sinfi SmartStudents sinifindən düzgün əlaqələndirilmişdir?", c: ["class KM754 extends SmartStudents", "class KM754:SmartStudents", "class KM754(SmartStudents)", "class KM754<-SmartStudents"], a: 2 },
+    { id: 58, q: "Aşağıdakılardan hansı obyekt nümunəsinin səhv yaradılmasına gətirib çıxarır?", c: ["pupper = Dog(\"Jamie\")", "pupper = new Dog(\"Jamie\")", "pupper = Dog()", "pupper = create Dog(\"Jamie\")"], a: 1 },
+    { id: 59, q: "Verilmiş proqramın nəticəsi Pythonda necə olacaq?<br><pre>class People():\n  def __init__(self, name):\n      self.name = name\n  def namePrint(self):\n       print(self.name)\nperson1 = People(\"Sally\")\nperson2 = People(\"Louise\")\nperson1.namePrint()</pre>", c: ["Louise", "Sally", "People", "namePrint"], a: 1 },
+    { id: 60, q: "Aşağıdakı ifadələrdən hansı obyekt yönümlü proqramlaşdırma ilə bağlı səhvdir?", c: ["konstruktor metodları obyekti işə salmaq üçün, dağıdıcı metodlar isə artıq tələb olunmadıqda obyekti məhv etmək üçün lazımdır.", "siniflər heç vaxt obyekt yarada bilməz, onlar yalnız funksiyaları saxlamaq üçündür.", "miras alma sayəsində kodun təkrar istifadəsi təmin edilir.", "polimorfizm eyni adlı metodların fərqli siniflərdə fərqli işləməsinə şərait yaradır."], a: 1 },
+    { id: 61, q: "Açar söz _________ sinif obyektində yerləşəcək məlumatları və sinif obyekti üçün çağırıla bilən funksiyaları göstərən nümunəni müəyyənləşdirir.", c: ["def", "object", "class", "struct"], a: 2 },
+    { id: 62, q: "_________ açar söz deyil, lakin konvensiyaya əsasən sinifin cari nümunəsinə (obyektinə) istinad etmək üçün istifadə olunur.", c: ["this", "self", "object", "class"], a: 1 },
+    { id: 63, q: "Doğru yoxsa yalan? Sinfi genişləndirmək üçün yeni sinif bütün məlumatlara və ana sinifin daxili işlərinə daxil olmalıdır.", c: ["True", "False", "None", "Sual qeyri-müəyyəndir"], a: 1 },
+    { id: 64, q: "Başlanğıc metodunu təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, title, author):", "def constructor(self, title, author):", "def init(self, title, author):", "function init(title, author):"], a: 0 },
+    { id: 65, q: "Def ilə init funksiysını yaratmaq üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def init_(self, distance, city):", "def __init__(self, distance, city):", "def __init__(distance, city):", "function __init__(self, distance, city):"], a: 1 },
+    { id: 66, q: "Başlanğıc metodunu təyin etmək üçün def funksiyası ilə aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, name, human):", "def init(name, human):", "def _init_(self, name, human):", "def __init__(name, human):"], a: 0 },
+    { id: 67, q: "Başlanğıc metodunu təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(student, ID):", "def init(self, student, ID):", "def __init__(self, student, ID):", "def __init__(self, student, İD):"], a: 3 },
+    { id: 68, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<br><pre>def myfunc():\n    x = 300\n print(x)\nmyfunc()</pre>", c: ["0", "300", "None", "x"], a: 1 },
+    { id: 69, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<br><pre>def numberic():\n    a = 100\n print(a*2)\nnumberic()</pre>", c: ["100", "200", "a*2", "0"], a: 1 },
+    { id: 70, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<br><pre>def name():\n    c = “Salam”\n print(c+”2”)\nname()</pre>", c: ["Salam", "Salam2", "c2", "Error"], a: 1 },
+    { id: 71, q: "Nə çap olunacaq?<br><pre>x = lambda a : a+10\nprint(x(5))</pre>", c: ["10", "5", "15", "50"], a: 2 },
+    { id: 72, q: "Nə çap olunacaq?<br><pre>x=lambda a, b: a*b\nprint(x(5,6))</pre>", c: ["11", "30", "56", "25"], a: 1 },
+    { id: 73, q: "Nə çap olunacaq?<br><pre>x=lambda a,b,c,d: a+b+c+d\nprint(x(1,2,3,4))</pre>", c: ["24", "10", "1234", "0"], a: 1 },
+    { id: 74, q: "Nə çap olunacaq?<br><pre>x=lambda a,b,c: a*b*c\nprint(x(2,3,4))</pre>", c: ["9", "24", "12", "234"], a: 1 },
+    { id: 75, q: "Nə çap olunacaq?<br><pre>x=lambda n,m: n+m\nprint(x(17,14))</pre>", c: ["31", "3", "1714", "23"], a: 0 },
+    { id: 76, q: "Nə çap olunacaq?<br><pre>x= lambda f ,g ,k: f+g+k \nprint(x( 11,22,2))</pre>", c: ["11222", "33", "35", "15"], a: 2 },
+    { id: 77, q: "Nə çap olunacaq?<br><pre>x=lambda d,e: d*e\nprint(x( 21,2))</pre>", c: ["42", "23", "212", "40"], a: 0 },
+    { id: 78, q: "Nə çap olunacaq?<br><pre>x=lambda b,c:b-c\nprint(x(20,5))</pre>", c: ["25", "15", "100", "4"], a: 1 },
+    { id: 79, q: "Nə çap olunacaq?<br><pre>x=lambda c,d: c\\d\nprint (x(100,10))</pre>", c: ["1000", "90", "10", "110"], a: 2 },
+    { id: 80, q: "Nə çap olunacaq?<br><pre>x=lambda  n,m,l: n*m*l\nprint(x(11,1,2))</pre>", c: ["14", "22", "1112", "11"], a: 1 },
+    { id: 81, q: "Nə çap olunacaq?<br><pre>x=lambda g,h: g\\h\nprint (x(36,12))</pre>", c: ["3", "48", "24", "432"], a: 0 },
+    { id: 82, q: "Nə çap olunacaq?<br><pre>x=lambda r,t,y:r-t-y;\nprint(x(64,32,6))</pre>", c: ["26", "38", "32", "102"], a: 0 },
+    { id: 83, q: "Nə çap olunacaq?<br><pre>x=lambda  s,x,k,j : s+x+k+j\nprint(x(12,7,32,5))</pre>", c: ["50", "44", "56", "62"], a: 2 },
+    { id: 84, q: "Nə çap olunacaq?<br><pre>x=lambda q,p: q\\p\nprint(x(10,2))</pre>", c: ["20", "5", "8", "12"], a: 1 },
+    { id: 85, q: "Nə çap olunacaq?<br><pre>x=lambda u,o: u+o\nprint(x(12,1))</pre>", c: ["12", "11", "13", "121"], a: 2 },
+    { id: 86, q: "Nə çap olunacaq?<br><pre>x=lambda z,n,y: z-n-y\nprint(x(20,2,1))</pre>", c: ["17", "19", "23", "15"], a: 0 },
+    { id: 87, q: "Nə çap olunacaq?<br><pre>x=lambda s,v: s\\v\nprint(x(7,7))</pre>", c: ["49", "0", "14", "1"], a: 3 },
+    { id: 88, q: "Nə çap olunacaq?<br><pre>x=lambda d,e: d-e\nprint (x(2,1))</pre>", c: ["1", "3", "2", "0"], a: 0 },
+    { id: 89, q: "Nə çap olunacaq?<br><pre>x=lambda i , s:s\\i\nprint(x(50,10))</pre>", c: ["500", "5", "0.2", "40"], a: 1 },
+    { id: 90, q: "Nə çap olunacaq?<br><pre>x=lambda g,d,n: g+d-n\nprint(x(10,5,5))</pre>", c: ["20", "0", "10", "5"], a: 2 },
+    { id: 91, q: "Nə çap olunacaq?<br><pre>x=lambda q,d,p: q\\d*p\nprint(x(12,2,2))</pre>", c: ["3", "12", "48", "6"], a: 1 },
+    { id: 92, q: "Nə çap olunacaq?<br><pre>x=lambda a,b: a\\b\nprint(x(21,7))</pre>", c: ["147", "3", "28", "14"], a: 1 },
+    { id: 93, q: "Nə çap olunacaq?<br><pre>x=lambda c,d,e: c+d-e\nprint(x(22,21,40))</pre>", c: ["3", "43", "83", "0"], a: 0 },
+    { id: 94, q: "Nə çap olunacaq?<br><pre>x=lambda k,s:  k-s\nprint(x(20,2))</pre>", c: ["22", "40", "10", "18"], a: 3 },
+    { id: 95, q: "Nə çap olunacaq?<br><pre>x=lambda d,v,b: d*v\\b\nprint(x(8,2,8))</pre>", c: ["128", "2", "8", "16"], a: 1 },
+    { id: 96, q: "Nə çap olunacaq?<br><pre>x=lambda f,t,y: f+t-y\nprint(x(23,12,2))</pre>", c: ["33", "37", "13", "35"], a: 0 },
+    { id: 97, q: "Nə çap olunacaq?<br><pre>x = lambda s,l,k: s*l-k\nprint(x(9,4,3))</pre>", c: ["33", "39", "65", "13"], a: 0 },
+    { id: 98, q: "Nə çap olunacaq ?<br><pre>x=lambda y,o,r: y*o*r\nprint(x( 3,3,2))</pre>", c: ["8", "18", "12", "9"], a: 1 },
+    { id: 99, q: "Nə çap olunacaq?<br><pre>x=lambda p,a,s: p\\a\\s\nprint(x(18,3,2))</pre>", c: ["3", "12", "108", "1"], a: 0 },
+    { id: 100, q: "Nə çap olunacaq?<br><pre>x=lamda a,b: a+b-32\nprint(x(36,24))</pre>", c: ["60", "92", "28", "32"], a: 2 }
+];
+
+let selectedQuestions = [];
+let entranceScore = 0;
+let timeRemaining = 1800; // 30 dəqiqə
+let timerInterval = null;
+let examFinished = false;
+
+function initPage() {
+    let res = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+    entranceScore = parseInt(res);
+    if (isNaN(entranceScore) || entranceScore < 0) entranceScore = 0;
+    if (entranceScore > 50) entranceScore = 50;
+    
+    startTimer();
+    startQuiz();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timeRemaining = 1800; 
+    
+    timerInterval = setInterval(() => {
+        if (examFinished) {
+            clearInterval(timerInterval);
+            return;
+        }
+        
+        timeRemaining--;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = "Vaxt bitdi!";
+            finishExam();
+        } else {
+            let mins = Math.floor(timeRemaining / 60);
+            let secs = timeRemaining % 60;
+            document.getElementById("timer").innerText = `Qalan vaxt: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    }, 1000);
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+}
+
+function startQuiz() {
+    examFinished = false;
+    document.getElementById("final-score-box").style.display = "none";
+    document.getElementById("finish-btn").style.display = "block";
+    
+    let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+    selectedQuestions = shuffled.slice(0, 25); 
+    
+    const quizContainer = document.getElementById("quiz");
+    quizContainer.innerHTML = "";
+    
+    selectedQuestions.forEach((item, index) => {
+        let correctText = item.c[item.a];
+        let options = [...item.c].sort(() => 0.5 - Math.random());
+        item.currentAnswers = options; 
+        item.correctIndex = options.indexOf(correctText); 
+        
+        let qHTML = `
+            <div class="question-card" id="card-${index}">
+                <div class="question-text">
+                    ${index + 1}. <span class="q-badge">Sual №${item.id}</span><br><br>${item.q}
+                </div>
+                <div class="options-container">
+        `;
+        
+        const letters = ["A", "B", "C", "D"];
+        options.forEach((opt, optIndex) => {
+            qHTML += `
+                <label class="option-label" id="lbl-${index}-${optIndex}">
+                    <input type="radio" name="q-${index}" value="${optIndex}" onchange="updateLiveStatsOnly()">
+                    <b>${letters[optIndex]})</b> &nbsp;${opt}
+                </label>
+            `;
+        });
+        
+        qHTML += `
+                <label class="option-label" id="lbl-${index}-4">
+                    <input type="radio" name="q-${index}" value="4" onchange="updateLiveStatsOnly()">
+                    <b>E)</b> Boş (cavab yoxdur)
+                </label>
+            </div>
+            <div id="detail-${index}" class="result-detail" style="display:none;"></div>
+        </div>`;
+        
+        quizContainer.innerHTML += qHTML;
+    });
+    updateLiveStatsOnly();
+}
+
+function updateLiveStatsOnly() {
+    if (examFinished) return;
+    
+    let answered = 0;
+    let liveDuz = 0;
+    let liveSehv = 0;
+    let liveBos = 0;
+
+    selectedQuestions.forEach((item, index) => {
+        let sel = document.querySelector(`input[name="q-${index}"]:checked`);
+        if (sel) {
+            let val = parseInt(sel.value);
+            if (val !== 4) {
+                answered++;
+                if (val === item.correctIndex) liveDuz++;
+                else liveSehv++;
+            } else {
+                liveBos++;
+            }
+        } else {
+            liveBos++;
+        }
+    });
+    
+    let progressPercent = (answered / 25) * 100;
+    document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+    document.getElementById("live-stats").innerHTML = `Cavablanan: ${answered} / 25<br>Düz: ${liveDuz} · Səhv: ${liveSehv} · Boş: ${liveBos}`;
+}
+
+function resetAnswers() {
+    if (examFinished) return;
+    selectedQuestions.forEach((_, index) => {
+        let checked = document.querySelector(`input[name="q-${index}"]:checked`);
+        if (checked) checked.checked = false;
+    });
+    updateLiveStatsOnly();
+}
+
+function finishExam() {
+    examFinished = true;
+    clearInterval(timerInterval);
+    
+    let duz = 0;
+    let sehv = 0;
+    let bos = 0;
+    const letters = ["A", "B", "C", "D", "E"];
+
+    selectedQuestions.forEach((item, index) => {
+        let sel = document.querySelector(`input[name="q-${index}"]:checked`);
+        let userVal = sel ? parseInt(sel.value) : 4; 
+        
+        let radios = document.querySelectorAll(`input[name="q-${index}"]`);
+        radios.forEach(r => r.disabled = true);
+
+        let card = document.getElementById(`card-${index}`);
+        let detail = document.getElementById(`detail-${index}`);
+        let correctLetter = letters[item.correctIndex];
+        let userLetter = letters[userVal];
+
+        if (userVal === 4) {
+            bos++;
+            card.classList.add("card-blank");
+            detail.innerHTML = `BOŞ &nbsp;&nbsp; Sənin cavabın: - · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "#d4a373";
+        } else if (userVal === item.correctIndex) {
+            duz++;
+            card.classList.add("card-correct");
+            document.getElementById(`lbl-${index}-${userVal}`).classList.add("opt-correct");
+            detail.innerHTML = `DÜZ &nbsp;&nbsp; Sənin cavabın: ${userLetter} · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "var(--btn-green)";
+        } else {
+            sehv++;
+            card.classList.add("card-incorrect");
+            document.getElementById(`lbl-${index}-${userVal}`).classList.add("opt-incorrect");
+            document.getElementById(`lbl-${index}-${item.correctIndex}`).classList.add("opt-correct");
+            detail.innerHTML = `SƏHV &nbsp;&nbsp; Sənin cavabın: ${userLetter} · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "var(--btn-red)";
+        }
+        detail.style.display = "block";
+    });
+
+    let examScore = (duz * 2) - sehv;
+    if (examScore < 0) examScore = 0; 
+    let totalScore = examScore + entranceScore;
+
+    document.getElementById("res-duz").innerText = `Düz: ${duz} (x2)`;
+    document.getElementById("res-sehv").innerText = `Səhv: ${sehv} (x-1)`;
+    document.getElementById("res-bos").innerText = `Boş: ${bos}`;
+    
+    document.getElementById("sc-sinag").innerText = examScore;
+    document.getElementById("sc-giris").innerText = entranceScore;
+    document.getElementById("sc-yekun").innerText = totalScore;
+
+    document.getElementById("finish-btn").style.display = "none";
+    document.getElementById("final-score-box").style.display = "block";
+}
+
+function restartQuiz() {
+    let res = prompt("Yenidən başlamaq üçün giriş balını daxil edin (0-50):", entranceScore);
+    if(res !== null) {
+        entranceScore = parseInt(res);
+        if (isNaN(entranceScore) || entranceScore < 0) entranceScore = 0;
+        if (entranceScore > 50) entranceScore = 50;
+    }
+    startTimer();
+    startQuiz();
+}
+
+window.onload = initPage;
+</script>
+
+</body>
+</html>
