@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python & OOP Sınaq İmtahanı (Orijinal Nömrələrlə)</title>
+    <style>
+        :root {
+            --primary-color: #4a90e2;
+            --background-color: #f5f7fa;
+            --card-color: #ffffff;
+            --text-color: #333333;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .quiz-container {
+            max-width: 750px;
+            width: 100%;
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .question-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            background-color: #fafbfc;
+        }
+        .question-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        .q-badge {
+            background-color: #e8f4fd;
+            color: var(--primary-color);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-left: 5px;
+            border: 1px solid #cbd5e1;
+        }
+        pre {
+            background: #23272e;
+            color: #abb2bf;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 10px 0;
+        }
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option-label {
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+        .option-label:hover {
+            background-color: #f0f4f8;
+            border-color: var(--primary-color);
+        }
+        input[type="radio"] {
+            margin: 0;
+            transform: scale(1.2);
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #357abd;
+        }
+        .result-box {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #e8f4fd;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px dashed var(--primary-color);
+        }
+        .correct {
+            background-color: #d4edda !important;
+            border-color: var(--success-color) !important;
+            color: #155724 !important;
+            font-weight: 600;
+        }
+        .incorrect {
+            background-color: #f8d7da !important;
+            border-color: var(--error-color) !important;
+            color: #721c24 !important;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Python & OOP Sınaq</h1>
+    <div class="subtitle">Hər dəfə 100 sualdan təsadüfi 25-i seçilir. Sualların orijinal nömrələri qeyd olunub.</div>
+    <div id="result" class="result-box"></div>
+    <div id="quiz"></div>
+    <button id="submit-btn" class="btn" onclick="checkAnswers()">Nəticəni Yoxla (Düz və Səhvlərə Bax)</button>
+    <button id="restart-btn" class="btn" style="display:none; background-color: #6c757d;" onclick="startQuiz()">Yenidən Başla (Yeni Suallar)</button>
+</div>
+
+<script>
+// id DEYƏRİ SUALIN SƏNİN SİYAHINDAKI ORİJİNAL NÖMRƏSİDİR
+const allQuestions = [
+    { id: 1, q: "Obyekt yönümlü proqramlaşdırmanın (OOP) əsas məqsədi nədir?", c: ["Kodun təkrar istifadəsi və modulluğu", "Sintaksis xətalarını tamamilə aradan qaldırmaq", "Yaddaş sahəsinə birbaşa nəzarət etmək", "Proqramın yalnız sətirlərlə işləməsini təmin etmək"], a: 0 },
+    { id: 2, q: "Pythonda Class nədir?", c: ["Obyektlərin yaradılması üçün bir şablon (çertyoj)", "Funksiyaları silmək üçün istifadə olunan əmr", "Riyazi hesablamalar aparan modul", "Siyahıları sıralayan daxili metod"], a: 0 },
+    { id: 3, q: "Classda dəyişən nümunəsi (instance variable) nədir?", c: ["Sinif nümunəsinə (obyektinə) xas olan dəyişən", "Bütün sinif üçün yalnız bir dəfə yaradılan qlobal sabit", "Funksiyanın daxilindəki müvəqqəti dövr dəyişəni", "Metod adlarının siyahısı"], a: 0 },
+    { id: 4, q: "Sinif dəyişəni (class variable) ilə nümunə dəyişəni (instance variable) arasındakı fərq nədir?", c: ["Sinif dəyişənləri bütün nümunələr üçün ümumi, nümunə dəyişənləri isə hər bir nümunə üçün spesifikdir.", "Sinif dəyişənləri yalnız funksiya daxilində, nümunə dəyişənləri isə qlobal mühitdə dəyişdirilə bilər.", "Heç bir fərqi yoxdur, hər ikisi tamamilə eyni funksiyanı yerinə yetirir.", "Nümunə dəyişənləri yalnız rəqəmləri, sinif dəyişənləri isə yalnız sətirləri qəbul edir."], a: 0 },
+    { id: 5, q: "OOP-da miras (inheritance) sinifə imkan verir:", c: ["Superklassdan xassələri və davranışları miras almasına", "Mövcud funksiyaları silməyə", "Kodun icra sürətini avtomatik ikiqat artırmağa", "Obyekti str formatına çevirməyə"], a: 0 },
+    { id: 6, q: "Obyektyönlü proqramlaşdırmada polimorfizm nədir?", c: ["Sinifdə eyni ada malik bir neçə metodun müəyyən edilməsi və ya müxtəlif obyektlərin eyni metoda fərqli reaksiya verməsi", "Proqramın eyni vaxtda bir neçə fayla yazılması", "Bir sinif daxilində yalnız bir dəyişənin istifadə olunması", "Səhvlərin idarə olunması mexanizmi"], a: 0 },
+    { id: 7, q: "Python-da metodun həddindən artıq yüklənməsinə (method overloading) nail olmaq üçün hansı açar sözdən istifadə olunur?", c: ["Python metodların ənənəvi həddindən artıq yüklənməsini yerli olaraq dəstəkləmir", "overload", "dispatch", "override"], a: 0 },
+    { id: 8, q: "OOP-də abstraksiyanın əsas məqsədi nədir?", c: ["Mürəkkəb sistemlərin sinifləri modelləşdirməklə sadələşdirilməsi və lazımsız detalların gizlədilməsi", "Bütün gizli dəyişənləri qlobal etmək", "Proqram kodunu sətir-sətir gizlətmək", "Dövr operatorlarının işini dayandırmaq"], a: 0 },
+    { id: 9, q: "Mövcud sinfə əsaslanan yeni sinif yaratmaq prosesi üçün termin nədir?", c: ["Miras (Inheritance)", "İnkapulyasiya", "Polimorfizm", "Abstraksiya"], a: 0 },
+    { id: 10, q: "OOP-da inkapsulyasiyadan istifadənin faydası nədir?", c: ["Təkmilləşdirilmiş kod təşkili və məlumatın təhlükəsiz qorunması", "Proqramın yaddaşda tutduğu yeri sıfırlamaq", "Bütün dəyişənlərin avtomatik silinməsi", "Kompilyasiya müddətinin qısaldılması"], a: 0 },
+    { id: 11, q: "Polimorfizm OOP-da kod çevikliyinə necə kömək edir?", c: ["Müxtəlif növlər (tiplər) üçün vahid interfeys təmin etməklə", "Proqramı exe faylına çevirməklə", "Kod sətirlərinin sayını məhudlaşdırmaqla", "Bütün obyektləri eyni yaddaş ünvanına yerləşdirməklə"], a: 0 },
+    { id: 12, q: "Python-da metaclass nədir?", c: ["Siniflərin özlərini yaratmaq üçün istifadə olunan sinif (sinfin sinfi)", "Siyahıların elementlərini silən xüsusi metod", "Riyazi hesablamaları sürətləndirən kitabxana", "Hər hansı bir dövr operatoru"], a: 0 },
+    { id: 13, q: "Python-da @property dekoratorunun məqsədi nədir?", c: ["Bir metodu xüsusiyyət (attribute) kimi çağırmaq və yalnız oxumaq üçün xassələr yaratmaq", "Sinif metodunu silmək üçün", "Kodun icrasını dayandırmaq üçün", "Yeni bir siyahı yaratmaq üçün"], a: 0 },
+    { id: 14, q: "Abc modulundan istifadə edərək Python-da necə abstrakt sinif yarada bilərsiniz?", c: ["ABC sinfindən miras almaq və @abstractmethod dekoratoru ilə metodları müəyyən etməklə", "Heç bir şey etmədən, sadəcə pass yazmaqla", "Qlobal dəyişənləri təyin etməklə", "Funksiyanın adını böyük hərflərlə yazmaqla"], a: 0 },
+    { id: 15, q: "Python-da __str__ metodunun məqsədi nədir?", c: ["Obyekti istifadəçi üçün anlaşılan simli (string) təsvirə çevirmək üçün", "Obyektin daxili ünvanını silmək üçün", "Obyekti integer tipinə konvertasiya etmək üçün", "İki obyekti bir-birinə vurmaq üçün"], a: 0 },
+    { id: 16, q: "Python-da inkapsulyasiyanı necə həyata keçirə bilərsiniz?", c: ["@property dekoratorundan və ya xüsusiyyətlərin önünə alt cizgi (_ və ya __) qoymaqla girişi məhdudlaşdırmaqla", "Yalnız import math yazmaqla", "def açar sözünü silməklə", "Qlobal dəyişənlərdən tamamilə imtina etməklə"], a: 0 },
+    { id: 17, q: "Python sinfində __init__ metodunun məqsədi nədir?", c: ["Sinif obyektinin yaradılması zamanı xassələrin (dəyişənlərin) işə salınması (initialization)", "Proqramı tamamilə bağlamaq", "İki sinfi bir-birindən çıxmaq", "Kodun sintaksisini yoxlamaq"], a: 0 },
+    { id: 18, q: "İnkapsulyasiya OOP-da məlumatların qorunmasına necə kömək edir?", c: ["Obyektin müəyyən komponentlərinə və daxili vəziyyətinə birbaşa girişi məhdudlaşdırmaqla", "Faylları şifrələməklə", "Proqramı internetdən təcrid etməklə", "Bütün dəyişənləri sabitə çevirməklə"], a: 0 },
+    { id: 19, q: "OOP-da çoxlu miras almanın (multiple inheritance) əsas məqsədi nədir?", c: ["Bir sinfin birdən çox supersinifdən (ana sinifdən) miras almasına icazə vermək", "Bir sinfin eyni vaxtda həm funksiya, həm də dövr olmasına imkan vermək", "Kodun yalnız bir sətirdə yazılmasını təmin etmək", "Bütün alt sinifləri silmək"], a: 0 },
+    { id: 20, q: "OOP-də dinamik polimorfizm nədir?", c: ["Kodun icrası (iş vaxtı - runtime) zamanı müxtəlif obyekt tipləri üçün vahid interfeys təmin etmək imkanı", "Proqramın ölçüsünün avtomatik kiçilməsi", "Dəyişənlərin adlarının avtomatik dəyişdirilməsi", "Kompilyasiya zamanı yaranan polimorfizm növü"], a: 0 },
+    { id: 21, q: "İnkapsulyasiya kontekstində Python-da giriş modifikatorlarının məqsədi nədir?", c: ["Obyektin xüsusiyyətlərinə kənardan birbaşa girişi məhdudlaşdırmaq və ya idarə etmək", "Metodların icra sürətini ölçmək", "Siyahının uzunluğunu hesablamaq", "Yeni siniflər generasiya etmək"], a: 0 },
+    { id: 22, q: "Python-da __metaclass__ atributunun rolu nədir?", c: ["Bir sinfin hansı metasınıf tərəfindən yaradılacağını göstərmək", "Sinif daxilində riyazi hesablamalar aparmaq", "Obyektləri siyahıya çevirmək", "Proqramı interpretasiya etmək"], a: 0 },
+    { id: 23, q: "Python-da aşağıdakılardan hansı boş (empty) bir sinif təyin edir?", c: ["class MyClass: pass", "class MyClass: void", "class MyClass: null", "class MyClass[]"], a: 0 },
+    { id: 24, q: "Aşağıdakılardan hansı Python funksiyasını düzgün müəyyənləşdirir?", c: ["def function_name():", "function function_name():", "new func function_name()", "create function_name:"], a: 0 },
+    { id: 25, q: "Python funksiyasında return təlimatının məqsədi nədir?", c: ["Funksiyadan çıxmaq və çağırıldığı yerə müəyyən bir dəyəri qaytarmaq", "Dövrü sonsuz olaraq davam etdirmək", "Konsola məlumat çap etmək, lakin funksiyanı dayandırmamaq", "Yeni bir dəyişən elan etmək"], a: 0 },
+    { id: 26, q: "Python-da bir neçə arqument funksiyaya necə ötürülə bilər?", c: ["Funksiya çağırıldıqda arqumentləri mötərizə daxilində vergüllə ayırmaqla", "Arqumentləri nöqtəli vergüllə ayırmaqla", "Arqumentləri kvadrat mötərizədə yazmaqla", "Hər arqument üçün yeni funksiya yaratmaqla"], a: 0 },
+    { id: 27, q: "Python funksiyasında return təlimatı yoxdursa nə baş verir?", c: ["Funksiya gizli olaraq None dəyərini qaytarır", "Proqram error (xəta) verir", "Funksiya sıfır (0) qaytarır", "Funksiya icra olunmur"], a: 0 },
+    { id: 28, q: "Python-da iki arqumentlə 'my_function' adlı funksiyanı çağırmaq üçün aşağıdakı üsullardan hansı düzgündür?", c: ["my_function(arg1, arg2)", "my_function[arg1, arg2]", "call my_function arg1, arg2", "my_function.arg1.arg2"], a: 0 },
+    { id: 29, q: "Pythonda bir funksiyanı təyin etmək üçün hansı açar söz istifadə olunur?", c: ["def", "fun", "function", "define"], a: 0 },
+    { id: 30, q: "Aşağıdakı ifadələrdən hansı Python-dakı funksiya arqumentlərinə aiddir?", c: ["Funksiyalar istənilən sayda arqument götürə bilər", "Funksiyalar maksimum 2 arqument götürə bilər", "Arqumentlərin tipi mütləq əvvəlcədən class olmalıdır", "Funksiyaya arqument ötürmək mümkün deyil"], a: 0 },
+    { id: 31, q: "Return təlimatının funksiyada əsas məqsədi nədir?", c: ["Bir funksiyadan hesablama nəticəsini və ya məlumatı çıxarıb geri qaytarmaq", "Funksiyanın adını dəyişdirmək", "Konsolu təmizləmək", "Kənar kitabxanaları qoşmaq"], a: 0 },
+    { id: 32, q: "Python-da standart halda arqumentlər funksiyalara necə ötürülür?", c: ["Mövqeyə (positional) və ya açar sözünə (keyword) görə", "Yalnız təsadüfi seçimlə", "Fayl vasitəsilə", "Şifrəli şəkildə"], a: 0 },
+    { id: 33, q: "Python funksiyalarında yerli (local) dəyişənlər haqqında aşağıdakı ifadələrdən hansı doğrudur?", c: ["Bunlar yalnız müəyyən edildikləri funksiya daxilində mövcuddur və əlçatandır", "Bunlar qlobal mühitdə də istifadə oluna bilər", "Funksiya bitdikdən sonra da yaddaşda qalır", "Bütün proqram boyu dəyişdirilə bilməz"], a: 0 },
+    { id: 34, q: "Python funksiyalarında pass təlimatının məqsədi nədir?", c: ["Heç bir tədbir tələb olunmadıqda və ya gövdə boş qaldıqda yer tutucu (placeholder) kimi istifadə olunur", "Funksiyanı silmək üçün", "Səhvləri ekrana çıxarmaq üçün", "Funksiyanı sürətləndirmək üçün"], a: 0 },
+    { id: 35, q: "Python-da arqumentlər olmadan my_function adlı bir funksiyanı çağırmaq üçün aşağıdakı üsullardan hansı düzgündür?", c: ["my_function()", "my_function{}", "call my_function", "my_function[]"], a: 0 },
+    { id: 36, q: "Python-da hər hansı bir funksiyadan kənar elan edilmiş qlobal dəyişənin əhatə dairəsi nədir?", c: ["Bütün Python faylı (proqramı) daxilindəvcuddur və əlçatandır", "Yalnız elan olunduğu sətirdə mövcuddur", "Yalnız siniflərin daxilində keçərlidir", "Funksiyalar tərəfindən heç vaxt oxunula bilməz"], a: 0 },
+    { id: 37, q: "Python-'dakı bir funksiya, sonrakı dəyəri olmayan qayıtma təlimatını ehtiva edərsə nə olar?", c: ["None dəyərini qaytarır və funksiyadan çıxır", "Heç nə qaytarmır və proqramı dondurur", "Sonsuz dövr yaradır", "Səhv mesajı verir"], a: 0 },
+    { id: 38, q: "Python-da bir funksiyanın tamamlanması üçün hansı açar söz istifadə olunur?", c: ["return", "stop", "break", "exit"], a: 0 },
+    { id: 39, q: "Python funksiya təriflərində * args parametrinin məqsədi nədir?", c: ["Dəyişən sayda mövqeli arqumenti bir tuple şəklində funksiyaya ötürmək", "Funksiyaya yalnız sətir tipli arqumentlər ötürmək", "Funksiyanı dayandırmaq", "Arqumentləri silmək"], a: 0 },
+    { id: 40, q: "Aşağıdakı ifadələrdən hansı Python funksiyalarında rekursiyanı dəqiq təsvir edir?", c: ["Rekursiya, funksiyanın özünü çağırdığı bir üsuldur", "Rekursiya funksiyanın daxilindəbaşqa bir sinif yaratmaqdır", "Dövrün funksiyadan kənara çıxmasıdır", "Yaddaşın tamamilə sıfırlanmasıdır"], a: 0 },
+    { id: 41, q: "Python funksiya təriflərində ** kwargs parametri nə deməkdir?", c: ["Açar sözlərlə istənilən sayda arqumentin lüğət (dict) şəklində ötürülməsi", "Funksiyanın iki dəfə çağırılması", "Yalnız rəqəmsal arqumentlərin qəbul edilməsi", "Arqumentlərin siyahıya çevrilməsi"], a: 0 },
+    { id: 42, q: "Aşağıdakı Python-da Lambda funksiyasını ən yaxşı təsvir edən nədir?", c: ["Lambda funksiyası adı olmayan lambda açar sözündən istifadə etməklə müəyyən edilmiş funksiyadır", "Lambda böyük ölçülü proqram kitabxanasıdır", "Yalnız dövrləri idarə edən metoddur", "Siniflərin daxilində işləyən xüsusi konstruktordur"], a: 0 },
+    { id: 43, q: "Python-da iç içə funksiyada nonlocal açar sözü nə üçün istifadə olunur?", c: ["Dəyişənləri iç içə bir funksiyada xarici (daxil olmaqla) bölgədən dəyişdirməyə imkan verir", "Dəyişəni tam qlobal etmək üçün", "Funksiyanı lokal yaddaşdan silmək üçün", "Riyazi xətaların qarşısını almaq üçün"], a: 0 },
+    { id: 44, q: "Python-da standart arqument dəyərləri olan bir funksiyanı təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def my_function(default_arg=value):", "def my_function(default_arg:=value):", "def my_function(value->default_arg):", "def my_function(default_arg : value):"], a: 0 },
+    { id: 45, q: "__init__ metodunun python classlarda mənası nədir?", c: ["Sinif obyektini işə salın və ilkin dəyərləri mənimsədin", "Sinfi tamamilə yaddaşdan silmək", "Başqa bir faylı proqrama daxil etmək", "Sinfin adını dəyişmək"], a: 0 },
+    { id: 46, q: "Python-da hansı təlimat generator funksiyasını dəqiq təsvir edir?", c: ["Generator funksiyası yield istifadə edərək tənbəlliklə dəyərlər ardıcıllığını yaradan funksiyadır", "Generator bütün dəyərləri eyni anda yaddaşda saxlayan funksiyadır", "Generator yalnız təsadüfi ədədlər generasiya edir", "Bu sinifləri kopyalamaq üçün istifadə olunan metoddur"], a: 0 },
+    { id: 47, q: "Pythonda map() funksiyasının məqsədi nədir?", c: ["Verilmiş funksiyanı bir ardıcıllığın hər bir elementinə tətbiq etmək və nəticələri qaytarmaq", "Siyahını əlifba sırası ile düzmək", "Proqramın yerləşdiyi qovluğun xəritəsini çıxarmaq", "Elementləri lüğətdən silmək"], a: 0 },
+    { id: 48, q: "Aşağıdakı ifadələrdən hansı Python-da dekoratoru dəqiq təsvir edir?", c: ["Dekorator başqa bir funksiyanın kodunu dəyişmədən ona funksionallıq əlavə edən bir xüsusiyyətdir", "Dekorator kodun rəngini dəyişən redaktor alətidir", "Yalnız sinif adlarını tənzimləyən obyektdir", "Səhvləri avtomatik tapan sistemdir"], a: 0 },
+    { id: 49, q: "Aşağıdakı proqramın nəticəsi necədir ?<pre>class MyClass:\n  x = 5\np1 = MyClass()\nprint(p1.x)</pre>", c: ["5", "MyClass", "0", "AttributeError"], a: 0 },
+    { id: 50, q: "Aşağıdakı proqramın nəticəsi necədir ?<pre>class Animal:\n  a = “Lion”\np1 = Animal()\nprint(p1.a)</pre>", c: ["“Lion”", "p1", "Animal", "None"], a: 0 },
+    { id: 51, q: "Aşağıdakı proqramın nəticəsi necədir ?<pre>class Human:\n  c = “Aysha”\nresult = Human()\nprint(result.c)</pre>", c: ["“Aysha”", "c", "Human", "Error"], a: 0 },
+    { id: 52, q: "Aşağıdakı proqramın nəticəsi necədir ?<pre>class NumBer:\n  D= 7\nPa = NumBer()\nprint(Pa.D)</pre>", c: ["7", "Pa", "0", "NumBer"], a: 0 },
+    { id: 53, q: "Aşağıdakı proqramın nəticəsi necədir ?<pre>class Num :\n  number = 56 \na1 = Num()\nprint(a1.number)</pre>", c: ["56", "Num", "a1", "number"], a: 0 },
+    { id: 54, q: "Aşağıdakı hallardan hansında CricketFan sinfi PartyAnimal sinifindən düzgün əlaqələndirilmişdir?", c: ["class CricketFan(PartyAnimal)", "class CricketFan implements PartyAnimal", "class CricketFan extends PartyAnimal", "class CricketFan : PartyAnimal"], a: 0 },
+    { id: 55, q: "Aşağıdakı hallardan hansında Animal sinfi Mammels sinifindən düzgün əlaqələndirilmişdir?", c: ["class Animal(Mammels)", "class Animal <- Mammels", "class Animal : Mammels", "class Animal extends Mammels"], a: 0 },
+    { id: 56, q: "Aşağıdakı hallardan hansında Numbers sinfi Oddnumb sinifindən düzgün əlaqələndirilmişdir?", c: ["class Numbers(Oddnumb)", "class Numbers:Oddnumb", "class Numbers base Oddnumb", "class Numbers <- Oddnumb"], a: 0 },
+    { id: 57, q: "Aşağıdakı hallardan hansında KM754 sinfi SmartStudents sinifindən düzgün əlaqələndirilmişdir?", c: ["class KM754(SmartStudents)", "class SmartStudents(KM754)", "class KM754 extends SmartStudents", "class KM754:SmartStudents"], a: 0 },
+    { id: 58, q: "Aşağıdakılardan hansı obyekt nümunəsinşn səhv yaradılmasına gətirib çıxarır?", c: ["pupper = new Dog(\"Jamie\")", "pupper = Dog(\"Jamie\")", "pupper = Dog()", "pupper = Dog(name=\"Jamie\")"], a: 0 },
+    { id: 59, q: "Verilmiş proqramın nəticəsi Pythonda necə olacak?<pre>class People():\n  def __init__(self, name):\n      self.name = name\n  def namePrint(self):\n       print(self.name)\nperson1 = People(\"Sally\")\nperson2 = People(\"Louise\")\nperson1.namePrint()</pre>", c: ["Sally", "Louise", "People", "name"], a: 0 },
+    { id: 60, q: "Aşağıdakı ifadələrdən hansı obyekt yönümlü proqramlaşdırma ilə bağlı səhvdir?", c: ["Pythonda bir sinifdən yalnız bir obyekt yaratmaq olar.", "Konstruktor metodları obyekti işə salmaq üçün lazımdır.", "Miras alma kodu təkrar yazmağın qarşısını alır.", "İnkapsulyasiya məlumatların icazəsiz dəyişdirilməsinin qarşısını alır."], a: 0 },
+    { id: 61, q: "Açar söz _________ sinif obyektində yerləşəcək məlumatları və sinif obyekti üçün çağırıla bilən funksiyaları göstərən nümunəni müəyyənləşdirir.", c: ["class", "def", "object", "struct"], a: 0 },
+    { id: 62, q: "_________ açar söz deyil, lakin konvensiyaya əsasən sinifin cari nümunəsinə (obyektinə) istinad etmək üçün istifadə olunur.", c: ["self", "this", "current", "me"], a: 0 },
+    { id: 63, q: "Doğru yoxsa yalan? Sinfi genişləndirmək üçün yeni sinif bütün məlumatlara və ana sinifin daxili işlərinə daxil olmalıdır.", c: ["False", "True"], a: 0 },
+    { id: 64, q: "Başlanğıc metodunu təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, title, author):", "def constructor(self, title, author):", "def init(self, title, author):", "function __init__(title, author):"], a: 0 },
+    { id: 65, q: "Def ile init funksiysını yaratmaq üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, distance, city):", "def _init_(distance, city):", "def init(self, distance, city):", "def __init__(distance, city):"], a: 0 },
+    { id: 66, q: "Başlanğıc metodunu təyin etmək üçün def funksiyası ilə aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, name, human):", "def __init__(name, human):", "def init(name, human):", "def __init__(name, human, self):"], a: 0 },
+    { id: 67, q: "Başlanğıc metodunu təyin etmək üçün aşağıdakı üsullardan hansı düzgündür?", c: ["def __init__(self, student, İD):", "def __init__(student, ID):", "def init(self, student, ID):", "def __init__(student, ID, self):"], a: 0 },
+    { id: 68, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<pre>def myfunc():\n   x = 300\n print(x)\nmyfunc()</pre>", c: ["300", "x", "None", "Error"], a: 0 },
+    { id: 69, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<pre>def numberic():\n   a = 100\n print(a*2)\nnumberic()</pre>", c: ["200", "100", "a*2", "0"], a: 0 },
+    { id: 70, q: "Aşağıda verilmiş proqramın nəticəsi necə olacaq?<pre>def name():\n   c = “Salam”\n print(c+”2”)\nname()</pre>", c: ["Salam2", "Salam", "c2", "Error"], a: 0 },
+    { id: 71, q: "Nə çap olunacaq?<pre>x = lambda a : a+10\nprint(x(5))</pre>", c: ["15", "5", "10", "50"], a: 0 },
+    { id: 72, q: "Nə çap olunacaq?<pre>x=lambda a, b: a*b\nprint(x(5,6))</pre>", c: ["30", "11", "56", "25"], a: 0 },
+    { id: 73, q: "Nə çap olunacaq?<pre>x=lambda a,b,c,d: a+b+c+d\nprint(x(1,2,3,4))</pre>", c: ["10", "24", "1234", "0"], a: 0 },
+    { id: 74, q: "Nə çap olunacaq?<pre>x=lambda a,b,c: a*b*c\nprint(x(2,3,4))</pre>", c: ["24", "9", "12", "48"], a: 0 },
+    { id: 75, q: "Nə çap olunacaq?<pre>x=lambda n,m: n+m\nprint(x(17,14))</pre>", c: ["31", "3", "1714", "238"], a: 0 },
+    { id: 76, q: "Nə çap olunacaq?<pre>x= lambda f ,g ,k: f+g+k \nprint(x( 11,22,2))</pre>", c: ["35", "33", "44", "11222"], a: 0 },
+    { id: 77, q: "Nə çap olunacaq?<pre>x=lambda d,e: d*e\nprint(x( 21,2))</pre>", c: ["42", "23", "10.5", "212"], a: 0 },
+    { id: 78, q: "Nə çap olunacaq?<pre>x=lambda b,c:b-c\nprint(x(20,5))</pre>", c: ["15", "25", "4", "100"], a: 0 },
+    { id: 79, q: "Nə çap olunacaq?<pre>x=lambda c,d: c / d\nprint (x(100,10))</pre>", c: ["10.0", "1000", "90", "110"], a: 0 },
+    { id: 80, q: "Nə çap olunacaq?<pre>x=lambda n,m,l: n*m*l\nprint(x(11,1,2))</pre>", c: ["22", "14", "11", "24"], a: 0 },
+    { id: 81, q: "Nə çap olunacaq?<pre>x=lambda g,h: g / h\nprint (x(36,12))</pre>", c: ["3.0", "48", "24", "4.0"], a: 0 },
+    { id: 82, q: "Nə çap olunacaq?<pre>x=lambda r,t,y:r-t-y;\nprint(x(64,32,6))</pre>", c: ["26", "38", "32", "102"], a: 0 },
+    { id: 83, q: "Nə çap olunacaq?<pre>x=lambda s,x,k,j : s+x+k+j\nprint(x(12,7,32,5))</pre>", c: ["56", "51", "60", "45"], a: 0 },
+    { id: 84, q: "Nə çap olunacaq?<pre>x=lambda q,p: q / p\nprint(x(10,2))</pre>", c: ["5.0", "20", "8", "12"], a: 0 },
+    { id: 85, q: "Nə çap olunacaq?<pre>x=lambda u,o: u+o\nprint(x(12,1))</pre>", c: ["13", "12", "11", "121"], a: 0 },
+    { id: 86, q: "Nə çap olunacaq?<pre>x=lambda z,n,y: z-n-y\nprint(x(20,2,1))</pre>", c: ["17", "19", "23", "15"], a: 0 },
+    { id: 87, q: "Nə çap olunacaq?<pre>x=lambda s,v: s / v\nprint(x(7,7))</pre>", c: ["1.0", "0", "14", "49"], a: 0 },
+    { id: 88, q: "Nə çap olunacaq?<pre>x=lambda d,e: d-e\nprint (x(2,1))</pre>", c: ["1", "3", "2", "0"], a: 0 },
+    { id: 89, q: "Nə çap olunacaq?<pre>x=lambda i , s:s / i\nprint(x(50,10))</pre>", c: ["0.2", "5.0", "60", "40"], a: 0 },
+    { id: 90, q: "Nə çap olunacaq?<pre>x=lambda g,d,n: g+d-n\nprint(x(10,5,5))</pre>", c: ["10", "20", "0", "5"], a: 0 },
+    { id: 91, q: "Nə çap olunacaq?<pre>x=lambda q,d,p: q / d * p\nprint(x(12,2,2))</pre>", c: ["12.0", "3", "48.0", "1.0"], a: 0 },
+    { id: 92, q: "Nə çap olunacaq?<pre>x=lambda a,b: a / b\nprint(x(21,7))</pre>", c: ["3.0", "14", "28", "147"], a: 0 },
+    { id: 93, q: "Nə çap olunacaq?<pre>x=lambda c,d,e: c+d-e\nprint(x(22,21,40))</pre>", c: ["3", "43", "83", "0"], a: 0 },
+    { id: 94, q: "Nə çap olunacaq?<pre>x=lambda k,s: k-s\nprint(x(20,2))</pre>", c: ["18", "22", "10", "40"], a: 0 },
+    { id: 95, q: "Nə çap olunacaq?<pre>x=lambda d,v,b: d*v / b\nprint(x(8,2,8))</pre>", c: ["2.0", "32.0", "8.0", "16.0"], a: 0 },
+    { id: 96, q: "Nə çap olunacaq?<pre>x=lambda f,t,y: f+t-y\nprint(x(23,12,2))</pre>", c: ["33", "37", "13", "35"], a: 0 },
+    { id: 97, q: "Nə çap olunacaq?<pre>x = lambda s,l,k: s*l-k\nprint(x(9,4,3))</pre>", c: ["33", "39", "65", "13"], a: 0 },
+    { id: 98, q: "Nə çap olunacaq ?<pre>x=lambda y,o,r: y*o*r\nprint(x( 3,3,2))</pre>", c: ["18", "8", "12", "9"], a: 0 },
+    { id: 99, q: "Nə çap olunacaq?<pre>x=lambda p,a,s: p / a / s\nprint(x(18,3,2))</pre>", c: ["3.0", "12.0", "27.0", "1.0"], a: 0 },
+    { id: 100, q: "Nə çap olunacaq?<pre>x=lambda a,b: a+b-32\nprint(x(36,24))</pre>", c: ["28", "60", "32", "92"], a: 0 }
+];
+
+let selectedQuestions = [];
+
+function startQuiz() {
+    document.getElementById("result").style.display = "none";
+    document.getElementById("submit-btn").style.display = "block";
+    document.getElementById("restart-btn").style.display = "none";
+    
+    // Sualları qarışdırıb 25 ədədini seçirik
+    let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+    selectedQuestions = shuffled.slice(0, 25); 
+    
+    const quizContainer = document.getElementById("quiz");
+    quizContainer.innerHTML = "";
+    
+    selectedQuestions.forEach((item, index) => {
+        let correctAnswerText = item.c[item.a];
+        
+        // Variantları qarışdırırıq
+        let options = [...item.c].sort(() => 0.5 - Math.random());
+        item.currentAnswers = options; 
+        item.correctIndex = options.indexOf(correctAnswerText); 
+        
+        let questionHTML = `
+            <div class="question-card" id="q-card-${index}">
+                <div class="question-text">
+                    ${index + 1}. <span class="q-badge">Sual №${item.id}</span><br><br>${item.q}
+                </div>
+                <div class="options-container">
+        `;
+        
+        options.forEach((opt, optIndex) => {
+            questionHTML += `
+                <label class="option-label" id="label-${index}-${optIndex}">
+                    <input type="radio" name="question-${index}" value="${optIndex}">
+                    ${opt}
+                </label>
+            `;
+        });
+        
+        questionHTML += `</div></div>`;
+        quizContainer.innerHTML += questionHTML;
+    });
+}
+
+function checkAnswers() {
+    let score = 0;
+    
+    selectedQuestions.forEach((item, index) => {
+        const selected = document.querySelector(`input[name="question-${index}"]:checked`);
+        
+        item.currentAnswers.forEach((_, optIndex) => {
+            document.getElementById(`label-${index}-${optIndex}`).classList.remove('correct', 'incorrect');
+        });
+        
+        // Düzgün cavabı yaşıl et
+        document.getElementById(`label-${index}-${item.correctIndex}`).classList.add('correct');
+        
+        if (selected) {
+            let answerIndex = parseInt(selected.value);
+            if (answerIndex === item.correctIndex) {
+                score++;
+            } else {
+                // Səhv seçiləni qırmızı et
+                document.getElementById(`label-${index}-${answerIndex}`).classList.add('incorrect');
+            }
+        }
+    });
+    
+    const resultBox = document.getElementById("result");
+    resultBox.innerHTML = `Sınaq Başa Çatdı!<br>Nəticəniz: 25 sualdan ${score} düzgün cavab.`;
+    resultBox.style.display = "block";
+    
+    document.getElementById("submit-btn").style.display = "none";
+    document.getElementById("restart-btn").style.display = "block";
+    
+    window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+window.onload = startQuiz;
+</script>
+
+</body>
+</html>
