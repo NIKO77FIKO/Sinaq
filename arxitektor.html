@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Sınaq Sistemi</title>
+    <style>
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #4a90e2;
+            --btn-red: #e74c3c;
+            --btn-green: #2ecc71;
+            --border-color: #e1e8ed;
+            --badge-bg: #e8f4fd;
+            --progress-bg: #e1e8ed;
+        }
+        .dark-mode {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #ffffff;
+            --primary-color: #357abd;
+            --border-color: #444444;
+            --badge-bg: #3a3a3a;
+            --progress-bg: #444444;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .quiz-container {
+            max-width: 750px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1, h2 { text-align: center; color: var(--text-color); margin: 5px 0; }
+        .author { text-align: center; font-weight: bold; margin-bottom: 20px; }
+        
+        /* Top Control Panel */
+        .top-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+        .timer-box {
+            background-color: var(--btn-red);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-width: 140px;
+        }
+        .stats-box {
+            background-color: #e2e8f0;
+            color: #333;
+            padding: 12px 15px;
+            border-radius: 6px;
+            flex-grow: 1;
+            font-size: 13px;
+            line-height: 1.4;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .dark-mode .stats-box { background-color: #444; color: white; }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: var(--progress-bg);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: var(--btn-green);
+            transition: width 0.3s ease;
+        }
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
+        .btn-action:hover { opacity: 0.9; }
+        .btn-blue { background-color: #4a90e2; }
+        .btn-red { background-color: var(--btn-red); }
+        .btn-green { background-color: var(--btn-green); }
+
+        /* Questions */
+        .question-card {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        
+        .card-correct { background-color: rgba(46, 204, 113, 0.15) !important; border-color: var(--btn-green) !important; }
+        .card-incorrect { background-color: rgba(231, 76, 60, 0.15) !important; border-color: var(--btn-red) !important; }
+        .card-blank { background-color: rgba(241, 196, 15, 0.15) !important; border-color: #f1c40f !important; }
+
+        .question-text { font-size: 15px; font-weight: bold; margin-bottom: 15px; }
+        .q-badge { background-color: var(--badge-bg); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        pre { background: #23272e; color: #abb2bf; padding: 12px; border-radius: 6px; overflow-x: auto; font-family: monospace; }
+        
+        .options-container { display: flex; flex-direction: column; gap: 8px; }
+        .option-label {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        .option-label:hover { background-color: rgba(74, 144, 226, 0.1); }
+        
+        .opt-correct { background-color: rgba(46, 204, 113, 0.25) !important; font-weight: bold; border-color: var(--btn-green) !important; }
+        .opt-incorrect { background-color: rgba(231, 76, 60, 0.25) !important; font-weight: bold; border-color: var(--btn-red) !important; }
+
+        .result-detail {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .final-result-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 25px;
+        }
+        .result-grid {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <h1>Online Sınaq İmtahanı</h1>
+    <div class="author">By Nurali and Nihat</div>
+
+    <div class="top-panel">
+        <div id="timer" class="timer-box">Qalan vaxt: 30:00</div>
+        <div class="stats-box">
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="live-stats">
+                Cavablanan: 0 / 25<br>Düz: 0 · Səhv: 0 · Boş: 25
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-action btn-blue" onclick="toggleDarkMode()">🌙 Dark / Light</button>
+    <button class="btn-action btn-blue" onclick="restartQuiz()">25 sualı yenidən seç (random)</button>
+    <button class="btn-action btn-red" onclick="resetAnswers()">Cavabları sıfırla</button>
+
+    <div id="quiz"></div>
+
+    <button id="finish-btn" class="btn-action btn-green" style="padding:15px; font-size:16px;" onclick="finishExam()">İmtahanı Bitir</button>
+
+    <div id="final-score-box" class="final-result-section" style="display:none;">
+        <h2>Nəticə</h2><br>
+        <div class="result-grid">
+            <span id="res-duz">Düz: 0 (x2)</span>
+            <span id="res-sehv">Səhv: 0 (x-1)</span>
+            <span id="res-bos">Boş: 25</span>
+        </div>
+        <div style="font-size:15px; line-height: 1.8;">
+            <b>Sınaq balı:</b> <span id="sc-sinag">0</span><br>
+            <b>Giriş balı:</b> <span id="sc-giris">0</span><br>
+            <hr style="border:0; border-top:1px solid var(--border-color);">
+            <b style="font-size:18px; color:var(--primary-color);">Yekun bal: <span id="sc-yekun">0</span></b>
+        </div>
+        <button class="btn-action btn-green" style="margin-top:20px;" onclick="restartQuiz()">Yenidən başla</button>
+    </div>
+</div>
+
+<script>
+// 100 Suallıq Yenilənmiş Baza Məlumatı
+const allQuestions = [
+    { id: 1, q: "Videoverilənlərin emalına imkan verən və monitorun işini idarə edən qurğu hansıdır?", c: ["Modem", "Videoadapter", "Skaner", "Printer"], a: 1 },
+    { id: 2, q: "Kompüter verilənlərinin uzaq məsafəyə telefon xətti vasitəsi ilə ötürən qurğu necə adlanır?", c: ["Plotter", "Videoadapter", "Modem", "İnterfeys"], a: 2 },
+    { id: 3, q: "İnformasiyanın vizual əks olunması üçün istifadə olunan qurğu necə adlanır?", c: ["Monitor", "Skaner", "Printer", "Plotter"], a: 0 },
+    { id: 4, q: "Kodlaşdırılmış informasiyanı mətn və ya qrafiki surətin çap edən qurğu necə adlanır?", c: ["Plotter", "Monitor", "Skaner", "Printer"], a: 3 },
+    { id: 5, q: "Hansı qurğu kompüterin idarəsi ilə qrafika, şəkil və ya diaqramı çəkir?", c: ["Skaner", "Plotter", "Videoadapter", "Modem"], a: 1 },
+    { id: 6, q: "Qrafiki təsvirin kompüterə daxil edilməsi və onun kompüterin yaddaşında yerləşdirilməsi üçün nəzərdə tutulan qurğu necə adlanır?", c: ["Skaner", "Printer", "Monitor", "Plotter"], a: 0 },
+    { id: 7, q: "Fərdi kompüterlər hansı prinsip əsasında layihələndirir?", c: ["Qapalı memarlıq", "Regional arxitektura", "Açıq arxitektura", "Şəbəkə arxitekturası"], a: 2 },
+    { id: 8, q: "Bütün fiziki və məntiqi parametrləri öz aralarında uzlaşdıran iki qurğunun birləşdirmə vasitəsi necə adlanır?", c: ["Kontroller", "İnterfeys", "Şina", "Slot"], a: 1 },
+    { id: 9, q: "Kompüterin minimal tərkibinə daxildir:", c: ["Monitor, sistem bloku, klaviatura", "Sistem bloku, mouse, printer", "Skaner, monitor, klaviatura", "Prosessor, operativ yaddaş, sərt disk"], a: 0 },
+    { id: 10, q: "Əmeli yaddaş nə üçün lazımdır?", c: ["İnformasiyanın uzun müddət saxlanılması üçün", "Cari anda icra olunan proqram və verilənləri yadda saxlamaq üçün", "Kompüterin konfiqurasiyasını saxlamaq üçün", "Qurğuların işini yoxlamaq üçün"], a: 1 },
+    { id: 11, q: "Xarici yaddaş nə üçün lazımdır?", c: ["Prosessorun işini sürətləndirmək üçün", "Müvəqqəti hesablamaları saxlamaq üçün", "Kompüteri söndürdükdən sonra informasiyanın uzun müddət saxlanılması üçün", "Daxili qurğuları idarə etmək üçün"], a: 2 },
+    { id: 12, q: "Diskin strukturu hansı hissələrdən ibarətdir?", c: ["Fiziki və məntiqi", "Daxili və xarici", "Birincili və ikincili", "Dinamik və statik"], a: 0 },
+    { id: 13, q: "Ən çox geniş yayılmış platformalara ………………. .aiddir?", c: ["Windows və Linux", "IBM və Apple", "Intel və AMD", "Android və iOS"], a: 1 },
+    { id: 14, q: "Kompüterin lokal şəbəkəyə qoşulması üçün hansı plata istifadə olunur?", c: ["LAN", "AGP", "Sound Card", "Video Card"], a: 0 },
+    { id: 15, q: "Monitor.......................adlanan xüsusi qurğunun idarəsi altında işləyir:", c: ["Kontroller", "Mikroprosessor", "İnterfeys", "Videoadapter"], a: 3 },
+    { id: 16, q: "Aşağıdakılardan hansı kompüter arxitekturasının tərkib hissəsinə aiddir?", c: ["Köməkçi proqramlar", "Verilənlərin formatları", "Xarici korpusun ölçüləri", "Monitorun tezliyi"], a: 1 },
+    { id: 17, q: "BİOS-da konfiqurasiyanın sazlanması üçün ……………… adlı proqram mövcuddur:", c: ["Driver", "Setup", "POST", "Boot"], a: 1 },
+    { id: 18, q: "BİOS-da arzuolunmaz dəyişikliklər olunubsa…………...rejimini seçməklə əvvəlki vəziyyətə qayıtmaq mümkündür:", c: ["Save and Exit", "Exit Without Saving", "Load Setup Defaults", "Boot Order"], a: 2 },
+    { id: 19, q: "Mikroprosessorun tərkibinə aşağıdakılardan hansı daxil deyil?", c: ["İdarəetmə qurğusu", "Hesab-məntiq qurğusu", "Əməli yaddaş", "Registrlər"], a: 2 },
+    { id: 20, q: "Videoplatanı birləşdirmək ........................slotundan istifadə edilir:", c: ["PCI", "AGP", "ISA", "SATA"], a: 1 },
+    { id: 21, q: "Yaddaşın funksiyalarına aşağıdakılardan hansı daxil deyil?", c: ["Verilənlərin saxlanılması", "İnformasiyanın qəbulu", "Verilənlər üzrə hesab əməllərinin yerinə yetirilməsi", "İnformasiyanın ötürülməsi"], a: 2 },
+    { id: 22, q: "Prosessorun funksiyalarına aşağıdakılardan hansı daxil deyil?", c: ["Digər qurğulardan informasiyanın qəbulu", "Əmrlərin deşifrə edilməsi", "Hesab əməliyyatlarının aparılması", "Məntiqi müqayisələrin edilməsi"], a: 0 },
+    { id: 23, q: "POST prosedurunun hansı siqnalı qida blokundakı nasazlığı bildirir?", c: ["Bir uzun kəsilməz siqnal", "Beş qısa siqnal", "Səkkiz qısa siqnal", "Üç qısa siqnal"], a: 0 },
+    { id: 24, q: "POST prosedurunun hansı siqnalı prosessorun nasazlığını bildirir?", c: ["Bir uzun siqnal", "İki qısa siqnal", "Beş qısa siqnal", "Yeddi qısa siqnal"], a: 2 },
+    { id: 25, q: "POST prosedurunun hansı siqnalı videoyaddaşın nasazlığını bildirir?", c: ["Doqquz qısa siqnal", "Səkkiz qısa siqnal", "Bir uzun, iki qısa siqnal", "Beş qısa siqnal"], a: 1 },
+    { id: 26, q: "POST prosedurunun hansı siqnalı ana platadakı problemi bildirir?", c: ["Yeddi qısa siqnal", "Səkkiz qısa siqnal", "Üç uzun siqnal", "Bir qısa siqnal"], a: 0 },
+    { id: 27, q: "XIX əsrin ortalarında kimin əsərlərində məntiq cəbrinə rast gəlinib?", c: ["Con fon Neyman", "Blez Paskal", "Corc Bul", "Çarlz Bebbic"], a: 2 },
+    { id: 28, q: "İxtiyari nəqli cümlə birqiymətli demək olar ki, o doğru və ya yalandırsa, o nə adlanır?", c: ["Məntiqi qanun", "Məntiqi mühakimə", "Məntiqi düstur", "Doğruluq cədvəli"], a: 1 },
+    { id: 29, q: "Mühakimə digər mühakimələrdən məntiqi əlaqənin köməyi ilə təşkil olunarsa..................adlanır:", c: ["Mürəkkəb", "Ekvivalent", "Sadə", "İnkar"], a: 0 },
+    { id: 30, q: "Məntiqi mühakiməyə müraciət üçün onlara ................ təyin olunur", c: ["Qiymət", "Ad (dəyişən)", "İndeks", "Funksiya"], a: 1 },
+    { id: 31, q: "“DEYİL” sözü ilə ifadə olunan əməliyyat necə adlanır?", c: ["Konyunksiya", "Dizyunksiya", "İnkar", "İmplikasiya"], a: 2 },
+    { id: 32, q: "“VƏ” sözü ilə ifadə olunan əməliyyat necə adlanır?", c: ["Dizyunksiya", "Konyunksiya", "İmplikasiya", "Ekvivalentlik"], a: 1 },
+    { id: 33, q: "“VƏ YA” sözü ilə ifadə olunan əməliyyat necə adlanır?", c: ["Dizyunksiya", "Konyunksiya", "İnkar", "İmplikasiya"], a: 0 },
+    { id: 34, q: "“ƏGƏR -ONDA” sözü ilə ifadə olunan əməliyyat necə adlanır?", c: ["Ekvivalentlik", "Konyunksiya", "İmplikasiya", "Dizyunksiya"], a: 2 },
+    { id: 35, q: "Videoplatanın əsas vəzifəsi ......................... informasiyasının emalını təmin etməkdir:", c: ["Mətn", "Ədədi", "Multimedia", "Analoq"], a: 2 },
+    { id: 36, q: "Məntiqi elementlərin işi .....................cədvəli vasitəsi ilə təsvir olunur:", c: ["Doğruluq (həqiqilik)", "Diaqonal", "Matris", "Funksional"], a: 0 },
+    { id: 37, q: "İkilik kodun bir mərtəbəsini etibarlı yadda saxlamaq üçün kompüterin registrlərinə geniş tətbiq olunan elektron sxem necə adlanır?", c: ["Summator", "Trigger", "Multiplikator", "İnvertor"], a: 1 },
+    { id: 38, q: "İkilik məntiqi ədədlərin cəmləməsini yerinə yetirən elektron məntiqi sxem necə adlanır?", c: ["Trigger", "Deşifrator", "Multiayırıcı", "Summator"], a: 3 },
+    { id: 39, q: "Məntiqi cəbrin aşağıdakı qanunu necə adlanır? ($A \\land 1 = A$ və ya $A \\lor 0 = A$)", c: ["Paylama", "Yerdəyişmə", "Neytrallılıq", "Qrup"], a: 2 },
+    { id: 40, q: "………………………………………… məntiqi düsturu dəyişənlərin bütün mümkün qiymətləri və düsturun qiymətlərinin uyğunluğu ifadə edir:", c: ["Məntiq qanunları", "Doğruluq (həqiqilik) cədvəli", "Alqoritmlər sxemi", "Keçid matrisi"], a: 1 },
+    { id: 41, q: "Tam tipli ədədlərin kompüterdə təsviri üçün ədədin işarəsi ................. mərtəbəsində yazılır?", c: ["Mərtəbə şəbəkəsinin sonuncu sıfırıncı", "Birinci mərtəbədə", "İstənilən mərtəbədə", "Mantissanın sonunda"], a: 0 },
+    { id: 42, q: "Kompüterdə sürüşən nöqtəli ədədin birmənalı təsvirini almaq üçün ədədin ……………………..formasından istifadə olunur:", c: ["Sabitləşdirilmiş", "Normallaşdırılmış", "Standartlaşdırılmış", "İkilik"], a: 1 },
+    { id: 43, q: "Məntiq tipli verilənlər hansı kodlaşdırmaya uyğundur?", c: ["Səkkizlik", "Onluq", "İkilik", "Simvollu"], a: 2 },
+    { id: 44, q: "Sabit və sürüşən nöqtəli ədədlər verilənlərin hansı tipinə uyğundur?", c: ["Tam", "Məntiqi", "Həqiqi", "Simvollu"], a: 2 },
+    { id: 45, q: "ASCII kodlaşdırma əsasında ........... simvolu kodlaşdırmaq mümkündür:", c: ["128-ə qədər", "256-ə qədər", "1024-ə qədər", "65536-ya qədər"], a: 1 },
+    { id: 46, q: "Sürüşən nöqtəli ədədlərdə .......... nöqtənin yerini sürüşdürməklə eyni ədəd müxtəlif cür yazıla bilər:", c: ["tərtibdə", "işarədə", "sürətdə", "mantissada"], a: 3 },
+    { id: 47, q: "Komplektləşdirici nədir?", c: ["Kompüterin daxili qurğuları", "Xarici proqramlar paketi", "Şəbəkə kabelləri", "Monitor aksesuarları"], a: 0 },
+    { id: 48, q: "Müasir kompüterlərdə əmrlər sisteminin formalaşdırılmasında neçə üsuldan istifadə olunur?", c: ["1", "2", "3", "4"], a: 1 },
+    { id: 49, q: "Müasir kompüterlərdə əmrlər sisteminin formalaşdırılmasında ............üsullarından istifadə olunur?", c: ["ASCII və Unicode", "LAN və WAN", "CISC və RISC", "RAM və ROM"], a: 2 },
+    { id: 50, q: "Kompüterdə yaddaş neçə cür olur?", c: ["2 (Daxili və xarici)", "3", "4", "5"], a: 0 },
+    { id: 51, q: "................... prosessorun yerinə yetirdiyi əmrlər toplusudur:", c: ["Alqoritm", "Proqram təminatı", "Əmrlər sistemi", "Əməliyyat sistemi"], a: 2 },
+    { id: 52, q: "Kompüterin ................ prosessorun bir saniyədə yerinə yetirdiyi sadə əməliyyatların sayı ilə təyin olunur:", c: ["İşləmə sürəti", "Məhsuldarlığı", "Mərtəbəliliyi", "Takt tezliyi"], a: 0 },
+    { id: 53, q: ".............. vahid zaman ərzində kompüterdə həll olunan məsələlərin orta sayı ilə təyin olunur:", c: ["İşləmə sürəti", "Məhsuldarlıq", "Etibarlılıq", "Tutum"], a: 1 },
+    { id: 54, q: "İnvertor məntiqi elementində giriş və çıxış siqnallarının sayı neçədir?", c: ["2 giriş və 1 çıxış", "1 giriş və 1 çıxış", "2 giriş və 2 çıxış", "1 giriş və 2 çıxış"], a: 1 },
+    { id: 55, q: "Konyuktor məntiq elementi................giriş siqnalına və bir çıxış siqnalına malikdir:", c: ["Yalnız 1", "Yalnız 2", "2 və daha artıq", "Girişi olmur"], a: 2 },
+    { id: 56, q: "Konyuktor məntiq elementi iki və daha artıq giriş siqnalına və................çıxış siqnalına malikdir:", c: ["1", "2", "3", "Giriş sayda"], a: 0 },
+    { id: 57, q: "Dizyunktor məntiq elementi ..................... giriş siqnalına və bir çıxış siqnalına malikdir:", c: ["Yalnız 1", "2 və daha artıq", "Heç bir", "Həmişə 4"], a: 1 },
+    { id: 58, q: "Dizyunktor məntiq elementi iki və daha artıq giriş siqnalına və ........çıxış siqnalına malikdir:", c: ["2", "1", "3", "Giriş siqnallarının cəmi qədər"], a: 1 },
+    { id: 59, q: "Əgər iki mülahizənin qiyməti eyni həqiqidirsə, onda onları ........... adlandırırlar:", c: ["İnkar", "Konyunktiv", "Dizyunktiv", "Ekvivalent"], a: 3 },
+    { id: 60, q: "Məntiq cəbrində mülahizələr................. olur:", c: ["Doğru və yalan", "Sadə və mürəkkəb", "Rəqəmsal və analoq", "Riyazi və məntiqi"], a: 1 },
+    { id: 61, q: "Triggerin vəziyyətini hansı siqnal təyin edir:", c: ["Giriş siqnalı", "Çıxış siqnalı", "Takt siqnalı", "İdarəetmə siqnalı"], a: 1 },
+    { id: 62, q: "Kompüterlər əsasən neçə əlamətə görə təsnif olunur?", c: ["3", "4", "5", "6"], a: 2 },
+    { id: 63, q: "Hesablama maşınını kim yaradıb?", c: ["Çarlz Bebbic", "Blez Paskal", "Con fon Neyman", "Konrad Suze"], a: 1 },
+    { id: 64, q: "“Analitik maşın” layihəsi kim tərəfindən tərtib edilib?", c: ["Corc Bul", "Vannever Buş", "Çarlz Bebbic", "Alan Türinq"], a: 2 },
+    { id: 65, q: "Hesablama maşını hansı ildə yaradılıb?", c: ["1642", "1822", "1930", "1946"], a: 0 },
+    { id: 66, q: "1930-cu ildə Massaçuset Texnoloji institunun professoru Vannever Buş .........yaratdı ki, bu da müasir kompüter erasının başlanması ilə bağlıdır?", c: ["Analitik maşın", "ENIAC", "Differensial analizator", "Mexaniki kalkulyator"], a: 2 },
+    { id: 67, q: "Alman mühəndisi Konrad Suze birinci təmiz ......... yaratdı", c: ["Elektron kompüter", "Mexaniki kompüter", "Sürüşən nöqtəli prosessor", "Lampalı hesablama maşını"], a: 1 },
+    { id: 68, q: "Müasir kompüterlərin əsas iş prinsiplərini və komponentləri kim tərəfindən tərtib olunub?", c: ["Blez Paskal", "Con fon Neyman", "Çarlz Bebbic", "Konrad Suze"], a: 1 },
+    { id: 69, q: "Birinci elektron rəqəm kompüteri necə adlanır?", c: ["EDVAC", "IBM PC", "ENIAC", "MARK I"], a: 2 },
+    { id: 70, q: "İlk elektron rəqəm kompüteri hansı elementlərin bazası əsasında qurulub?", c: ["Transistorlar", "İnteqral sxemlər", "Elektron lampalar", "Yarımkeçiricilər"], a: 2 },
+    { id: 71, q: "Birinci nəsilə hansı kompüterlər aiddir?", c: ["50-ci ildə yaradılan və onun sxemlərində elektron lampalardan istifadə olunub", "Transistorlar əsasında qurulan böyük maşınlar", "İnteqral sxemlərlə işləyən mini-kompüterlər", "Mikroprosessorlu fərdi kompüterlər"], a: 0 },
+    { id: 72, q: "İkinci nəsilə hansı kompüterlər aiddir?", c: ["Böyük inteqral sxemli superkompüterlər", "1955-65-ci illərdə yaradılmış və diskret transzistorlu məntiq elementlərindən istifadə olunub", "Tamamilə mexaniki olan sistemlər", "Lampalı bazaya malik hesablama sistemləri"], a: 1 },
+    { id: 73, q: "Hansı nəsil kompüterlərdə perfolent, perfokart, maqnit lentləri və çap qurğularından istifadə olunub?", c: ["Birinci nəsillərdə", "İkinci nəsillərdə", "Üçüncü nəsillərdə", "Dördüncü nəsillərdə"], a: 0 },
+    { id: 74, q: "Hansı kompüterlər üçüncü nəslə aiddir?", c: ["Element bazası kimi inteqral sxemlərdən istifadə olunub", "Süni intellektə əsaslanan maşınlar", "Yalnız elektron lampalarla işləyənlər", "Mikroprosessorlu fərdi kompüterlər"], a: 0 },
+    { id: 75, q: "Hansı nəsil maşınlar struktur nöqteyi-nəzərdən ümumi yaddaş və xarici qurğuların ümumi sahəsi ilə işləyən çoxprosessorlu və çoxmaşınlı kimi təsvir olunub?", c: ["İkinci nəsil", "Üçünəl nəsil", "Dördüncü nəsil", "Beşinci nəsil"], a: 2 },
+    { id: 76, q: "Gələcək nəsil kompüterlərin arxitekturası neçə əsas bloku özündə saxlayacaq?", c: ["2", "3", "4", "5"], a: 0 },
+    { id: 77, q: "Funksional elementlər və onlar arasındakı əlaqə kompüterin ………", c: ["Arxitekturasıdır", "Proqramıdır", "Strukturudur", "Alqoritmidir"], a: 2 },
+    { id: 78, q: "Hansı arxitektura verilənlərin axını keçən bir hesab məntiq qurğusunu (HMQ) və əmr və proqramlar axını keçən bir idarəedici qurğunu (İQ) özündə saxlayır?", c: ["Çoxprosessorlu arxitektura", "Klassik arxitektura", "Paralel prosessorlu arxitektura", "Matrisli arxitektura"], a: 1 },
+    { id: 79, q: "Proqramlaşdırmada istifadəçi imkanları, əmrlər sistemi, yaddaşın təşkili və s. ümumi səviyyədə təsviri daxil olan kompüterin ........... adlanır", c: ["Strukturu", "İnterfeysi", "Platası", "Arxitekturası"], a: 3 },
+    { id: 80, q: "Proqram və verilənlərin kompüterin yaddaşında birlikdə saxlanmasının məşhur prinsipi necə adlanır?", c: ["Paskal prinsipi", "fon Neyman arxitekturası", "Bebbic strukturu", "Bul cəbri"], a: 1 },
+    { id: 81, q: "Ümumi əməli yaddaş və bir neçə prosessorları olan maşınlar hansı arxitekturaya aiddir?", c: ["Çoxprosessorlu arxitektura", "Çoxmaşınlı hesablama sistemi", "Klassik fon Neyman arxitekturası", "Şəbəkə arxitekturası"], a: 0 },
+    { id: 82, q: "Hesablama sisteminə daxil olan bir neçə prosessorları olan, ümumi əməli yaddaşı olmayan, amma hər birinin özünün lokal yaddaşı olan sistem hansı arxitekturaya aiddir?", c: ["Çoxmaşınlı hesablama sistemi", "Çoxprosessorlu arxitektura", "Paralel prosessorlu arxitektura", "Klassik arxitektura"], a: 0 },
+    { id: 83, q: "Hansı arxitekturada bir neçə HMQ bir İQ-nun idarəsi ilə işləyir?", c: ["Klassik arxitektura", "Çoxmaşınlı arxitektura", "Paralel prosessorlu arxitektura", "Paylanmış sistemlər"], a: 2 },
+    { id: 84, q: "…………………— periferiya qurğularını və ya mərkəzi prosessorla kanal rabitəsini əlaqələndirir, prosessoru bu qurğunun bilavasitə işləməsinə idarədən azad edir:", c: ["Kontroller", "İnterfeys", "Şina", "Drayver"], a: 0 },
+    { id: 85, q: "…………………kompüterlər olduqca dar sinif məsələlərin həllinə və ya çoxlu sayda həlli tələb olunandan və xüsusi istismar şəraitində işləyən bir məsələyə xidmət edir:", c: ["Universal", "Xüsusi", "Böyük", "Super"], a: 1 },
+    { id: 86, q: "……………………… — elə kompüterdir ki, hansı ki, mərkəzi prosessor mikroprosessor kimi yerinə yetirir:", c: ["Meynfreymlər", "Superkompüterlər", "Mikrokompüterlər", "Analoq maşınlar"], a: 2 },
+    { id: 87, q: "…………………… — bu mikrokompüter universal təyinatlı, bir insanın idarə etdiyi və bir istifadəçi üçün nəzərdə tutulub:", c: ["Fərdi kompüterlər", "Meynfreymlər", "İşçi stansiyalar", "Serverlər"], a: 0 },
+    { id: 88, q: "……………… geniş sinif elmi-texniki məsələlərin həlli üçün nəzərdə tutulub, mürəkkəb və bahalı maşındır:", c: ["Fərdi kompüter", "Meynfreymlər", "Mikrokompüter", "Dizüstü kompüter"], a: 1 },
+    { id: 89, q: "………………… — məhsuldarlığı 100 meqaflopdan (1 meqaflop - saniyədə sürüşən nöqtəlilərlə milyon əməliyyat) çox olan olduqca güclü kompüterlərdir:", c: ["Superkompüterlər", "Meynfreymlər", "Fərdi kompüterlər", "Mikrokompüterlər"], a: 0 },
+    { id: 90, q: "WAV və MP3 formatlarının arasında hansı fərq vardır?", c: ["WAV daha kiçik formatda olur", "Mp3 daha kiçik formatda olur", "Formatlar arasında heç bir fərq yoxdur", "WAV yalnız video üçün istifadə olunur"], a: 1 },
+    { id: 91, q: "Səs kartındakı Mavi girişinin adı nədir?", c: ["Mic In", "Line out", "Line in", "Speaker out"], a: 2 },
+    { id: 92, q: "Codec nədir?", c: ["Səsin gücünü artırmaq", "Lazımsız sayılan səsləri çıxarmaq (sıxışdırmaq)", "Səsi analoq formaya salmaq", "Mikrofona qoşulma proqramı"], a: 1 },
+    { id: 93, q: "RAM-da Access Time nədir?", c: ["Prosessorun yaddaşdan məlumatı oxumaq üçün lazım olan minimum zamandır", "Kompüterin açılış müddətidir", "Sərt diskin fırlanma sürətidir", "Bios-un yüklənmə vaxtıdır"], a: 0 },
+    { id: 94, q: "RAM-da Latency yəni Gecikmə nədir?", c: ["RAM-ın tutumunun ölçüsüdür", "RAM-ın nə qədər yavaş ola biləcəyinin ölçüsüdür", "RAM-ın daxili tezliyidir", "Enerji sərfiyyatının göstəricisidir"], a: 1 },
+    { id: 95, q: "RDRAM – Rambus RAM-ları günümüzdə standartlaşmamasının səbəbləri nələrdir?", c: ["Sürətinin çox aşağı olması", "Yüksək maliyyət və alternativ modellərin olması", "Ana platalara fiziki olaraq yerləşməməsi", "Çox böyük ölçüdə olması"], a: 1 },
+    { id: 96, q: "Ekran Kartında görüntü ilə bağlı hesablamaların saxlandığı yaddaş nədir?", c: ["Keş yaddaş", "Daimi yaddaş (ROM)", "Displey yaddaş (Video RAM)", "CMOS RAM"], a: 2 },
+    { id: 97, q: "Ekran kartı hansı portlara qoşulur? (4 ədəd port)", c: ["IDE, SATA, FDD, USB", "ISA, PCI, AGP, PCI Express", "LAN, COM, LPT, PS/2", "AMR, CNR, SIMM, DIMM"], a: 1 },
+    { id: 98, q: "Blu-ray-də 1 x sürət müəyyən olunub?", c: ["4.5 MB/s", "150 KB/s", "36 MB/s", "10 MB/s"], a: 2 },
+    { id: 99, q: "Kompüterlər qabarit ölçülərinə və məhsuldarlığına görə hansı siniflərə bölünür? (1. orta kompüterlər, 2. mikro-kompüterlər, 3. mini kompüterlər, 4. super kompüterlər, 5. fərdi kompüterlər)", c: ["1, 2, 3, 5", "2, 3, 4, 5", "1, 2, 3, 4", "Hamısı"], a: 2 },
+    { id: 100, q: "Xarici yaddaş qurğusu nə üçün istifadə olunur?", c: ["İnformasiyanı sürətlə emal etmək üçün", "İnformasiyanı uzun müddət yadda saxlamaq üçün", "Daxili qurğuları soyutmaq üçün", "Monitora təsvir vermək üçün"], a: 1 },
+    { id: 101, q: "Sistem interfeysi nə üçündür?", c: ["Kompüter qurğularının qarşılıqlı əlaqəsini və onlar arasında informasiya mübadiləsini təmin edir", "Yalnız elektrik enerjisini paylayır", "Faylları arxivləşdirmək üçün istifadə olunur", "İstifadəçiyə qrafiki pəncərə təqdim edir"], a: 0 },
+    { id: 102, q: "Kompüterin periferiya hissəsi hansı qurğulardan ibarətdir? (1. Daxiletmə-xaricetmə qurğusu, 2. Daxili yaddaş qurğusu, 3. Xarici yaddaş qurğusu, 4. Sistem interfeysi, 5. İdarə pultu, 6. Mikroprosessor)", c: ["1, 3, 5", "2, 4, 6", "1, 2, 3", "4, 5, 6"], a: 0 },
+    { id: 103, q: "Aşağıdakılardan hansı məlumat daşıyıcısı deyil?", c: ["Sərt disk (HDD)", "Audio plata", "Fləş kart", "Compact Disc (CD)"], a: 1 },
+    { id: 104, q: "Aşağıdakılardan hansı xarici yaddaş qurğularıdır?", c: ["HDD, CD, DVD", "RAM, ROM, BIOS", "CPU, GPU, APU", "Cache, Register, CMOS"], a: 0 },
+    { id: 105, q: "Aşağıdakılardan hansı kompüterin əsub tərkib hissəsidir?", c: ["Sistem bloku", "Printer", "Skaner", "Modem"], a: 0 },
+    { id: 106, q: "Aşağıdakılardan hansında xarici yaddaş qurğuları düzgün göstərilmişdir?", c: ["RAM, Cache, SSD, HDD", "SSD, CD, Fləş kart, HDD, DVD", "BIOS, ROM, Register, Fləş kart", "CPU, Sound Card, Video Card, HDD"], a: 1 },
+    { id: 107, q: "Sözarası məsafə düyməsi hansıdır?", c: ["Enter", "Backspace", "Spacebar", "Shift"], a: 2 },
+    { id: 108, q: "Aşağıdakılardan hansı funksional düymədir?", c: ["Ctrl", "F11", "Esc", "Alt"], a: 1 },
+    { id: 109, q: "Aşağıdakılardan hansı daxiletmə qurğusudur?", c: ["Monitor", "Printer", "Klaviatura", "Səs ucaldanlar"], a: 2 },
+    { id: 110, q: "Aşağıdakılardan hansılar periferiya qurğularıdır?", c: ["Prosessor, Ana plata", "Printer, skaner", "Operativ yaddaş, daxili keş", "Qida bloku, kontroller"], a: 1 },
+    { id: 111, q: "Monitorun ölçüsü nə ile təyin olunur?", c: ["Ekranın eninin ölçüsü ilə", "Ekranın diaqonalının ölçüsü ilə", "Ekranın hündürlüyü ilə", "Çəkisi ilə"], a: 1 },
+    { id: 112, q: "Aşağıdakılardan hansı çıxış qurğusudur?", c: ["Skaner", "Mouse", "Lazerli printer", "Veb-kamera"], a: 2 },
+    { id: 113, q: "Monitorun keyfiyyət ölçüsü nədir?", c: ["Düym", "Piksel", "Hertz", "Kilobayt"], a: 1 },
+    { id: 114, q: "Yaşıl rəng PS/2 portuna hansı xarici kompüter ehtiyat hissəsi taxılır?", c: ["Mouse", "Klaviatura", "Modem", "Printer"], a: 0 },
+    { id: 115, q: "Köhnə tipli anakartlarda: modem, səs, ekran, şəbəkə və başqa kartların qoşulması üçün istifadə olunan slot hansıdır?", c: ["AGP", "PCI Express", "ISA", "SATA"], a: 2 },
+    { id: 116, q: "Əməliyyat sistemini periferiya qurğuları ilə əlaqələndirən proqram necə adlanır?", c: ["Bios", "Drayver", "Utilita", "Text Editor"], a: 1 },
+    { id: 117, q: "Telefon xətləri ilə qlobal şəbəkəyə qoşulmağa imkan verən qurğu hansıdır?", c: ["Skaner", "LAN kartı", "Modem", "Plotter"], a: 2 },
+    { id: 118, q: "Hansı daxiletmə qurğusudur?", c: ["Monitor", "Veb-kamera", "Printer", "Səs ucaldan"], a: 1 },
+    { id: 119, q: "Kompüterlərin neçə sinfi mövcuddur?", c: ["2 (Rəqəmsal və Analoq)", "3", "4", "5"], a: 0 },
+    { id: 120, q: "Hansı sinif kompüterlər verilənləri ikilik kod şəklində emal edir?", c: ["Analoq kompüterləri", "Rəqəm kompüterləri", "Hibrid kompüterləri", "Mexaniki kompüterlər"], a: 1 }
+];
+
+let selectedQuestions = [];
+let entranceScore = 0;
+let timeRemaining = 1800; // 30 dəqiqə
+let timerInterval = null;
+let examFinished = false;
+
+function initPage() {
+    let res = prompt("İmtahana giriş balı (0-50). Boş buraxsan 0 olacaq:", "0");
+    entranceScore = parseInt(res);
+    if (isNaN(entranceScore) || entranceScore < 0) entranceScore = 0;
+    if (entranceScore > 50) entranceScore = 50;
+    
+    startTimer();
+    startQuiz();
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timeRemaining = 1800; 
+    
+    timerInterval = setInterval(() => {
+        if (examFinished) {
+            clearInterval(timerInterval);
+            return;
+        }
+        
+        timeRemaining--;
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById("timer").innerText = "Vaxt bitdi!";
+            finishExam();
+        } else {
+            let mins = Math.floor(timeRemaining / 60);
+            let secs = timeRemaining % 60;
+            document.getElementById("timer").innerText = `Qalan vaxt: ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+    }, 1000);
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle("dark-mode");
+}
+
+function startQuiz() {
+    examFinished = false;
+    document.getElementById("final-score-box").style.display = "none";
+    document.getElementById("finish-btn").style.display = "block";
+    
+    let shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+    selectedQuestions = shuffled.slice(0, 25); 
+    
+    const quizContainer = document.getElementById("quiz");
+    quizContainer.innerHTML = "";
+    
+    selectedQuestions.forEach((item, index) => {
+        let correctText = item.c[item.a];
+        let options = [...item.c].sort(() => 0.5 - Math.random());
+        item.currentAnswers = options; 
+        item.correctIndex = options.indexOf(correctText); 
+        
+        let qHTML = `
+            <div class="question-card" id="card-${index}">
+                <div class="question-text">
+                    ${index + 1}. <span class="q-badge">Sual №${item.id}</span><br><br>${item.q}
+                </div>
+                <div class="options-container">
+        `;
+        
+        const letters = ["A", "B", "C", "D"];
+        options.forEach((opt, optIndex) => {
+            qHTML += `
+                <label class="option-label" id="lbl-${index}-${optIndex}">
+                    <input type="radio" name="q-${index}" value="${optIndex}" onchange="updateLiveStatsOnly()">
+                    <b>${letters[optIndex]})</b> &nbsp;${opt}
+                </label>
+            `;
+        });
+        
+        qHTML += `
+                <label class="option-label" id="lbl-${index}-4">
+                    <input type="radio" name="q-${index}" value="4" onchange="updateLiveStatsOnly()">
+                    <b>E)</b> Boş (cavab yoxdur)
+                </label>
+            </div>
+            <div id="detail-${index}" class="result-detail" style="display:none;"></div>
+        </div>`;
+        
+        quizContainer.innerHTML += qHTML;
+    });
+    updateLiveStatsOnly();
+}
+
+function updateLiveStatsOnly() {
+    if (examFinished) return;
+    
+    let answered = 0;
+    let liveDuz = 0;
+    let liveSehv = 0;
+    let liveBos = 0;
+
+    selectedQuestions.forEach((item, index) => {
+        let sel = document.querySelector(`input[name="q-${index}"]:checked`);
+        if (sel) {
+            let val = parseInt(sel.value);
+            if (val !== 4) {
+                answered++;
+                if (val === item.correctIndex) liveDuz++;
+                else liveSehv++;
+            } else {
+                liveBos++;
+            }
+        } else {
+            liveBos++;
+        }
+    });
+    
+    let progressPercent = (answered / 25) * 100;
+    document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+    document.getElementById("live-stats").innerHTML = `Cavablanan: ${answered} / 25<br>Düz: ${liveDuz} · Səhv: ${liveSehv} · Boş: ${liveBos}`;
+}
+
+function resetAnswers() {
+    if (examFinished) return;
+    selectedQuestions.forEach((_, index) => {
+        let checked = document.querySelector(`input[name="q-${index}"]:checked`);
+        if (checked) checked.checked = false;
+    });
+    updateLiveStatsOnly();
+}
+
+function finishExam() {
+    examFinished = true;
+    clearInterval(timerInterval);
+    
+    let duz = 0;
+    let sehv = 0;
+    let bos = 0;
+    const letters = ["A", "B", "C", "D", "E"];
+
+    selectedQuestions.forEach((item, index) => {
+        let sel = document.querySelector(`input[name="q-${index}"]:checked`);
+        let userVal = sel ? parseInt(sel.value) : 4; 
+        
+        let radios = document.querySelectorAll(`input[name="q-${index}"]`);
+        radios.forEach(r => r.disabled = true);
+
+        let card = document.getElementById(`card-${index}`);
+        let detail = document.getElementById(`detail-${index}`);
+        let correctLetter = letters[item.correctIndex];
+        let userLetter = letters[userVal];
+
+        if (userVal === 4) {
+            bos++;
+            card.classList.add("card-blank");
+            detail.innerHTML = `BOŞ &nbsp;&nbsp; Sənin cavabın: - · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "#d4a373";
+        } else if (userVal === item.correctIndex) {
+            duz++;
+            card.classList.add("card-correct");
+            document.getElementById(`lbl-${index}-${userVal}`).classList.add("opt-correct");
+            detail.innerHTML = `DÜZ &nbsp;&nbsp; Sənin cavabın: ${userLetter} · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "var(--btn-green)";
+        } else {
+            sehv++;
+            card.classList.add("card-incorrect");
+            document.getElementById(`lbl-${index}-${userVal}`).classList.add("opt-incorrect");
+            document.getElementById(`lbl-${index}-${item.correctIndex}`).classList.add("opt-correct");
+            detail.innerHTML = `SƏHV &nbsp;&nbsp; Sənin cavabın: ${userLetter} · Düzgün cavab: ${correctLetter}`;
+            detail.style.color = "var(--btn-red)";
+        }
+        detail.style.display = "block";
+    });
+
+    let examScore = (duz * 2) - sehv;
+    if (examScore < 0) examScore = 0; 
+    let totalScore = examScore + entranceScore;
+
+    document.getElementById("res-duz").innerText = `Düz: ${duz} (x2)`;
+    document.getElementById("res-sehv").innerText = `Səhv: ${sehv} (x-1)`;
+    document.getElementById("res-bos").innerText = `Boş: ${bos}`;
+    
+    document.getElementById("sc-sinag").innerText = examScore;
+    document.getElementById("sc-giris").innerText = entranceScore;
+    document.getElementById("sc-yekun").innerText = totalScore;
+
+    document.getElementById("finish-btn").style.display = "none";
+    document.getElementById("final-score-box").style.display = "block";
+
+    // Səhifəni avtomatik olaraq nəticələr panelinə (ən aşağıya) rəvan şəkildə sürüşdürür
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
+function restartQuiz() {
+    let res = prompt("Yenidən başlamaq üçün giriş balını daxil edin (0-50):", entranceScore);
+    if(res !== null) {
+        entranceScore = parseInt(res);
+        if (isNaN(entranceScore) || entranceScore < 0) entranceScore = 0;
+        if (entranceScore > 50) entranceScore = 50;
+    }
+    startTimer();
+    startQuiz();
+}
+
+window.onload = initPage;
+</script>
+
+</body>
+</html>
